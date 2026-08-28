@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ADMIN - Translation Jobs Manager</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui;margin:0;padding:0}
+body{background:#07070a;color:#fff;padding:12px;min-height:100vh}
+.top{max-width:700px;margin:0 auto 12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.back{padding:8px 12px;background:rgba(255,255,255,0.08);border:1px solid #333;border-radius:10px;color:#fff;text-decoration:none;font-size:10px;font-weight:800}
+.card{background:#1e1e32;border:1px solid #333;border-radius:16px;padding:14px;margin-bottom:10px;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#22d3ee,#0ea5e9)}
+input,textarea,select{width:100%;background:#0f0f1a;border:1px solid #333;border-radius:10px;color:#fff;padding:10px;margin-top:6px;font-size:12px;outline:none}
+textarea{height:80px}
+label{font-size:8px;color:#888;font-weight:800;margin-top:10px;display:block;letter-spacing:1px}
+.btn{padding:10px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:10px;flex:1;display:flex;justify-content:center}
+.btn-e{background:rgba(96,165,250,0.15);color:#93c5fd;border:1px solid rgba(96,165,250,0.3)}
+.btn-d{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
+.btn-add{width:100%;background:linear-gradient(135deg,#22d3ee,#0ea5e9);color:#000;padding:14px;border-radius:12px;font-weight:900;border:none;margin-top:10px;cursor:pointer;box-shadow:0 6px 18px rgba(34,211,238,0.3)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style>
+</head>
+<body>
+<div class="top"><div style="display:flex;gap:6px"><a class="back" href="dashboard.html">← DASH</a><a class="back" href="admintranslation.html" style="background:#22d3ee;color:#000">🛡️ REVIEW PENDING</a></div><a class="back" href="translation.html">👁️ USER VIEW</a></div>
+<div style="max-width:700px;margin:0 auto"><h3 style="color:#22d3ee;text-align:center">🌐 ADMIN - POST TRANSLATION JOBS</h3><p style="text-align:center;color:#666;font-size:10px;margin-top:4px">Only your jobs show in translation.html - empty means empty, no fake defaults</p><div id="list" style="margin-top:12px"></div></div>
+<div class="card" style="max-width:700px;margin:12px auto"><h4 style="color:#22d3ee">➕ Add New Translation Job</h4><label>Title</label><input id="aTitle" placeholder="EN to SW - Health Article"><label>Instructions</label><textarea id="aDesc" placeholder="Keep medical terms accurate, natural Swahili..."></textarea><label>Source Text to Translate (Main Content)</label><textarea id="aSource" placeholder="Good nutrition is the foundation of good health..." style="min-height:120px"></textarea><div class="grid2"><div><label>From</label><select id="aFrom"><option>EN</option><option>SW</option><option>FR</option><option>KI</option><option>AR</option><option>DE</option></select></div><div><label>To</label><select id="aTo"><option>SW</option><option>EN</option><option>FR</option><option>KI</option></select></div></div><div class="grid2"><div><label>Price KES</label><input id="aPrice" type="number" value="500"></div><div><label>Word Count</label><input id="aWords" value="800 words"></div></div><div class="grid2"><div><label>Deadline Hours</label><input id="aDead" type="number" value="24"></div><div><label>Difficulty</label><select id="aLevel"><option>Easy</option><option>Medium</option><option>Hard</option></select></div></div><button class="btn-add" onclick="addJob()">🚀 PUBLISH TO translation.html</button></div>
+<script>
+const KEY='DIAMINES_TRANSLATION_ALL_JOBS';
+function getAll(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return[]}}
+function setAll(v){localStorage.setItem(KEY,JSON.stringify(v));render();}
+function render(){let all=getAll();let h='';if(!all.length)h=`<div style="text-align:center;padding:30px;color:#666">No jobs yet - add above<br>When empty, translation.html shows "No jobs"</div>`;else h=all.map(j=>`<div class="card"><div style="display:flex;justify-content:space-between"><b>🌐 ${j.title}</b><span style="color:#4ade80">KES ${j.price}</span></div><small style="color:#888">${j.fromLang}→${j.toLang} • ${j.words} • ${j.h}h</small><p style="font-size:11px;color:#aaa;margin-top:6px">${j.desc}</p><div style="font-size:10px;color:#666;margin-top:6px;background:#000;padding:6px;border-radius:8px;max-height:60px;overflow:auto">${(j.sourceText||'').substring(0,150)}...</div><div style="display:flex;gap:6px;margin-top:10px"><button class="btn btn-e" onclick="editJob('${j.id}')">✏️ EDIT</button><button class="btn btn-d" onclick="delJob('${j.id}')">🗑️ DELETE</button></div></div>`).join('');document.getElementById('list').innerHTML=h;}
+function addJob(){let title=document.getElementById('aTitle').value.trim(),desc=document.getElementById('aDesc').value.trim(),src=document.getElementById('aSource').value.trim();if(!title||!desc||!src){alert('Title, Desc, Source Text required');return;}let job={id:'TL'+Date.now(),title,desc,sourceText:src,orig:src,fromLang:document.getElementById('aFrom').value,toLang:document.getElementById('aTo').value,price:parseInt(document.getElementById('aPrice').value)||500,words:document.getElementById('aWords').value.trim()||'800 words',h:parseInt(document.getElementById('aDead').value)||24,level:document.getElementById('aLevel').value,difficulty:document.getElementById('aLevel').value};let all=getAll();all.unshift(job);setAll(all);alert('✅ Published: '+title+' - KES '+job.price);document.getElementById('aTitle').value='';document.getElementById('aDesc').value='';document.getElementById('aSource').value='';}
+function delJob(id){if(!confirm('Delete? Will disappear from AVAILABLE'))return;setAll(getAll().filter(x=>x.id!==id));}
+function editJob(id){let all=getAll(),j=all.find(x=>x.id===id);if(!j)return;let nt=prompt('Edit Title',j.title);if(nt===null)return;let np=prompt('Edit Price KES',j.price);if(np===null)return;let ns=prompt('Edit Source Text',j.sourceText);if(ns!==null)j.sourceText=ns;j.title=nt.trim()||j.title;j.price=parseInt(np)||j.price;setAll(all);}
+render();
+</script>
+</body>
+</html>

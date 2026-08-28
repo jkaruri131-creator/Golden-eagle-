@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Transcription - EXACT PAY FIX</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui;margin:0;padding:0}
+body{background:#07070a;color:#fff;padding:12px}
+.header{background:#1a1a0a;border:2px solid #facc15;padding:12px;border-radius:16px;position:sticky;top:6px;z-index:10}
+.badge{background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.3);padding:4px 8px;border-radius:99px;font-size:9px;font-weight:900}
+.job{background:#1a1a2e;border-left:5px solid #facc15;border-radius:14px;padding:12px;margin-bottom:10px;position:relative}
+.btn{width:100%;padding:12px;border:none;border-radius:12px;font-weight:900;font-size:11px;margin-top:8px;cursor:pointer;display:flex;justify-content:center;gap:6px}
+.btn-g{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-g2{background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid #22c55e}
+.btn-r{background:#ef4444;color:#fff}
+.btn-r2{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid #ef4444}
+.btn-y{background:#facc15;color:#000}
+.btn-b{background:#222;color:#fff;border:1px solid #444}
+.box{background:#000;padding:10px;border-radius:10px;margin-top:8px;font-size:11px;white-space:pre-wrap;display:none;max-height:250px;overflow:auto;border:1px solid #333}
+.box.show{display:block}
+textarea{width:100%;background:#0a0a15;color:#fff;border:2px solid #facc15;border-radius:12px;padding:10px;min-height:90px;outline:none}
+.page{display:none}.page.active{display:block}
+.confetti{position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#facc15,#22c55e,#60a5fa,#facc15);background-size:200% 100%;animation:move 2s linear infinite}
+@keyframes move{0%{background-position:0%}100%{background-position:200%}}
+</style>
+</head>
+<body>
+<div id="pageList" class="page active"><div class="header"><div style="display:flex;justify-content:space-between"><b style="color:#facc15">🎙️ PENDING - EXACT AMOUNT FIX</b><span style="background:#000;border:1px solid #facc15;color:#facc15;padding:5px 10px;border-radius:99px">⏳ <b id="cnt">0</b></span></div><div style="margin-top:8px;display:flex;gap:6px"><button onclick="loadList()" style="padding:8px 14px;background:#22c55e;color:#fff;border:none;border-radius:99px;font-weight:900">🔄 SYNC</button><a href="transcription-jobs.html" style="padding:8px 14px;background:#facc15;color:#000;border-radius:99px;font-weight:900;text-decoration:none">📋 JOBS</a><a href="dashboard.html" style="padding:8px 14px;background:#222;color:#fff;border-radius:99px;text-decoration:none">🏠 DASHBOARD</a></div></div><div id="list" style="margin-top:12px"></div></div>
+<div id="pageReview" class="page"><div class="header"><button onclick="showPage('pageList')" style="padding:6px 10px;background:#222;color:#fff;border-radius:99px;border:1px solid #444">⬅️ Back</button> <b style="color:#facc15;margin-left:6px">REVIEW & PAY EXACT</b><div class="confetti"></div></div><div id="reviewDetails" style="margin-top:10px"></div><div style="background:#1e1e32;padding:12px;border-radius:14px;border:2px solid #facc15;margin-top:10px;position:relative"><div class="confetti"></div><label style="color:#facc15;font-size:11px;font-weight:800">💬 FEEDBACK (Optional)</label><textarea id="fbBox" placeholder="Leave empty for without feedback"></textarea><button class="btn btn-g" onclick="approve(true)">✅ APPROVE + FEEDBACK - PAY EXACT KES</button><button class="btn btn-g2" onclick="approve(false)">✅ APPROVE WITHOUT - PAY EXACT KES</button><button class="btn btn-r" onclick="reject(true)">❌ REJECT + FEEDBACK</button><button class="btn btn-r2" onclick="reject(false)">❌ REJECT WITHOUT</button><button class="btn btn-y" onclick="feedbackOnly()">💬 FEEDBACK ONLY</button><button class="btn btn-b" onclick="showPage('pageList')">CANCEL</button></div></div>
+<script>
+let pending=[],cur=null;
+const KEY_GLOBAL='DIAMINES_TRANS_PENDING_GLOBAL';
+function getPending(){try{return JSON.parse(localStorage.getItem(KEY_GLOBAL)||'[]')}catch{return []}}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='pageList')loadList()}
+function toggleBox(id){document.getElementById(id).classList.toggle('show')}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function loadList(){pending=getPending();document.getElementById('cnt').innerText=pending.length;let html='';pending.forEach((j,i)=>{html+=`<div class="job"><div style="display:flex;justify-content:space-between"><b>🎙️ ${j.title}</b><b style="color:#4ade80">KES ${j.earn||j.price}</b></div><span class="badge">👤 ${j.userEmail}</span> <small style="color:#888;font-size:9px">${new Date(j.submittedAt).toLocaleString()} • ID:${j.submittedAt}</small><div style="margin-top:6px;display:flex;gap:6px"><button class="btn" style="width:48%;background:#1a0000;color:#ff7b7b;border:1px solid #ef4444;padding:8px" onclick="toggleBox('o_${i}')">📄 ORIGINAL</button><button class="btn" style="width:48%;background:#001a0a;color:#7bffa3;border:1px solid #22c55e;padding:8px" onclick="toggleBox('e_${i}')">⌨️ TRANSCRIPTION</button></div><div id="o_${i}" class="box">${esc(j.original||'')}</div><div id="e_${i}" class="box">${esc(j.proof||j.content||'')}</div><button class="btn btn-y" onclick="openReview(${i})">✍️ REVIEW → PAY EXACT KES ${j.earn||j.price}</button></div>`});if(!html)html=`<div style="text-align:center;padding:40px;color:#666">🎉 No pending</div>`;document.getElementById('list').innerHTML=html;}
+function openReview(i){cur=pending[i];document.getElementById('reviewDetails').innerHTML=`<div class="job"><b>${cur.title}</b> - <b style="color:#4ade80">EXACT KES ${cur.earn||cur.price}</b><br><span class="badge">👤 ${cur.userEmail}</span><br><small style="color:#888">Submitted ID: ${cur.submittedAt}</small><div style="margin-top:6px;display:flex;gap:6px"><button class="btn" style="width:48%;background:#1a0000;color:#ff7b7b;border:1px solid #ef4444;padding:8px" onclick="toggleBox('ro')">📄 ORIGINAL</button><button class="btn" style="width:48%;background:#001a0a;color:#7bffa3;border:1px solid #22c55e;padding:8px" onclick="toggleBox('re')">⌨️ TRANSCRIPTION</button></div><div id="ro" class="box">${esc(cur.original)}</div><div id="re" class="box show">${esc(cur.proof||cur.content)}</div></div>`;document.getElementById('fbBox').value=cur.adminFeedback||'';showPage('pageReview');}
+function removeCur(){let all=getPending().filter(x=>x.submittedAt!==cur.submittedAt);localStorage.setItem(KEY_GLOBAL, JSON.stringify(all));let userKey='DIAMINES_TRANS_PD_'+cur.userEmail;try{let arr=JSON.parse(localStorage.getItem(userKey)||'[]');localStorage.setItem(userKey, JSON.stringify(arr.filter(x=>x.submittedAt!==cur.submittedAt)));}catch{}}
+
+// ===== EXACT PAY FIX - NO DEDUCT, NO DOUBLE ADD =====
+function payExact(email, earn, submittedAt){
+ email=email.toLowerCase().trim();
+ earn=parseFloat(earn)||0;
+ submittedAt=String(submittedAt);
+
+ // Prevent double pay for same job
+ const PAID_KEY='DIAMINES_PAID_TRANS_'+email;
+ let paidList=JSON.parse(localStorage.getItem(PAID_KEY)||'[]');
+ if(paidList.includes(submittedAt)){
+  alert('⚠️ This job ID '+submittedAt+' was ALREADY PAID! Blocking double pay.');
+  return null;
+ }
+
+ // ONE canonical balance - no Math.max
+ const BAL_KEY='DIAMINES_BAL_'+email;
+ let currentBal=parseFloat(localStorage.getItem(BAL_KEY)||'0');
+ if(isNaN(currentBal)) currentBal=0;
+
+ let newBal=currentBal+earn; // EXACT ADD ONLY
+
+ // Update all dashboard keys with SAME exact newBal
+ localStorage.setItem(BAL_KEY, newBal.toString());
+ localStorage.setItem('BAL_'+email, newBal.toString());
+ localStorage.setItem('DIAMINES_BAL', newBal.toString());
+ localStorage.setItem('BAL', newBal.toString());
+ localStorage.setItem('DIAMINES_WALLET_'+email, newBal.toString());
+
+ // Update current session
+ try{
+  let curSess=JSON.parse(localStorage.getItem('DIAMINES_CURRENT')||'null');
+  if(curSess && curSess.email && curSess.email.toLowerCase()===email){
+   curSess.balance=newBal;
+   curSess.wallet=newBal;
+   localStorage.setItem('DIAMINES_CURRENT', JSON.stringify(curSess));
+  }
+ }catch(e){}
+
+ // Mark as paid
+ paidList.push(submittedAt);
+ localStorage.setItem(PAID_KEY, JSON.stringify(paidList));
+
+ return newBal;
+}
+
+function approve(withFb){
+ let fb=document.getElementById('fbBox').value.trim();
+ if(withFb &&!fb) fb='Excellent! Approved KES '+(cur.earn||cur.price);
+ if(!withFb) fb='Approved by admin. Great work!';
+ let email=cur.userEmail.toLowerCase();
+ let earn=parseFloat(cur.earn||cur.price||0);
+ let submittedAt=cur.submittedAt;
+
+ // Check double pay first
+ let newBal=payExact(email, earn, submittedAt);
+ if(newBal===null){ showPage('pageList'); return; }
+
+ // Save to APPROVED history
+ let histKey='DIAMINES_TRANS_HISTORY_TRANS_'+email;
+ let hist=JSON.parse(localStorage.getItem(histKey)||'[]');
+ hist.unshift({...cur, status:'approved', feedback:fb, reviewedAt:new Date().toISOString(), price:earn, earn:earn});
+ localStorage.setItem(histKey, JSON.stringify(hist));
+ localStorage.setItem('DIAMINES_TRANS_HISTORY_'+email, JSON.stringify(hist));
+
+ removeCur();
+ alert('✅ EXACT PAY SUCCESS\n\n💰 Paid: KES '+earn+' (exact amount of this job)\n👤 '+email+'\n📊 Old + '+earn+' = New KES '+newBal+'\n\nCheck dashboard.html - updated instantly, no deduct!');
+ showPage('pageList');
+}
+function reject(withFb){
+ let fb=document.getElementById('fbBox').value.trim();
+ if(withFb &&!fb){alert('Type feedback');return;}
+ if(!withFb) fb='Rejected by admin.';
+ let email=cur.userEmail.toLowerCase();
+ let histKey='DIAMINES_TRANS_HISTORY_TRANS_'+email;
+ let hist=JSON.parse(localStorage.getItem(histKey)||'[]');
+ hist.unshift({...cur, status:'rejected', feedback:fb, reviewedAt:new Date().toISOString()});
+ localStorage.setItem(histKey, JSON.stringify(hist));
+ localStorage.setItem('DIAMINES_TRANS_HISTORY_'+email, JSON.stringify(hist));
+ removeCur();
+ alert('❌ REJECTED - No payment');
+ showPage('pageList');
+}
+function feedbackOnly(){
+ let fb=document.getElementById('fbBox').value.trim();
+ if(!fb){alert('Type feedback');return;}
+ let all=getPending();let idx=all.findIndex(x=>x.submittedAt===cur.submittedAt);
+ if(idx>-1){all[idx].adminFeedback=fb;localStorage.setItem(KEY_GLOBAL, JSON.stringify(all));}
+ alert('💬 Feedback saved');
+ showPage('pageList');
+}
+loadList();
+</script>
+</body>
+</html>

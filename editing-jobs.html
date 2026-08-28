@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Add Editing Jobs - Admin</title>
+<style>*{box-sizing:border-box;font-family:system-ui;margin:0;padding:0}body{background:#070711;color:#fff;padding:12px}.card{background:#15152d;border:1px solid #333;border-radius:14px;padding:14px;margin-bottom:12px}input,textarea{width:100%;padding:12px;background:#000;border:2px solid #333;border-radius:10px;color:#fff;margin:6px 0}button{padding:14px;border:none;border-radius:10px;font-weight:900;cursor:pointer;width:100%;margin-top:8px}.btn-g{background:#00e676;color:#000}.btn-b{background:#2962ff;color:#fff}.btn-r{background:#ff1744;color:#fff}.job{background:#0f0f23;border-radius:12px;padding:12px;margin-bottom:10px;border-left:5px solid #00b8d4}
+</style></head><body>
+<div style="background:#0f0f23;border:2px solid #00b8d4;padding:12px;border-radius:12px;margin-bottom:12px">
+<b style="color:#00e5ff">🛠️ ADMIN - EDITING JOBS</b> | Jobs on site: <b id="count">0</b> | <a href="editing.html" style="color:#00b8d4">Go to editing.html</a>
+<div style="margin-top:8px;background:#000;padding:8px;border-radius:8px"><small style="color:#888">STORAGE KEY:</small> <small style="color:#00e676">DIAMINES_EDITING_AVAILABLE_JOBS</small> | <small id="syncStatus" style="color:#ffb700">Checking...</small></div>
+</div>
+
+<div class="card" style="border:2px solid #00b8d4">
+<input id="title" placeholder="Job Title e.g. KANYARI - Fix Grammar">
+<input id="desc" placeholder="Short desc">
+<input id="earn" type="number" value="70">
+<textarea id="original" rows="7" placeholder="Paste messy text that user must edit..."></textarea>
+<button class="btn-g" onclick="addJob()">🚀 ADD JOB TO editing.html</button>
+</div>
+
+<div class="card"><h3>Jobs on Website</h3><div id="list"></div></div>
+
+<script>
+const KEY='DIAMINES_EDITING_AVAILABLE_JOBS';
+function getJobs(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return []}}
+
+function addJob(){
+  let title=document.getElementById('title').value.trim();
+  let original=document.getElementById('original').value.trim();
+  let desc=document.getElementById('desc').value.trim();
+  let earn=parseFloat(document.getElementById('earn').value)||70;
+  if(!title||!original) return alert('Title and original required');
+
+  let jobs=getJobs();
+  let newJob={id:'JOB_'+Date.now(), title, desc:desc||'Fix grammar', original, earn, createdAt:new Date().toISOString()};
+  jobs.unshift(newJob);
+
+  // FORCE SAVE TO GLOBAL KEY - THIS IS WHAT editing.html READS
+  localStorage.setItem(KEY, JSON.stringify(jobs));
+  localStorage.setItem('DIAMINES_EDITING_JOBS_BACKUP', JSON.stringify(jobs)); // backup key
+
+  // Force sync event for other tabs
+  localStorage.setItem('LAST_JOB_UPDATE', Date.now().toString());
+
+  document.getElementById('title').value=''; document.getElementById('desc').value=''; document.getElementById('original').value='';
+  render();
+  alert('✅ Job "'+title+'" saved to key: '+KEY+'\nNow open editing.html in SAME browser - it will appear in Available!');
+}
+
+function render(){
+  let jobs=getJobs();
+  document.getElementById('count').innerText=jobs.length;
+  document.getElementById('syncStatus').innerText=jobs.length+' jobs in storage - OK';
+  document.getElementById('syncStatus').style.color='#00e676';
+  let h=''; jobs.forEach((j,i)=>{ h+=`<div class="job"><b>${j.title}</b> - KES ${j.earn}<br><small>${j.desc}</small><p style="font-size:11px;color:#888;white-space:pre-wrap">${j.original.substring(0,120)}...</p><button class="btn-r" style="padding:8px;margin-top:6px" onclick="del(${i})">Delete</button></div>`; });
+  document.getElementById('list').innerHTML=h||'<small style="color:#666">No jobs</small>';
+}
+function del(i){ let jobs=getJobs(); jobs.splice(i,1); localStorage.setItem(KEY, JSON.stringify(jobs)); render(); }
+render();
+setInterval(render,2000);
+</script></body></html>

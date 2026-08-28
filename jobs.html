@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES - Jobs</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#070711;color:#fff;padding:14px;max-width:600px;margin:0 auto}
+a{color:#888;text-decoration:none;font-size:13px}
+.job{background:#1a1a35;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.btn{padding:10px 16px;border-radius:10px;border:none;background:#facc15;color:#000;font-weight:800;font-size:11px;cursor:pointer}
+.upg{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:99;display:none;align-items:center;justify-content:center;padding:20px}
+.upg.show{display:flex}
+.upg-card{background:linear-gradient(180deg,#1e1e3f,#12122a);border:1px solid #facc15;border-radius:24px;padding:24px;max-width:360px;width:100%;text-align:center}
+</style>
+</head>
+<body>
+<a href="dashboard.html">← Dashboard</a>
+<h2 style="margin:14px 0">💼 My Jobs - <span id="pkgName"></span></h2>
+<p style="font-size:11px;color:#8b8ba7;margin-bottom:12px">LION = Affiliate, Digital, Writings accessible. Others = tap to upgrade</p>
+<div id="list"></div>
+
+<div class="upg" id="upgradeModal" onclick="this.classList.remove('show')">
+<div class="upg-card" onclick="event.stopPropagation()">
+<div style="font-size:44px" id="upgIcon">🔒</div>
+<h3 id="upgTitle" style="margin:10px 0;color:#facc15">Upgrade Required</h3>
+<p id="upgMsg" style="font-size:12px;color:#8b8ba7"></p>
+<div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:12px;margin:14px 0;text-align:left">
+<b id="upgNeed" style="color:#fff"></b><br>
+<small id="upgUnlock" style="color:#4ade80;font-size:10px"></small>
+</div>
+<button onclick="location.href='membership.html'" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#facc15,#ffb700);color:#000;font-weight:800;cursor:pointer">💎 UPGRADE NOW →</button>
+<button onclick="document.getElementById('upgradeModal').classList.remove('show')" style="width:100%;padding:10px;margin-top:8px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#8b8ba7">Close</button>
+</div>
+</div>
+
+<script>
+function getEmail(){return String(JSON.parse(localStorage.getItem("DIAMINES_CURRENT")).email).toLowerCase()}
+let allJobs=[
+ {id:"digital",name:"Digital Marketing",pay:110,icon:"📢",desc:"Share referral link"},
+ {id:"affiliate",name:"Affiliate Marketing",pay:95,icon:"🛒",desc:"Share product link - Coming Soon"},
+ {id:"writings",name:"Writings",pay:25,icon:"✍️",desc:"Write article 300 words"},
+ {id:"editing",name:"Editing",pay:40,icon:"📝",desc:"Proofread article"},
+ {id:"transcription",name:"Transcription",pay:65,icon:"🎧",desc:"Audio to text"},
+ {id:"translation",name:"Translation",pay:85,icon:"🌍",desc:"Translate 200 words"},
+ {id:"gaming",name:"Gaming",pay:150,icon:"🎮",desc:"Play 5 mins - BEST PAY"}
+];
+function getAllowed(){
+ let email=getEmail();
+ let allowed=JSON.parse(localStorage.getItem("DIAMINES_ALLOWED_JOBS_"+email)||"[]");
+ let pkg=localStorage.getItem("DIAMINES_PACKAGE_"+email)||"none";
+ if(allowed.length==0){
+  if(pkg=="lion") allowed=["digital","affiliate","writings"];
+  if(pkg=="tiger") allowed=["digital","affiliate","writings","editing"];
+  if(pkg=="cheetah") allowed=["digital","affiliate","writings","editing","transcription","translation"];
+  if(pkg=="elephant") allowed=["digital","affiliate","writings","editing","transcription","translation","gaming"];
+ }
+ return {allowed,pkg};
+}
+function getNeed(jobId){
+ if(["digital","affiliate","writings"].includes(jobId)) return {name:"LION 🦁",price:"KES 500",unlock:"Digital, Affiliate, Writings",icon:"🦁"};
+ if(jobId=="editing") return {name:"TIGER 🐯",price:"KES 1500",unlock:"Editing + lower jobs",icon:"🐯"};
+ if(["transcription","translation"].includes(jobId)) return {name:"CHEETAH 🐆",price:"KES 3000",unlock:"Transcription, Translation + lower",icon:"🐆"};
+ if(jobId=="gaming") return {name:"ELEPHANT 🐘",price:"KES 5500",unlock:"ALL 7 JOBS including Gaming",icon:"🐘"};
+}
+function render(){
+ let {allowed,pkg}=getAllowed();
+ document.getElementById("pkgName").innerText=pkg.toUpperCase()+" ("+allowed.length+"/7)";
+ // Show allowed first (column) but all same look
+ let sorted=[...allJobs].sort((a,b)=>(allowed.includes(a.id)?0:1)-(allowed.includes(b.id)?0:1));
+ let html="";
+ sorted.forEach(j=>{
+  let ok=allowed.includes(j.id);
+  html+=`<div class="job" onclick="doJob('${j.id}',${j.pay})"><div><b style="color:#fff">${j.icon} ${j.name}</b><br><small style="color:#8b8ba7">${j.desc}</small><br><small style="color:#4ade80">KES ${j.pay}</small></div><button class="btn">${ok?'DO JOB':'UPGRADE'}</button></div>`;
+ });
+ document.getElementById("list").innerHTML=html;
+}
+function doJob(id,pay){
+ let {allowed,pkg}=getAllowed();
+ if(!allowed.includes(id)){
+  let need=getNeed(id);
+  document.getElementById("upgIcon").innerText=need.icon;
+  document.getElementById("upgTitle").innerText="Need "+need.name;
+  document.getElementById("upgMsg").innerHTML=`You have <b style="color:#fff">${pkg.toUpperCase()} (${allowed.length} jobs)</b>. To access <b style="color:#facc15">${id.toUpperCase()}</b> you must upgrade to <b>${need.name}</b>.`;
+  document.getElementById("upgNeed").innerText=need.name+" - "+need.price;
+  document.getElementById("upgUnlock").innerText="Unlocks: "+need.unlock;
+  document.getElementById("upgradeModal").classList.add("show");
+  return;
+ }
+ // allowed - do job
+ if(!confirm(`Do ${id} for KES ${pay}?`)) return;
+ let email=getEmail();
+ let bal=Number(localStorage.getItem("DIAMINES_BAL_"+email)||0);
+ localStorage.setItem("DIAMINES_BAL_"+email,String(bal+pay));
+ alert(`✅ KES ${pay} added for ${id}!`);
+}
+render();
+</script>
+</body>
+</html>

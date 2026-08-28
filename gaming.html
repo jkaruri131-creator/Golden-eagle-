@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gaming - DIAMINES</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif}
+body{background:#0f0f1a;color:#fff;padding:16px 14px 80px;max-width:600px;margin:0 auto;min-height:100vh}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.back{width:40px;height:40px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none}
+.bal{background:linear-gradient(135deg,#facc15,#f59e0b);color:#111;padding:8px 14px;border-radius:99px;font-weight:800;font-size:12px}
+.tabs{display:flex;background:rgba(255,255,255,0.05);border-radius:14px;padding:4px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08)}
+.tab{flex:1;padding:10px;border:none;border-radius:10px;background:transparent;color:#8b8ba7;font-weight:700;font-size:11px;cursor:pointer}
+.tab.active{background:linear-gradient(135deg,#f87171,#ef4444);color:#fff}
+.card{background:linear-gradient(135deg,#1e1e32,#181830);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:18px;margin-bottom:14px}
+.badge{font-size:9px;padding:4px 8px;border-radius:99px;font-weight:800;background:rgba(248,113,113,0.15);color:#f87171;border:1px solid rgba(248,113,113,0.3)}
+.btn{width:100%;padding:13px;border:none;border-radius:12px;font-weight:800;font-size:11px;cursor:pointer;margin-top:12px}
+.btn-spin{background:linear-gradient(135deg,#f87171,#ef4444);color:#fff}
+.btn-play{background:linear-gradient(135deg,#facc15,#f59e0b);color:#111}
+.game-area{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-top:12px;text-align:center}
+.wheel{width:190px;height:190px;border-radius:50%;margin:18px auto;background:conic-gradient(#facc15 0deg 60deg,#22c55e 60deg 120deg,#a855f7 120deg 180deg,#22d3ee 180deg 240deg,#f87171 240deg 300deg,#3b82f6 300deg 360deg);border:5px solid #222;transition:transform 3.2s cubic-bezier(0.17,0.67,0.12,0.99)}
+.pointer{width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:18px solid #facc15;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.tile{aspect-ratio:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer}
+.tile.open{background:#facc15;color:#111}.tile.matched{background:#22c55e;color:#fff}
+.tap-btn{width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,#f87171,#ef4444);border:4px solid rgba(255,255,255,0.1);color:#fff;font-size:22px;font-weight:800;margin:18px auto;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}
+.progress{height:6px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;margin-top:10px}
+.progress div{height:100%;background:linear-gradient(90deg,#facc15,#f87171);transition:width 0.2s}
+</style>
+</head>
+<body>
+<div class="top"><a class="back" href="dashboard.html">←</a><h2 style="font-family:'Space Grotesk'">🎮 Gaming 3%</h2><div class="bal">KES <span id="bal">0</span></div></div>
+
+<div class="tabs">
+<button class="tab active" id="t1" onclick="switchTab(1)">🎡 SPIN 3%</button>
+<button class="tab" id="t2" onclick="switchTab(2)">🧠 MEMORY 3%</button>
+<button class="tab" id="t3" onclick="switchTab(3)">👆 TAP 3%</button>
+</div>
+
+<div id="content"></div>
+
+<script>
+var EMAIL='demo@test.com';
+try{var c=JSON.parse(localStorage.getItem('DIAMINES_CURRENT')||'null'); if(c&&c.email) EMAIL=c.email;}catch(e){}
+function getBal(){return parseInt(localStorage.getItem('DIAMINES_BAL')||'0');}
+function setBal(v){localStorage.setItem('DIAMINES_BAL',''+v); document.getElementById('bal').innerText=v;}
+function addBal(a){setBal(getBal()+a);}
+setBal(getBal());
+
+var tab=1;
+function switchTab(t){tab=t; document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')}); document.getElementById('t'+t).classList.add('active'); render();}
+
+function render(){
+var h='';
+if(tab==1){
+ h='<div class="card"><b>🎡 Lucky Spin</b> <span class="badge">3% WIN CHANCE</span><br><span style="font-size:11px;color:#a1a1b5">1 free/day, then KES 10 • Only 3% win • Win up to KES 500</span><div class="game-area"><div class="pointer"></div><div class="wheel" id="wheel"></div><p id="spinResult" style="font-size:12px;color:#facc15;margin-top:10px">3% chance to win!</p><button class="btn btn-spin" onclick="doSpin()">🎡 SPIN - KES 10 (3% WIN)</button><p style="font-size:9px;color:#666;margin-top:8px">Win probability: 3% • Loss: 97%</p></div></div>';
+}
+else if(tab==2){
+ h='<div class="card"><b>🧠 Memory Match</b> <span class="badge">3% WIN CHANCE</span><br><span style="font-size:11px;color:#a1a1b5">Cost KES 5 • Match all 8 pairs in 45s • Only 3% chance to get KES 50 even if you complete</span><div class="game-area"><div style="display:flex;justify-content:space-between;font-size:11px"><span>⏰ <span id="mTime">45</span>s</span><span>🎯 <span id="mPairs">0</span>/8</span><span>💰 3% chance</span></div><div class="grid" id="mGrid"></div><button class="btn btn-play" onclick="startMemory()">START - KES 5 (3% WIN)</button></div></div>';
+}
+else{
+ h='<div class="card"><b>👆 Tap Rush</b> <span class="badge">3% WIN CHANCE</span><br><span style="font-size:11px;color:#a1a1b5">FREE • 10s • Need 50+ taps • Even if you hit target, only 3% chance to win</span><div class="game-area"><div style="display:flex;justify-content:space-between;font-size:11px"><span>⏰ <span id="tTime">10</span>s</span><span>👆 <span id="tCount">0</span></span></div><div class="progress"><div id="tBar" style="width:0%"></div></div><div class="tap-btn" id="tapBtn" ontouchstart="doTap()" onmousedown="doTap()">TAP!</div><p id="tResult" style="font-size:12px;color:#f87171">3% win chance - Press START</p><button class="btn btn-play" onclick="startTap()">START TAP RUSH (3% WIN)</button></div></div>';
+}
+document.getElementById('content').innerHTML=h;
+if(tab==2)initPreview();
+}
+
+var spinDeg=0;
+function doSpin(){
+var key='DIAMINES_FREE_SPIN_'+new Date().toDateString();
+var free=localStorage.getItem(key);
+if(!free){localStorage.setItem(key,'1');}
+else{if(getBal()<10){alert('Need KES 10'); return;} setBal(getBal()-10);}
+var wheel=document.getElementById('wheel');
+spinDeg+=1800+Math.floor(Math.random()*360);
+wheel.style.transform='rotate('+spinDeg+'deg)';
+document.getElementById('spinResult').innerText='Spinning... 3% chance';
+setTimeout(function(){
+// 3% WIN LOGIC
+var winChance=Math.random();
+if(winChance>0.03){
+ document.getElementById('spinResult').innerText='😢 No win! (97% loss rate) - Try again! 3% chance only.';
+ return;
+}
+var rewards=[50,100,200,500];
+var rewardsW=[50,30,15,5];
+var r=Math.random()*100, cum=0, win=50;
+for(var i=0;i<rewardsW.length;i++){cum+=rewardsW[i]; if(r<cum){win=rewards[i]; break;}}
+addBal(win);
+document.getElementById('spinResult').innerText='🎉 JACKPOT! 3% WIN! You won KES '+win+'!';
+},3300);
+}
+
+var mEmojis=['🍎','🍎','⚽','⚽','🚀','🚀','🎮','🎮','💎','💎','🔥','🔥','🌟','🌟','🎯','🎯'];
+var mFirst=null,mSecond=null,mLock=false,mMatched=0,mTimer=null,mTime=45,mPlaying=false;
+function initPreview(){var grid=document.getElementById('mGrid'); if(!grid) return; grid.innerHTML=''; for(var i=0;i<16;i++){var d=document.createElement('div'); d.className='tile'; d.innerText='❓'; grid.appendChild(d);}}
+function startMemory(){if(getBal()<5){alert('Need KES 5'); return;} setBal(getBal()-5); mEmojis.sort(function(){return 0.5-Math.random()}); mFirst=null; mSecond=null; mLock=false; mMatched=0; mTime=45; mPlaying=true; var grid=document.getElementById('mGrid'); grid.innerHTML=''; for(var i=0;i<16;i++){var d=document.createElement('div'); d.className='tile'; d.dataset.emoji=mEmojis[i]; d.innerText='❓'; d.onclick=(function(el){return function(){openTile(el)}})(d); grid.appendChild(d);} if(mTimer) clearInterval(mTimer); mTimer=setInterval(function(){mTime--; document.getElementById('mTime').innerText=mTime; if(mTime<=0){clearInterval(mTimer); mPlaying=false; alert('Time up! '+mMatched+'/8'); render();}},1000);}
+function openTile(el){
+if(!mPlaying||mLock||el.classList.contains('open')||el.classList.contains('matched')) return;
+el.innerText=el.dataset.emoji; el.classList.add('open');
+if(!mFirst){mFirst=el;}
+else{mSecond=el; mLock=true;
+ if(mFirst.dataset.emoji===mSecond.dataset.emoji){
+  setTimeout(function(){mFirst.classList.add('matched'); mSecond.classList.add('matched'); mFirst=null; mSecond=null; mLock=false; mMatched++; document.getElementById('mPairs').innerText=mMatched;
+   if(mMatched==8){
+    clearInterval(mTimer); mPlaying=false;
+    // 3% WIN CHECK
+    if(Math.random()<=0.03){addBal(50); alert('🎉 INSANE! 3% WIN! You won KES 50 despite 97% loss rate!');}
+    else{alert('😢 You matched all but 3% win chance failed! (97% lose). No reward this time. Try again!');}
+    render();
+   }
+  },350);
+ }else{
+  setTimeout(function(){mFirst.innerText='❓'; mSecond.innerText='❓'; mFirst.classList.remove('open'); mSecond.classList.remove('open'); mFirst=null; mSecond=null; mLock=false;},600);
+ }
+}
+}
+
+var tCount=0,tTime=10,tTimer=null,tPlaying=false;
+function startTap(){tCount=0; tTime=10; tPlaying=true; document.getElementById('tCount').innerText='0'; document.getElementById('tTime').innerText='10'; document.getElementById('tBar').style.width='0%'; document.getElementById('tResult').innerText='GO GO GO! Need 50+ taps but only 3% win!'; if(tTimer) clearInterval(tTimer); tTimer=setInterval(function(){tTime--; document.getElementById('tTime').innerText=tTime; document.getElementById('tBar').style.width=((10-tTime)*10)+'%'; if(tTime<=0){clearInterval(tTimer); tPlaying=false; finishTap();}},1000);}
+function doTap(){if(!tPlaying) return; tCount++; document.getElementById('tCount').innerText=tCount; var b=document.getElementById('tapBtn'); b.style.transform='scale(0.92)'; setTimeout(function(){b.style.transform='scale(1)';},70);}
+function finishTap(){
+if(tCount<50){document.getElementById('tResult').innerText='😢 Only '+tCount+' taps, need 50+ minimum'; return;}
+// 3% WIN CHECK
+if(Math.random()>0.03){
+ document.getElementById('tResult').innerText='😢 '+tCount+' taps! But 3% win chance FAILED (97% loss). No reward. Try again!';
+ return;
+}
+var win=0; if(tCount>=100) win=150; else if(tCount>=80) win=80; else win=30;
+addBal(win);
+document.getElementById('tResult').innerText='🎉 3% JACKPOT! '+tCount+' taps = KES '+win+' WON!';
+}
+
+render();
+</script>
+</body>
+</html>

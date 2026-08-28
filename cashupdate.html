@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cash Auto Update</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui;margin:0;padding:0}
+body{background:#070711;color:#fff;padding:10px}
+.box{background:#0f0f23;border:2px solid #00e676;border-radius:16px;padding:16px;text-align:center}
+.bal{font-size:36px;color:#00e676;font-weight:900;margin:6px 0}
+.badge{display:inline-block;padding:5px 12px;border-radius:99px;font-size:11px;font-weight:800}
+.live{background:#00e676;color:#000;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.small{font-size:11px;color:#888}
+.log{background:#000;border-radius:10px;padding:8px;margin-top:10px;text-align:left;max-height:120px;overflow:auto;font-size:11px;color:#888}
+</style></head><body>
+<div class="box">
+<span class="badge live">● LIVE</span>
+<div style="margin-top:8px"><small class="small">ACCOUNT BALANCE AUTO UPDATE</small><br><div class="bal">KES <span id="bal">0</span></div></div>
+<div style="background:#000;padding:8px;border-radius:10px;margin-top:8px">
+<small class="small">Base: <span id="base">0</span> | Editing: <span id="edit">0</span> | Approved: <span id="count">0</span></small>
+</div>
+<div id="log" class="log"></div>
+</div>
+
+<script>
+let cur=null; try{cur=JSON.parse(localStorage.getItem('DIAMINES_CURRENT')||'null')}catch{}
+let email=(cur?cur.email:'').toLowerCase().trim()||(localStorage.getItem('LAST_EMAIL')||'').toLowerCase().trim();
+
+function getData(){
+  let b=parseFloat(localStorage.getItem('BAL_'+email)||'0');
+  let t=parseFloat(localStorage.getItem('TOTAL_EARNED_'+email)||'0');
+  let h=[]; try{h=JSON.parse(localStorage.getItem('HISTORY_'+email)||'[]')}catch{}
+  let ap=h.filter(x=>x.status==='approved');
+  let sum=ap.reduce((s,j)=>s+parseFloat(j.earn||0),0);
+  let final=Math.max(b,t,sum);
+  return {final, sum, ap, raw:b}
+}
+function addLog(m){
+  let el=document.getElementById('log');
+  el.innerHTML=`<div>[${new Date().toLocaleTimeString()}] ${m}</div>`+el.innerHTML;
+}
+function sync(){
+  if(!email){document.getElementById('bal').innerText='0'; return;}
+  let base=parseFloat(localStorage.getItem('DIAMINES_BAL')||'0');
+  let d=getData();
+  if(d.final>d.raw){
+    localStorage.setItem('BAL_'+email,d.final.toString());
+    localStorage.setItem('TOTAL_EARNED_'+email,d.final.toString());
+  }
+  let total=base+d.final;
+  document.getElementById('bal').innerText=total;
+  document.getElementById('base').innerText=base;
+  document.getElementById('edit').innerText=d.final;
+  document.getElementById('count').innerText=d.ap.length;
+
+  try{
+    if(parent && parent.document){
+      let a=parent.document.getElementById('accountBalance');
+      if(a) a.innerText=total;
+    }
+  }catch{}
+
+  let last=parseInt(localStorage.getItem('LAST_COUNT_'+email)||'0');
+  if(d.ap.length>last){
+    addLog(`✅ APPROVED +KES ${d.ap[0].earn} - ${d.ap[0].title} - Total: KES ${total}`);
+    try{navigator.vibrate(200)}catch{}
+    localStorage.setItem('LAST_COUNT_'+email,d.ap.length.toString());
+  }
+}
+if(email) addLog(`👤 ${email} - Auto sync started`);
+else addLog(`❌ No email - login first`);
+
+sync();
+setInterval(sync,1000);
+window.addEventListener('storage',sync);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden) sync()});
+</script>
+</body></html>

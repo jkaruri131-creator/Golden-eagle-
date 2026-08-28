@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ADMIN - Jobs Manager</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui;margin:0;padding:0}
+body{background:#07070a;color:#fff;padding:12px}
+.top{max-width:700px;margin:0 auto 12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.back{padding:8px 12px;background:rgba(255,255,255,0.08);border:1px solid #333;border-radius:10px;color:#fff;text-decoration:none;font-size:10px;font-weight:800}
+.card{background:#1e1e32;border:1px solid #333;border-radius:16px;padding:14px;margin-bottom:10px}
+input,textarea,select{width:100%;background:#0f0f1a;border:1px solid #333;border-radius:10px;color:#fff;padding:10px;margin-top:6px;font-size:12px}
+label{font-size:8px;color:#888;font-weight:800;margin-top:10px;display:block}
+.btn{padding:10px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:10px;flex:1;display:flex;justify-content:center;gap:6px}
+.btn-e{background:rgba(96,165,250,0.15);color:#93c5fd;border:1px solid rgba(96,165,250,0.3)}
+.btn-d{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
+.btn-add{width:100%;background:linear-gradient(135deg,#facc15,#f59e0b);color:#000;padding:14px;border-radius:12px;font-weight:900;border:none;margin-top:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style>
+</head>
+<body>
+<div class="top"><div style="display:flex;gap:6px"><a class="back" href="dashboard.html">← DASH</a><a class="back" href="admintranscription.html" style="background:#facc15;color:#000">🛡️ REVIEW PENDING</a></div><a class="back" href="transcription.html">👁️ USER VIEW</a></div>
+<div style="max-width:700px;margin:0 auto">
+<h3 style="color:#facc15;text-align:center">🎙️ ADMIN - POST TRANSCRIPTION JOBS</h3>
+<p style="text-align:center;color:#666;font-size:10px;margin-top:4px">Only jobs you add here will show in transcription.html. If you delete all, it becomes empty - no fake jobs.</p>
+<div id="content" style="margin-top:12px"></div>
+</div>
+
+<div id="addBox" class="card" style="max-width:700px;margin:12px auto">
+<h4 style="color:#facc15">➕ Add New Job</h4>
+<label>Title</label><input id="aTitle" placeholder="Business Meeting">
+<label>Description / Instructions</label><textarea id="aDesc" placeholder="Mark speakers, timestamps..."></textarea>
+<label>Audio URL (mp3) - Real site logic</label><input id="aAudio" placeholder="https://...mp3">
+<label>Preview text (if no audio URL)</label><textarea id="aPrev" placeholder="Audio contains discussion about..."></textarea>
+<div class="grid2"><div><label>Price KES</label><input id="aPrice" type="number" value="350"></div><div><label>Duration</label><input id="aDur" value="18 min"></div></div>
+<div class="grid2"><div><label>Deadline Hours</label><input id="aDead" type="number" value="24"></div><div><label>Level</label><select id="aLevel"><option>Easy</option><option>Medium</option><option>Hard</option></select></div></div>
+<button class="btn-add" onclick="addJob()">🚀 PUBLISH TO WEBSITE</button>
+</div>
+
+<script>
+const KEY_ALL='DIAMINES_TRANS_ALL_JOBS';
+function getAll(){try{return JSON.parse(localStorage.getItem(KEY_ALL)||'[]')}catch{return []}}
+function setAll(v){localStorage.setItem(KEY_ALL, JSON.stringify(v)); renderList();}
+
+function renderList(){
+ let all=getAll();
+ let h='';
+ if(!all.length) h=`<div style="text-align:center;padding:30px;color:#666">No jobs yet - add above<br>When empty, transcription.html will show "No jobs available"</div>`;
+ else h=all.map(j=>`<div class="card"><div style="display:flex;justify-content:space-between"><b>🎙️ ${j.title}</b><span style="color:#4ade80">KES ${j.price}</span></div><small style="color:#888">${j.duration} • ${j.level} • ${j.h}h ${j.audioUrl?'• 🔊 Audio':''}</small><p style="font-size:11px;color:#aaa;margin-top:6px">${j.desc}</p><div style="display:flex;gap:6px;margin-top:10px"><button class="btn btn-e" onclick="editJob('${j.id}')">✏️ EDIT</button><button class="btn btn-d" onclick="delJob('${j.id}')">🗑️ DELETE</button></div></div>`).join('');
+ document.getElementById('content').innerHTML=h;
+}
+function addJob(){
+ let title=document.getElementById('aTitle').value.trim();
+ let desc=document.getElementById('aDesc').value.trim();
+ if(!title||!desc){alert('Title & Desc required');return;}
+ let job={
+  id:'TR'+Date.now(),
+  title,
+  desc,
+  preview:document.getElementById('aPrev').value.trim()||desc,
+  audioUrl:document.getElementById('aAudio').value.trim(),
+  price:parseInt(document.getElementById('aPrice').value)||350,
+  duration:document.getElementById('aDur').value.trim()||'18 min',
+  words:document.getElementById('aDur').value.trim()||'18 min',
+  h:parseInt(document.getElementById('aDead').value)||24,
+  level:document.getElementById('aLevel').value||'Easy'
+ };
+ let all=getAll();
+ all.unshift(job);
+ setAll(all);
+ alert('✅ Published: '+title);
+ document.getElementById('aTitle').value='';document.getElementById('aDesc').value='';document.getElementById('aAudio').value='';document.getElementById('aPrev').value='';
+}
+function delJob(id){
+ if(!confirm('Delete '+id+'? It will disappear from users AVAILABLE')) return;
+ setAll(getAll().filter(x=>x.id!==id));
+}
+function editJob(id){
+ let all=getAll();
+ let j=all.find(x=>x.id===id);
+ if(!j)return;
+ let newTitle=prompt('Edit Title', j.title);
+ if(newTitle===null) return;
+ let newPrice=prompt('Edit Price KES', j.price);
+ if(newPrice===null) return;
+ j.title=newTitle.trim()||j.title;
+ j.price=parseInt(newPrice)||j.price;
+ setAll(all);
+}
+renderList();
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin - Approve/Reject No Feedback</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui;margin:0;padding:0}
+body{background:#060610;color:#fff;padding:10px}
+.header{background:#15152d;border:2px solid #ffb700;padding:14px;border-radius:14px;position:sticky;top:5px;z-index:10}
+.job{background:#0f0f23;border:1px solid #333;border-radius:14px;padding:14px;margin-bottom:12px;border-left:6px solid #ffb700}
+.btn{width:100%;padding:13px;border:none;border-radius:10px;font-weight:900;font-size:11px;cursor:pointer;margin-top:7px;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-y{background:#ffb700;color:#000}.btn-g{background:#00e676;color:#000}.btn-g2{background:#0a5c2a;color:#fff;border:1px solid #00e676}
+.btn-r{background:#ff1744;color:#fff}.btn-r2{background:#4a0a0a;color:#ff7b7b;border:1px solid #ff1744}
+.btn-b{background:#222;color:#fff;border:1px solid #444}
+.btn-sm{width:48%;padding:9px;font-size:10px;display:inline-flex}
+.box{background:#000;padding:12px;border-radius:10px;margin:8px 0;max-height:300px;overflow:auto;border:1px solid #444;font-size:12px;white-space:pre-wrap;display:none}
+.box.show{display:block}
+textarea{width:100%;background:#0a0a15;color:#fff;border:3px solid #ffb700;border-radius:12px;padding:12px;font-size:13px;min-height:120px;outline:none}
+textarea:focus{border-color:#00e676}
+.badge{background:#2962ff;color:#fff;padding:4px 10px;border-radius:99px;font-size:10px;font-weight:900}
+.page{display:none}.page.active{display:block}
+.view-btns{display:flex;gap:2%;margin-top:8px}
+.row2{display:flex;gap:2%}
+.row2.btn{width:49%}
+</style></head><body>
+
+<div id="pageList" class="page active">
+<div class="header">
+<b style="color:#ffb700">🛡️ ADMIN - PENDING</b> <span style="float:right;background:#000;padding:5px 10px;border-radius:99px;border:1px solid #ffb700;color:#ffb700;font-size:11px">⏳ <b id="cnt">0</b></span><br>
+<small style="color:#888">Buttons to view original & edited</small>
+<div style="margin-top:6px"><button onclick="loadList()" style="padding:6px 12px;background:#00e676;color:#000;border:none;border-radius:99px;font-weight:900;font-size:11px">🔄 SYNC</button></div>
+</div>
+<div id="list" style="margin-top:10px"></div>
+</div>
+
+<div id="pageReview" class="page">
+<div class="header">
+<button onclick="showPage('pageList')" style="padding:6px 12px;background:#222;color:#fff;border:1px solid #444;border-radius:99px;font-size:11px">⬅️ Back</button>
+<b style="color:#ffb700;margin-left:8px">✍️ REVIEW & FEEDBACK</b>
+</div>
+<div id="reviewDetails" style="margin-top:10px"></div>
+<div style="background:#15152d;padding:12px;border-radius:14px;border:2px solid #ffb700;margin-top:10px">
+<label style="color:#ffb700;font-weight:900;font-size:12px">💬 TYPE FEEDBACK (Optional now):</label>
+<textarea id="feedbackBox" placeholder="Type feedback if you want... or use No Feedback buttons below"></textarea>
+
+<!-- WITH FEEDBACK -->
+<button class="btn btn-g" onclick="doApprove()">✅ APPROVE + SEND FEEDBACK & PAY</button>
+<button class="btn btn-r" onclick="doReject()">❌ REJECT + SEND FEEDBACK</button>
+
+<div style="text-align:center;margin:8px 0;color:#666;font-size:10px">--- OR WITHOUT FEEDBACK ---</div>
+
+<!-- WITHOUT FEEDBACK -->
+<div class="row2">
+<button class="btn btn-g2" onclick="doApproveNoFeedback()">✅ APPROVE WITHOUT FEEDBACK</button>
+<button class="btn btn-r2" onclick="doRejectNoFeedback()">❌ REJECT WITHOUT FEEDBACK</button>
+</div>
+
+<button class="btn btn-y" onclick="doFeedbackOnly()">💬 SEND FEEDBACK ONLY (Keep Pending)</button>
+<button class="btn btn-b" onclick="showPage('pageList')">⬅️ CANCEL</button>
+</div>
+</div>
+
+<script>
+let pendingJobs=[]; let currentJob=null;
+function getPending(){let all=[],seen=new Set();try{JSON.parse(localStorage.getItem('GLOBAL_PENDING')||'[]').forEach(j=>{if(j.submittedAt&&!seen.has(j.submittedAt)){all.push(j);seen.add(j.submittedAt);}});}catch{}for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i);if(k&&k.startsWith('PENDING_')){try{JSON.parse(localStorage.getItem(k)||'[]').forEach(j=>{if(j.submittedAt&&!seen.has(j.submittedAt)){all.push(j);seen.add(j.submittedAt);}});}catch{}}}return all.sort((a,b)=>new Date(b.submittedAt)-new Date(a.submittedAt));}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='pageList')loadList();}
+function toggleBox(id){let el=document.getElementById(id);if(el)el.classList.toggle('show');}
+function loadList(){
+  pendingJobs=getPending(); document.getElementById('cnt').innerText=pendingJobs.length;
+  let html=''; pendingJobs.forEach((j,i)=>{
+    html+=`<div class="job"><div style="display:flex;justify-content:space-between"><b>✍️ ${j.title}</b><b style="color:#00e676">KES ${j.earn}</b></div><div style="margin:5px 0"><span class="badge">👤 ${j.userEmail}</span> <small style="color:#888">${new Date(j.submittedAt).toLocaleString()}</small></div>
+    <div class="view-btns"><button class="btn btn-sm" style="background:#1a0000;color:#ff7b7b;border:1px solid #ff1744" onclick="toggleBox('orig_${i}')">📄 VIEW ORIGINAL</button><button class="btn btn-sm" style="background:#001a0a;color:#7bffa3;border:1px solid #00e676" onclick="toggleBox('edit_${i}')">✍️ VIEW EDITED</button></div>
+    <div id="orig_${i}" class="box" style="border-left:4px solid #ff1744"><b style="color:#ff1744">ORIGINAL:</b><br><br>${esc(j.original||'')}</div><div id="edit_${i}" class="box" style="border-left:4px solid #00e676"><b style="color:#00e676">EDITED:</b><br><br>${esc(j.proof||'')}</div>
+    <button class="btn btn-y" onclick="openReview(${i})">✍️ OPEN REVIEW PAGE →</button></div>`;
+  });
+  if(!html) html='<div style="text-align:center;padding:40px;color:#666">No pending jobs</div>';
+  document.getElementById('list').innerHTML=html;
+}
+function openReview(i){
+  currentJob=pendingJobs[i];
+  document.getElementById('reviewDetails').innerHTML=`<div class="job"><b>${currentJob.title}</b> - <b style="color:#00e676">KES ${currentJob.earn}</b><br><span class="badge">👤 ${currentJob.userEmail}</span>
+  <div class="view-btns"><button class="btn btn-sm" style="background:#1a0000;color:#ff7b7b;border:1px solid #ff1744" onclick="toggleBox('r_orig')">📄 VIEW ORIGINAL</button><button class="btn btn-sm" style="background:#001a0a;color:#7bffa3;border:1px solid #00e676" onclick="toggleBox('r_edit')">✍️ VIEW EDITED</button></div>
+  <div id="r_orig" class="box" style="border-left:4px solid #ff1744"><b style="color:#ff1744">ORIGINAL:</b><br><br>${esc(currentJob.original||'')}</div>
+  <div id="r_edit" class="box show" style="border-left:4px solid #00e676"><b style="color:#00e676">EDITED TO REVIEW:</b><br><br>${esc(currentJob.proof||'')}</div></div>`;
+  document.getElementById('feedbackBox').value = currentJob.adminFeedback || localStorage.getItem('DRAFT_'+currentJob.submittedAt) || '';
+  showPage('pageReview');
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function removeCurrent(){let gp=JSON.parse(localStorage.getItem('GLOBAL_PENDING')||'[]'); gp=gp.filter(x=>x.submittedAt!==currentJob.submittedAt); localStorage.setItem('GLOBAL_PENDING', JSON.stringify(gp)); let up=JSON.parse(localStorage.getItem('PENDING_'+currentJob.userEmail)||'[]'); up=up.filter(x=>x.submittedAt!==currentJob.submittedAt); localStorage.setItem('PENDING_'+currentJob.userEmail, JSON.stringify(up)); localStorage.removeItem('DRAFT_'+currentJob.submittedAt);}
+
+// FIXED - ONLY ADDS ONCE, NO DOUBLE COUNT
+function doApprove(){
+  let fb=document.getElementById('feedbackBox').value.trim()||'Excellent work! Approved. KES '+currentJob.earn+' added.';
+  let email = currentJob.userEmail.toLowerCase().trim();
+  let earn = parseFloat(currentJob.earn);
+  let hist=JSON.parse(localStorage.getItem('HISTORY_'+email)||'[]');
+  hist.unshift({...currentJob, userEmail:email, status:'approved', feedback:fb, reviewedAt:new Date().toISOString()});
+  localStorage.setItem('HISTORY_'+email, JSON.stringify(hist));
+
+  // FIXED: ONLY update editing balance - adds up correctly
+  let bal=parseFloat(localStorage.getItem('BAL_'+email)||'0');
+  let newBal = bal + earn;
+  localStorage.setItem('BAL_'+email, newBal.toString());
+  localStorage.setItem('TOTAL_EARNED_'+email, newBal.toString());
+
+  removeCurrent();
+  alert('✅ APPROVED - Paid KES '+earn+' to '+email+'\nNew Balance: KES '+newBal+'\n(70+80=150 correct)');
+  showPage('pageList');
+}
+
+function doReject(){
+  let fb=document.getElementById('feedbackBox').value.trim();
+  if(!fb){alert('⚠️ Type feedback for reject with feedback');return;}
+  let email = currentJob.userEmail.toLowerCase().trim();
+  let hist=JSON.parse(localStorage.getItem('HISTORY_'+email)||'[]');
+  hist.unshift({...currentJob, userEmail:email, status:'rejected', feedback:fb, reviewedAt:new Date().toISOString()});
+  localStorage.setItem('HISTORY_'+email, JSON.stringify(hist));
+  removeCurrent();
+  alert('❌ REJECTED WITH FEEDBACK');
+  showPage('pageList');
+}
+
+function doApproveNoFeedback(){
+  if(!confirm('Approve '+currentJob.userEmail+' WITHOUT feedback?\n\nKES '+currentJob.earn+' will be paid.')) return;
+  let email = currentJob.userEmail.toLowerCase().trim();
+  let earn = parseFloat(currentJob.earn);
+  let hist=JSON.parse(localStorage.getItem('HISTORY_'+email)||'[]');
+  hist.unshift({...currentJob, userEmail:email, status:'approved', feedback:'Approved by admin. Great work!', reviewedAt:new Date().toISOString()});
+  localStorage.setItem('HISTORY_'+email, JSON.stringify(hist));
+
+  // FIXED: ONLY update editing balance - adds up correctly
+  let bal=parseFloat(localStorage.getItem('BAL_'+email)||'0');
+  let newBal = bal + earn;
+  localStorage.setItem('BAL_'+email, newBal.toString());
+  localStorage.setItem('TOTAL_EARNED_'+email, newBal.toString());
+
+  removeCurrent();
+  alert('✅ APPROVED WITHOUT FEEDBACK - Paid KES '+earn+'\nNew Balance: KES '+newBal+'\n(70+80=150 correct)');
+  showPage('pageList');
+}
+
+function doRejectNoFeedback(){
+  if(!confirm('Reject '+currentJob.userEmail+' WITHOUT feedback?\n\nThis will reject with no reason.')) return;
+  let email = currentJob.userEmail.toLowerCase().trim();
+  let hist=JSON.parse(localStorage.getItem('HISTORY_'+email)||'[]');
+  hist.unshift({...currentJob, userEmail:email, status:'rejected', feedback:'Rejected by admin.', reviewedAt:new Date().toISOString()});
+  localStorage.setItem('HISTORY_'+email, JSON.stringify(hist));
+  removeCurrent();
+  alert('❌ REJECTED WITHOUT FEEDBACK');
+  showPage('pageList');
+}
+
+function doFeedbackOnly(){let fb=document.getElementById('feedbackBox').value.trim(); if(!fb){alert('⚠️ Type feedback');return;} let gp=JSON.parse(localStorage.getItem('GLOBAL_PENDING')||'[]'); let gi=gp.findIndex(x=>x.submittedAt===currentJob.submittedAt); if(gi>=0){gp[gi].adminFeedback=fb; localStorage.setItem('GLOBAL_PENDING', JSON.stringify(gp));} let up=JSON.parse(localStorage.getItem('PENDING_'+currentJob.userEmail)||'[]'); let ui=up.findIndex(x=>x.submittedAt===currentJob.submittedAt); if(ui>=0){up[ui].adminFeedback=fb; localStorage.setItem('PENDING_'+currentJob.userEmail, JSON.stringify(up));} localStorage.setItem('DRAFT_'+currentJob.submittedAt, fb); alert('💬 Feedback sent'); showPage('pageList');}
+document.getElementById('feedbackBox').addEventListener('input', function(){ if(currentJob) localStorage.setItem('DRAFT_'+currentJob.submittedAt, this.value); });
+loadList();
+</script></body></html>

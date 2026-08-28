@@ -1,0 +1,124 @@
+
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Golden Eagle</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}body{background:#09090b;color:#fff}
+.header{background:#111113;padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #27272a;position:sticky;top:0;z-index:50}
+.menu-btn{font-size:24px;background:#1f1f23;border:1px solid #27272a;color:#fff;width:38px;height:38px;border-radius:10px}
+.sidebar{position:fixed;top:0;left:-310px;width:295px;height:100%;background:#111113;border-right:1px solid #27272a;z-index:10000;transition:.3s;overflow-y:auto}
+.sidebar.open{left:0}.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:none}.overlay.show{display:block}
+.side-head{padding:18px;border-bottom:1px solid #27272a;display:flex;justify-content:space-between;align-items:center}
+.side-bal{margin:14px;background:linear-gradient(135deg,#1f1f23,#221e00);border:1px solid #3f3a00;border-radius:14px;padding:14px}
+.side-menu a{display:flex;align-items:center;gap:10px;padding:13px 14px;margin:4px 12px;border-radius:12px;text-decoration:none;color:#a1a1aa;border:1px solid transparent;transition:.2s;font-size:14px;font-weight:600}
+.side-menu a.active{background:#27272a;color:#facc15;border-color:#3f3f46}
+.page{display:none}.page.active{display:block}
+.card{background:#18181b;border:1px solid #27272a;border-radius:18px;padding:18px;margin:12px}
+.jobs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px}
+.job{background:#18181b;border:1px solid #27272a;border-radius:16px;padding:18px;text-align:center;cursor:pointer}
+.item{background:#1f1f23;border:1px solid #27272a;border-radius:12px;padding:12px;margin:8px 0}
+.badge{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700}.pending{background:#422006;color:#facc15;border:1px solid #713f12}.approved{background:#052e16;color:#22c55e;border:1px solid #14532d}.rejected{background:#1f1f23;color:#71717a;border:1px solid #27272a}
+input{width:100%;padding:14px;background:#27272a;border:1px solid #3f3f46;border-radius:12px;color:#fff;margin:8px 0;text-align:center}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-weight:800;cursor:pointer;margin-top:8px}.btn-gold{background:#facc15;color:#000}.btn-green{background:#22c55e;color:#fff}.btn-dark{background:#27272a;color:#fff;border:1px solid #3f3f46}
+.gold{color:#facc15}.muted{color:#71717a;font-size:12px}
+</style></head><body>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+<div class="sidebar" id="sidebar">
+<div class="side-head"><b class="gold">🦅 GOLDEN EAGLE</b><button onclick="closeMenu()" style="background:#27272a;border:none;color:#fff;width:32px;height:32px;border-radius:10px">✕</button></div>
+<div class="side-bal"><div class="muted">TOTAL BALANCE</div><div style="font-size:24px;font-weight:800" class="gold">KES <span id="sideBal">0</span></div><div class="muted" style="margin-top:6px">Pending: KES <span id="pendSide" class="gold">0</span></div></div>
+<div class="side-menu">
+<a id="sm-dash" class="active" onclick="goPage('dash');closeMenu()">📊 Dashboard</a>
+<a onclick="goPage('tasks');closeMenu()">💼 Tasks (Academic + Transcription)</a>
+<a onclick="goPage('team');closeMenu()">👥 My Team L1-L6</a>
+<a onclick="goPage('tree');closeMenu()">🌳 Tree View 15%~1%</a>
+<a onclick="goPage('deposit');closeMenu()">💰 Deposit History</a>
+<a id="sm-with" onclick="goPage('withdraw');closeMenu()">💸 Withdraw / Request</a>
+<a onclick="goPage('myreq');closeMenu()">📋 My Withdraw Requests</a>
+<a onclick="goPage('member');closeMenu()">👑 Membership</a>
+<a onclick="goPage('admin');closeMenu()">🔐 Admin Panel</a>
+<a onclick="localStorage.clear();location.reload()" style="color:#ef4444">🚪 Logout / Clear</a>
+</div>
+</div>
+
+<div class="header"><button class="menu-btn" onclick="openMenu()">☰</button><b>DASHBOARD</b><div style="margin-left:auto;text-align:right"><div class="muted">Balance</div><b class="gold">KES <span id="topBal">0</span></b></div></div>
+
+<!-- DASH PAGE -->
+<div id="page-dash" class="page active">
+<div class="card" style="background:linear-gradient(135deg,#18181b,#221e00)"><div style="display:flex;justify-content:space-between"><div><div class="muted">MAIN BALANCE</div><div style="font-size:26px;font-weight:800" class="gold">KES <span id="bal1">0</span></div></div><div style="text-align:right"><div class="muted">Total Withdrawn</div><b id="totW" class="gold">0</b></div></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-gold" onclick="goPage('deposit')">💰 Deposit</button><button class="btn btn-dark" style="border-color:#22c55e" onclick="goPage('withdraw')">💸 Withdraw</button></div></div>
+<div style="margin:12px"><b>💼 Jobs From Main Dashboard</b></div>
+<div class="jobs"><div class="job" onclick="earn(500)"><div style="font-size:26px">📝</div><b>Academic Writing</b><br><small class="gold">+500</small></div><div class="job" onclick="earn(300)"><div style="font-size:26px">🎧</div><b>Transcription</b><br><small class="gold">+300</small></div><div class="job" onclick="goPage('team')" style="border-color:#facc15"><div style="font-size:26px">👥</div><b class="gold">My Team</b><br><small>View L1-L6</small></div><div class="job" onclick="goPage('tree')"><div style="font-size:26px">🌳</div><b>Tree</b><br><small>15%~1%</small></div></div>
+<div class="card"><b>📋 Recent Activity</b><div id="dashList"></div></div>
+</div>
+
+<!-- TASKS PAGE -->
+<div id="page-tasks" class="page"><div class="card"><h3>💼 Available Tasks</h3><p class="muted">Same jobs that were on main dashboard - now in sidebar too</p></div><div class="jobs"><div class="job" onclick="earn(500);goPage('dash')"><div style="font-size:30px">📝</div><b>Academic Task</b><br><small class="gold">KES 500 / task</small><br><button class="btn btn-gold" style="margin-top:10px">Start +500</button></div><div class="job" onclick="earn(300);goPage('dash')"><div style="font-size:30px">🎧</div><b>Transcription Task</b><br><small class="gold">KES 300 / task</small><br><button class="btn btn-dark" style="margin-top:10px">Start +300</button></div></div></div>
+
+<!-- TEAM -->
+<div id="page-team" class="page"><div class="card"><h3>👥 My Team L1-L6</h3><p class="muted">Commission structure from dashboard</p><div style="margin-top:12px"><div class="item">Level 1 - 15%</div><div class="item">Level 2 - 8%</div><div class="item">Level 3 - 5%</div><div class="item">Level 4 - 3%</div><div class="item">Level 5 - 2%</div><div class="item">Level 6 - 1%</div></div></div></div>
+
+<!-- TREE -->
+<div id="page-tree" class="page"><div class="card"><h3>🌳 Tree View</h3><p class="muted">Your downline visualization</p><div style="text-align:center;padding:40px"><div style="font-size:50px">🌳</div><p>Tree logic from main dashboard</p></div></div></div>
+
+<!-- DEPOSIT -->
+<div id="page-deposit" class="page"><div class="card"><h3>💰 Deposit History</h3><div id="depList"></div></div></div>
+
+<!-- WITHDRAW -->
+<div id="page-withdraw" class="page"><div class="card"><div style="display:flex;justify-content:space-between"><div><div class="muted">AVAILABLE</div><div style="font-size:22px;font-weight:800" class="gold">KES <span id="bal2">0</span></div></div><div><div class="muted">Pending</div><b class="gold">KES <span id="pend">0</span></b></div></div>
+<input id="amt" type="number" placeholder="Amount Min 200"><input id="phone" type="tel" placeholder="M-Pesa 0115..." value="0115183029">
+<button class="btn btn-gold" onclick="requestWithdraw()">🚀 REQUEST WITHDRAWAL (No Deduction Yet)</button>
+<p class="muted" style="margin-top:10px;text-align:center">Balance stays until Admin approves - PURE LOGIC</p></div></div>
+
+<!-- MY REQS -->
+<div id="page-myreq" class="page"><div class="card"><h3>📋 My Withdraw Requests</h3><div id="myReqs"></div></div></div>
+
+<!-- MEMBER -->
+<div id="page-member" class="page"><div class="card"><h3>👑 Membership</h3><p class="muted">From main dashboard</p></div></div>
+
+<!-- ADMIN -->
+<div id="page-admin" class="page">
+<div class="card"><h3>🔐 Admin Panel</h3><div id="lockBox"><input id="pw" type="password" placeholder="Password admin123"><button class="btn btn-gold" onclick="unlock()">Unlock</button></div>
+<div id="adminBox" style="display:none"><p class="muted">Approve to DEDUCT balance</p><div id="adminList"></div></div></div>
+</div>
+
+<script>
+if(!localStorage.getItem('GE_BAL')) localStorage.setItem('GE_BAL','5800');
+if(!localStorage.getItem('GE_REQS')) localStorage.setItem('GE_REQS','[]');
+if(!localStorage.getItem('GE_WIT')) localStorage.setItem('GE_WIT','0');
+if(!localStorage.getItem('GE_DEPOSITS')) localStorage.setItem('GE_DEPOSITS','[]');
+function getBal(){return parseInt(localStorage.getItem('GE_BAL'))}
+function getReqs(){return JSON.parse(localStorage.getItem('GE_REQS'))}
+function saveReqs(r){localStorage.setItem('GE_REQS',JSON.stringify(r))}
+function openMenu(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('show')}
+function closeMenu(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show')}
+function goPage(p){
+document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+document.getElementById('page-'+p).classList.add('active');
+document.querySelectorAll('.side-menu a').forEach(e=>e.classList.remove('active'));
+if(p=='dash') document.getElementById('sm-dash').classList.add('active');
+if(p=='withdraw') document.getElementById('sm-with').classList.add('active');
+render();
+}
+function earn(e){localStorage.setItem('GE_BAL',getBal()+e);render()}
+function render(){
+let bal=getBal();let reqs=getReqs();
+let deps=JSON.parse(localStorage.getItem('GE_DEPOSITS')||'[]');
+let pendingTotal=reqs.filter(r=>r.status=='pending').reduce((s,r)=>s+r.amt,0);
+document.getElementById('sideBal').innerText=bal;document.getElementById('topBal').innerText=bal;
+document.getElementById('bal1').innerText=bal;document.getElementById('bal2').innerText=bal;
+document.getElementById('pendSide').innerText=pendingTotal;
+document.getElementById('totW').innerText=localStorage.getItem('GE_WIT');
+document.getElementById('pend').innerText=pendingTotal;
+let html=reqs.map(r=>`<div class="item"><div style="display:flex;justify-content:space-between"><b>KES ${r.amt}</b> <span class="badge ${r.status}">${r.status}</span></div><small>${r.phone} • ${r.date}</small>${r.status=='pending'?`<br><small style="color:#facc15">Balance still KES ${bal} (not deducted)</small>`:''}</div>`).join('');
+document.getElementById('dashList').innerHTML=html||'<small class="muted">No requests yet</small>';
+document.getElementById('myReqs').innerHTML=html||'<small class="muted">No requests</small>';
+document.getElementById('depList').innerHTML=deps.map(d=>`<div class="item"><b>KES ${d.amt||d.amount}</b> - ${d.status||'approved'}</div>`).join('')||'<small class="muted">No deposits</small>';
+document.getElementById('adminList').innerHTML=reqs.map(r=>`<div class="item"><div style="display:flex;justify-content:space-between"><b>KES ${r.amt}</b> to ${r.phone} <span class="badge ${r.status}">${r.status}</span></div><small>${r.date}</small>${r.status=='pending'?`<div style="display:flex;gap:6px;margin-top:8px"><button onclick="approve(${r.id})" style="flex:1;background:#22c55e;color:#fff;padding:10px;border:none;border-radius:8px;font-weight:700">APPROVE & DEDUCT</button><button onclick="reject(${r.id})" style="flex:1;background:#27272a;color:#fff;border:1px solid #3f3f46;border-radius:8px;padding:10px">REJECT</button></div>`:''}</div>`).join('')||'No requests';
+}
+function requestWithdraw(){
+let amt=parseInt(document.getElementById('amt').value);let phone=document.getElementById('phone').value;
+if(!amt||amt<200) return alert('Min 200');if(!phone) return alert('Enter phone');if(amt>getBal()) return alert('Low bal: '+getBal());
+let reqs=getReqs();reqs.unshift({id:Date.now(),amt,phone,date:new Date().toLocaleString(),status:'pending'});saveReqs(reqs);
+alert('Sent! Balance STILL KES '+getBal()+' - NOT deducted until admin approves');render();goPage('myreq');
+}
+function unlock(){if(document.getElementById('pw').value!=='admin123') return alert('Wrong password');document.getElementById('lockBox').style.display='none';document.getElementById('adminBox').style.display='block';render();}
+function approve(id){let reqs=getReqs();let r=reqs.find(x=>x.id===id);if(!r) return;let bal=getBal();if(r.amt>bal) return alert('User low balance');localStorage.setItem('GE_BAL',bal-r.amt);localStorage.setItem('GE_WIT',parseInt(localStorage.getItem('GE_WIT'))+r.amt);r.status='approved';saveReqs(reqs);alert('Approved! New bal '+(bal-r.amt));render();}
+function reject(id){let reqs=getReqs();let r=reqs.find(x=>x.id===id);r.status='rejected';saveReqs(reqs);alert('Rejected - balance untouched');render();}
+render();
+</script></body></html>

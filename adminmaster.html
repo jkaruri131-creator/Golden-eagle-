@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MASTER ADMIN - FULL POWER</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&family=Space+Grotesk:wght@800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif}
+body{background:#07070f;color:#fff;padding:14px 10px 90px;min-height:100vh}
+.top{max-width:700px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center}
+.back{padding:8px 14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;text-decoration:none;font-size:10px;font-weight:800}
+.title{font-family:'Space Grotesk';font-size:20px;font-weight:800}
+.tabs{max-width:700px;margin:0 auto 10px;display:flex;background:rgba(255,255,255,0.05);border-radius:12px;padding:3px;gap:2px}
+.tab{flex:1;padding:10px;border:none;border-radius:8px;background:transparent;color:#888;font-weight:800;font-size:9px;cursor:pointer}
+.tab.active{background:#fff;color:#000}
+.wrap{max-width:700px;margin:0 auto}
+.card{background:#151528;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:14px;margin-bottom:10px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#60a5fa,#a855f7,#22c55e)}
+.badge{font-size:8px;padding:4px 8px;border-radius:99px;font-weight:800;border:1px solid}
+.b-green{background:rgba(34,197,94,0.15);color:#4ade80;border-color:rgba(34,197,94,0.3)}
+.b-yellow{background:rgba(250,204,21,0.15);color:#facc15;border-color:rgba(250,204,21,0.3)}
+.b-blue{background:rgba(96,165,250,0.15);color:#93c5fd;border-color:rgba(96,165,250,0.3)}
+.b-gray{background:rgba(255,255,255,0.07);color:#aaa;border-color:rgba(255,255,255,0.1)}
+.b-red{background:rgba(239,68,68,0.15);color:#f87171;border-color:rgba(239,68,68,0.3)}
+.b-purple{background:rgba(168,85,247,0.15);color:#c4b5fd;border-color:rgba(168,85,247,0.3)}
+.doc{background:#000;border-radius:10px;padding:10px;margin-top:8px;max-height:120px;overflow:auto;font-size:11px;color:#ccc;line-height:1.5;border:1px solid #222}
+.pwr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.pwr{border:none;border-radius:12px;padding:14px 6px;font-weight:800;font-size:9px;cursor:pointer;color:#fff;display:flex;flex-direction:column;align-items:center;gap:3px;box-shadow:0 6px 20px rgba(0,0,0,0.3)}
+.pwr b{font-size:20px}
+.pwr-approve{background:linear-gradient(135deg,#22c55e,#16a34a)}
+.pwr-reject{background:linear-gradient(135deg,#ef4444,#b91c1c)}
+.pwr-fb{background:linear-gradient(135deg,#60a5fa,#2563eb)}
+.pwr:active{transform:scale(0.9)}
+textarea,input,select{width:100%;background:#0f0f1a;border:1px solid #333;border-radius:10px;color:#fff;padding:10px;margin-top:5px;font-size:12px}
+textarea{height:80px}
+label{font-size:8px;color:#666;font-weight:800;margin-top:10px;display:block;letter-spacing:1px}
+.btn{padding:10px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center;flex:1}
+.btn-e{background:rgba(96,165,250,0.15);color:#93c5fd;border:1px solid rgba(96,165,250,0.3)}
+.btn-d{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
+.btn-add{width:100%;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;padding:14px;margin-top:12px;font-size:11px;border-radius:12px;border:none;font-weight:800;cursor:pointer}
+.empty{text-align:center;padding:40px;color:#555}
+.filter{display:flex;gap:5px;overflow-x:auto;margin-bottom:10px;padding-bottom:4px}
+.fbtn{padding:6px 10px;border-radius:99px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#888;font-size:8px;font-weight:800;white-space:nowrap;cursor:pointer}
+.fbtn.active{background:#fff;color:#000}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:99;display:none;align-items:center;justify-content:center;padding:12px}
+.modal.show{display:flex}
+.modal-box{background:#1a1a2e;border:1px solid #333;border-radius:20px;padding:18px;width:100%;max-width:400px;max-height:90vh;overflow:auto}
+</style>
+</head>
+<body>
+<div class="top"><a class="back" href="dashboard.html">← DASH</a><div class="title">👑 MASTER ADMIN</div><a class="back" href="writing.html">USER VIEW</a></div>
+<div class="wrap">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:10px">
+<div class="card" style="padding:10px;text-align:center;margin:0"><b id="cPd" style="font-size:18px">0</b><br><small style="font-size:7px;color:#666">PENDING</small></div>
+<div class="card" style="padding:10px;text-align:center;margin:0"><b id="cJobs" style="font-size:18px">0</b><br><small style="font-size:7px;color:#666">JOBS</small></div>
+<div class="card" style="padding:10px;text-align:center;margin:0"><b id="cUsers" style="font-size:18px">0</b><br><small style="font-size:7px;color:#666">USERS</small></div>
+<div class="card" style="padding:10px;text-align:center;margin:0"><b id="cPaid" style="font-size:14px;color:#4ade80">0</b><br><small style="font-size:7px;color:#666">PAID KES</small></div>
+</div>
+<div class="tabs">
+<button class="tab active" id="tPd" onclick="setTab('pd')">PENDING</button>
+<button class="tab" id="tJobs" onclick="setTab('jobs')">JOBS</button>
+<button class="tab" id="tAdd" onclick="setTab('add')">ADD</button>
+<button class="tab" id="tHist" onclick="setTab('hist')">HISTORY</button>
+</div>
+<div class="filter" id="filters">
+<button class="fbtn active" onclick="setF('all',this)">ALL</button>
+<button class="fbtn" onclick="setF('writing',this)">📝 WRITING</button>
+<button class="fbtn" onclick="setF('transcription',this)">🎙️ TRANS</button>
+<button class="fbtn" onclick="setF('data',this)">📊 DATA</button>
+<button class="fbtn" onclick="setF('survey',this)">📋 SURVEY</button>
+</div>
+<div id="content"></div>
+</div>
+
+<div class="modal" id="fbModal" onclick="if(event.target===this)this.classList.remove('show')">
+<div class="modal-box">
+<h3 style="text-align:center">💬 ADMIN FEEDBACK POWER</h3>
+<p id="fbInfo" style="font-size:10px;color:#93c5fd;text-align:center;margin:6px 0"></p>
+<div class="doc" id="fbDoc"></div>
+<label>Your feedback (user sees this)</label>
+<textarea id="fbText" placeholder="Write feedback..."></textarea>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+<button class="pwr pwr-reject" style="flex-direction:row;justify-content:center" onclick="sendFb(false)">❌ REJECT</button>
+<button class="pwr pwr-approve" style="flex-direction:row;justify-content:center" onclick="sendFb(true)">✅ APPROVE & PAY</button>
+</div>
+<button class="btn" style="width:100%;margin-top:8px;background:#222;color:#fff" onclick="document.getElementById('fbModal').classList.remove('show')">CANCEL</button>
+</div>
+</div>
+
+<div class="modal" id="editModal" onclick="if(event.target===this)this.classList.remove('show')">
+<div class="modal-box">
+<h3 style="text-align:center">✏️ EDIT TASK - FULL POWER</h3>
+<input type="hidden" id="eId">
+<label>Category</label><select id="eCat"><option value="writing">📝 Writing</option><option value="transcription">🎙️ Transcription</option><option value="data">📊 Data Entry</option><option value="survey">📋 Survey</option><option value="other">📦 Other</option></select>
+<label>Title</label><input id="eTitle">
+<label>Description</label><textarea id="eDesc"></textarea>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><label>Price KES</label><input id="ePrice" type="number"></div><div><label>Words/Time</label><input id="eWords"></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><label>Deadline H</label><input id="eDead" type="number"></div><div><label>Level</label><input id="eLevel"></div></div>
+<label>Subject</label><input id="eSub">
+<div style="display:flex;gap:8px;margin-top:12px"><button class="btn" style="flex:1;background:#222;color:#fff" onclick="document.getElementById('editModal').classList.remove('show')">CANCEL</button><button class="btn" style="flex:1;background:#60a5fa;color:#fff" onclick="saveEdit()">💾 SAVE - FULL POWER</button></div>
+</div>
+</div>
+
+<script>
+let tab='pd',filter='all',pending=[],jobs=[],curFb=null;
+
+function loadJobs(){
+ jobs=[];
+ try{let w=JSON.parse(localStorage.getItem('DIAMINES_WRITE_ALL')||'[]');w.forEach(j=>jobs.push({id:j.id,title:j.title,desc:j.desc||j.description,price:j.price,words:j.words,level:j.level,subject:j.subject,deadlineH:j.deadlineH||24,category:'writing',raw:j,type:'write'}))}catch(e){}
+ try{let t=JSON.parse(localStorage.getItem('DIAMINES_TRANS_ALL')||'[]');t.forEach(j=>jobs.push({id:j.id,title:j.title,desc:j.desc,price:j.price||j.earn,words:j.time||j.words,time:j.time,level:j.difficulty||j.level,deadlineH:j.deadlineHours||24,category:'transcription',raw:j,type:'trans'}))}catch(e){}
+ try{let g=JSON.parse(localStorage.getItem('DIAMINES_TASKS_ALL')||'[]');g.forEach(j=>jobs.push({...j,desc:j.description||j.desc,price:j.price,category:j.category||'other',type:'generic'}))}catch(e){}
+ return jobs;
+}
+
+function scanPending(){
+ pending=[];let users=new Set(),paid=0;
+ for(let i=0;i<localStorage.length;i++){
+  let key=localStorage.key(i); if(!key) continue;
+  // ANY pending key
+  if(key.includes('PENDING')||key.includes('_PD_')){
+   if(key.startsWith('DIAMINES_WRITE_PD_')||key.startsWith('DIAMINES_TRANS_PENDING_')||key.startsWith('DIAMINES_TASKS_PENDING_')){
+    let email=key.replace('DIAMINES_WRITE_PD_','').replace('DIAMINES_TRANS_PENDING_','').replace('DIAMINES_TASKS_PENDING_','');
+    try{let arr=JSON.parse(localStorage.getItem(key)||'[]');arr.forEach(job=>{pending.push({email,key,category:job.category|| (key.includes('WRITE')?'writing':key.includes('TRANS')?'transcription':'other'),job});users.add(email)})}catch(e){}
+   }
+  }
+  if(key.includes('HISTORY')){
+   try{let arr=JSON.parse(localStorage.getItem(key)||'[]');arr.filter(x=>x.status==='approved').forEach(x=>{paid+=parseInt(x.price||x.earn||0)});if(key.includes('HISTORY_')){let em=key.split('HISTORY_')[1];if(em) users.add(em)}}catch(e){}
+  }
+ }
+ return {paid,users:users.size};
+}
+
+function setTab(t){tab=t;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById(t==='pd'?'tPd':t==='jobs'?'tJobs':t==='add'?'tAdd':'tHist').classList.add('active');render()}
+function setF(f,el){filter=f;document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('active'));if(el) el.classList.add('active');render()}
+
+function render(){
+ let all=loadJobs(); let {paid,users}=scanPending();
+ document.getElementById('cPd').innerText=pending.length; document.getElementById('cJobs').innerText=all.length; document.getElementById('cUsers').innerText=users; document.getElementById('cPaid').innerText='KES '+paid;
+ let h='';
+ if(tab==='pd'){
+  let list=filter==='all'?pending:pending.filter(p=>p.category===filter);
+  if(!list.length) h=`<div class="empty">🎉 No pending ${filter.toUpperCase()}<br><small>Add jobs or wait for submissions</small></div>`;
+  else list.forEach((p,i)=>{
+   let j=p.job; let idx=pending.indexOf(p);
+   let icon=p.category==='writing'?'📝':p.category==='transcription'?'🎙️':p.category==='data'?'📊':p.category==='survey'?'📋':'📦';
+   h+=`<div class="card"><div style="display:flex;justify-content:space-between"><b style="font-size:12px">${icon} ${j.title}</b><span class="badge ${p.category==='writing'?'b-blue':p.category==='transcription'?'b-yellow':'b-purple'}">${p.category.toUpperCase()}</span></div><div style="font-size:9px;color:#60a5fa;margin-top:4px">👤 ${p.email} • 💰 KES ${j.price||j.earn||0} • ${j.submittedAt?new Date(j.submittedAt).toLocaleString():''}</div><div class="doc">${(j.content||j.transcript||j.desc||'').substring(0,600)}...</div><label>💬 Quick feedback (optional - admin can approve without)</label><textarea id="qfb_${idx}" placeholder="Excellent work! 9/10..."></textarea><div class="pwr-grid"><button class="pwr pwr-approve" onclick="doApprove(${idx})"><b>✅</b><span>APPROVE</span><small>PAY KES ${j.price||j.earn||0}</small></button><button class="pwr pwr-reject" onclick="doReject(${idx})"><b>❌</b><span>REJECT</span><small>Return</small></button><button class="pwr pwr-fb" onclick="openFb(${idx})"><b>💬</b><span>FEEDBACK</span><small>Full review</small></button></div></div>`;
+  });
+ }else if(tab==='jobs'){
+  let list=filter==='all'?all:all.filter(j=>j.category===filter);
+  if(!list.length) h=`<div class="empty">No ${filter} jobs</div>`;
+  else list.forEach(j=>{
+   let icon=j.category==='writing'?'📝':j.category==='transcription'?'🎙️':j.category==='data'?'📊':j.category==='survey'?'📋':'📦';
+   h+=`<div class="card"><div style="display:flex;justify-content:space-between"><b style="font-size:12px">${icon} ${j.title}</b><span class="badge b-green">KES ${j.price}</span></div><p style="font-size:10px;color:#888;margin-top:4px">${(j.desc||'').substring(0,100)}</p><div style="display:flex;gap:5px;margin-top:6px"><span class="badge b-gray">${j.words||j.time||''}</span><span class="badge b-gray">${j.level||''}</span><span class="badge b-gray">${j.deadlineH||24}h</span></div><div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-e" onclick="openEdit('${j.id}')">✏️ EDIT</button><button class="btn btn-d" onclick="delJob('${j.id}')">🗑️ DELETE</button></div></div>`;
+  });
+ }else if(tab==='add'){
+  h=`<div class="card"><h3 style="text-align:center">➕ ADD TASK - CHOOSE CATEGORY</h3><label>📂 Category</label><select id="aCat"><option value="writing">📝 Writing (goes to writing.html)</option><option value="transcription">🎙️ Transcription (goes to transcription.html)</option><option value="data">📊 Data Entry</option><option value="survey">📋 Survey</option><option value="other">📦 Other</option></select><label>Title</label><input id="aTitle" placeholder="Task title"><label>Description</label><textarea id="aDesc" placeholder="Full instructions"></textarea><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><label>Price KES</label><input id="aPrice" type="number" value="500"></div><div><label>Words / Time</label><input id="aWords" value="800 words"></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><label>Deadline H</label><input id="aDead" type="number" value="24"></div><div><label>Level</label><input id="aLevel" value="College"></div></div><label>Subject</label><input id="aSub"><button class="btn-add" onclick="addTask()">🚀 PUBLISH NOW - FULL POWER</button></div>`;
+ }else{
+  let hist=[];for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i);if(k&&k.includes('HISTORY_')){try{let arr=JSON.parse(localStorage.getItem(k)||'[]');arr.forEach(x=>{hist.push({email:k.split('HISTORY_')[1],job:x,cat:x.category|| (k.includes('WRITE')?'writing':k.includes('TRANS')?'transcription':'other')})})}catch(e){}}}
+  hist.sort((a,b)=>b.job.reviewedAt-a.job.reviewedAt);
+  let list=filter==='all'?hist:hist.filter(x=>x.cat===filter);
+  if(!list.length) h=`<div class="empty">No history</div>`;
+  else h+=list.slice(0,80).map(x=>{let j=x.job;return `<div class="card" style="border-left:4px solid ${j.status==='approved'?'#22c55e':'#ef4444'}"><div style="display:flex;justify-content:space-between"><b style="font-size:11px">${j.title}</b><span class="badge ${j.status==='approved'?'b-green':'b-red'}">${j.status.toUpperCase()}</span></div><div style="font-size:9px;color:#666;margin-top:3px">👤 ${x.email} • ${x.cat} • KES ${j.price||j.earn||0} • ${new Date(j.reviewedAt).toLocaleString()}</div><div style="margin-top:6px;background:#000;padding:8px;border-radius:8px;font-size:10px">💬 ${j.feedback||''}</div></div>`}).join('');
+ }
+ document.getElementById('content').innerHTML=h;
+}
+
+function getFeedback(idx){let el=document.getElementById('qfb_'+idx);return el?el.value.trim():''}
+function doApprove(idx){
+ let p=pending[idx]; if(!p) return;
+ let fb=getFeedback(idx)||`🔥 Excellent ${p.category} work! Approved. KES ${p.job.price||p.job.earn||0} paid! Keep it up! 💰`;
+ powerAction(p.email,p.job.id,p.category,true,fb);
+}
+function doReject(idx){
+ let p=pending[idx]; if(!p) return;
+ let fb=getFeedback(idx);
+ if(!fb){fb=prompt('❌ REJECT reason (user will see this feedback):','Needs revision - improve quality'); if(fb===null) return;}
+ powerAction(p.email,p.job.id,p.category,false,fb);
+}
+function openFb(idx){
+ curFb=pending[idx];
+ document.getElementById('fbInfo').innerText=`👤 ${curFb.email} • ${curFb.job.title} • KES ${curFb.job.price||curFb.job.earn||0}`;
+ document.getElementById('fbDoc').innerText=(curFb.job.content||curFb.job.transcript||'').substring(0,500);
+ document.getElementById('fbText').value=getFeedback(idx);
+ document.getElementById('fbModal').classList.add('show');
+}
+function sendFb(approve){
+ if(!curFb) return;
+ let fb=document.getElementById('fbText').value.trim()||(approve?'Great work! Approved.':'Needs improvement');
+ powerAction(curFb.email,curFb.job.id,curFb.category,approve,fb);
+ document.getElementById('fbModal').classList.remove('show'); curFb=null;
+}
+
+function powerAction(email,jobId,category,approve,feedback){
+ let keys=[`DIAMINES_WRITE_PD_${email}`,`DIAMINES_TRANS_PENDING_${email}`,`DIAMINES_TASKS_PENDING_${email}`,`DIAMINES_WRITE_PD_${email.toLowerCase()}`,`DIAMINES_TRANS_PENDING_${email.toLowerCase()}`,`DIAMINES_TASKS_PENDING_${email.toLowerCase()}`];
+ let foundKey=null,job=null;
+ for(let k of keys){try{let arr=JSON.parse(localStorage.getItem(k)||'[]');let f=arr.find(x=>x.id===jobId);if(f){foundKey=k;job=f;break}}catch(e){}}
+ if(!job){
+  for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i);if(k&&k.includes(email)&& (k.includes('PENDING')||k.includes('_PD_'))){try{let arr=JSON.parse(localStorage.getItem(k)||'[]');let f=arr.find(x=>x.id===jobId);if(f){foundKey=k;job=f;break}}catch(e){}}}
+ }
+ if(!job){alert('Job not found');return}
+
+ let histKey=category==='writing'?'DIAMINES_WRITE_HISTORY_'+email:category==='transcription'?'DIAMINES_TRANS_HISTORY_'+email:'DIAMINES_TASKS_HISTORY_'+email;
+ let hist=JSON.parse(localStorage.getItem(histKey)||'[]');
+
+ if(approve){
+  hist.push({...job,status:'approved',reviewedAt:Date.now(),feedback,category,price:job.price||job.earn||0});
+  let price=parseInt(job.price||job.earn||0);
+  let bal=parseInt(localStorage.getItem('DIAMINES_BAL_'+email)||localStorage.getItem('DIAMINES_BAL_'+email.toLowerCase())||'0'); bal+=price;
+  localStorage.setItem('DIAMINES_BAL_'+email,bal+''); localStorage.setItem('DIAMINES_BAL_'+email.toLowerCase(),bal+''); localStorage.setItem('DIAMINES_BAL',''+bal); localStorage.setItem('DIAMINES_BALANCE_'+email,bal+'');
+  try{let users=JSON.parse(localStorage.getItem('DIAMINES_USERS')||'[]');let u=users.find(x=>x.email.toLowerCase()===email.toLowerCase());if(u){u.balance=bal;localStorage.setItem('DIAMINES_USERS',JSON.stringify(users))} let cur=JSON.parse(localStorage.getItem('DIAMINES_CURRENT')||'null');if(cur&&cur.email.toLowerCase()===email.toLowerCase()){cur.balance=bal;localStorage.setItem('DIAMINES_CURRENT',JSON.stringify(cur))}}catch(e){}
+ }else{
+  hist.push({...job,status:'rejected',reviewedAt:Date.now(),feedback,category});
+ }
+ localStorage.setItem(histKey,JSON.stringify(hist));
+ localStorage.setItem(histKey.toLowerCase(),JSON.stringify(hist));
+ // remove from pending
+ try{let arr=JSON.parse(localStorage.getItem(foundKey)||'[]');localStorage.setItem(foundKey,JSON.stringify(arr.filter(x=>x.id!==jobId)));}catch(e){}
+ localStorage.setItem('DIAMINES_LAST_EARN',''+Date.now());
+ render();
+}
+
+function addTask(){
+ let cat=document.getElementById('aCat').value;
+ let title=document.getElementById('aTitle').value.trim();
+ let desc=document.getElementById('aDesc').value.trim();
+ let price=parseInt(document.getElementById('aPrice').value)||500;
+ let words=document.getElementById('aWords').value||'800';
+ let dead=parseInt(document.getElementById('aDead').value)||24;
+ let level=document.getElementById('aLevel').value||'College';
+ let sub=document.getElementById('aSub').value.trim()||'General';
+ if(!title||!desc){alert('Title & desc required');return}
+ let id=(cat==='writing'?'W':cat==='transcription'?'T':'X')+(Date.now()%100000);
+ if(cat==='writing'){
+  let all=JSON.parse(localStorage.getItem('DIAMINES_WRITE_ALL')||'[]'); all.unshift({id,title,desc,words:isNaN(parseInt(words))?800:parseInt(words),price,deadlineH:dead,level,subject:sub,category:cat}); localStorage.setItem('DIAMINES_WRITE_ALL',JSON.stringify(all));
+ }else if(cat==='transcription'){
+  let all=JSON.parse(localStorage.getItem('DIAMINES_TRANS_ALL')||'[]'); all.unshift({id,title,desc,time:words,price,deadlineHours:dead,difficulty:level,category:cat}); localStorage.setItem('DIAMINES_TRANS_ALL',JSON.stringify(all));
+ }else{
+  let all=JSON.parse(localStorage.getItem('DIAMINES_TASKS_ALL')||'[]'); all.unshift({id,title,description:desc,words,price,deadlineH:dead,level,subject:sub,category:cat,source:'generic'}); localStorage.setItem('DIAMINES_TASKS_ALL',JSON.stringify(all));
+ }
+ alert(`✅ PUBLISHED ${cat.toUpperCase()}: ${title} KES ${price}`);
+ setTab('jobs');
+}
+function openEdit(id){
+ let all=loadJobs(); let j=all.find(x=>x.id===id); if(!j) return;
+ document.getElementById('eId').value=j.id; document.getElementById('eCat').value=j.category; document.getElementById('eTitle').value=j.title; document.getElementById('eDesc').value=j.desc||''; document.getElementById('ePrice').value=j.price; document.getElementById('eWords').value=j.words||j.time||''; document.getElementById('eDead').value=j.deadlineH||24; document.getElementById('eLevel').value=j.level||''; document.getElementById('eSub').value=j.subject||''; document.getElementById('editModal').classList.add('show');
+}
+function saveEdit(){
+ let id=document.getElementById('eId').value; let all=loadJobs(); let idx=all.findIndex(x=>x.id===id); if(idx===-1) return;
+ let j=all[idx];
+ let newCat=document.getElementById('eCat').value;
+ let updated={...j,title:document.getElementById('eTitle').value,desc:document.getElementById('eDesc').value,price:parseInt(document.getElementById('ePrice').value)||j.price,words:document.getElementById('eWords').value,time:document.getElementById('eWords').value,level:document.getElementById('eLevel').value,difficulty:document.getElementById('eLevel').value,deadlineH:parseInt(document.getElementById('eDead').value)||24,deadlineHours:parseInt(document.getElementById('eDead').value)||24,subject:document.getElementById('eSub').value,category:newCat};
+ // replace in correct storage
+ if(j.type==='write' || j.category==='writing'){
+  let w=JSON.parse(localStorage.getItem('DIAMINES_WRITE_ALL')||'[]'); let i=w.findIndex(x=>x.id===id); if(i>-1){w[i]={...w[i],title:updated.title,desc:updated.desc,price:updated.price,words:parseInt(updated.words)||w[i].words,level:updated.level,subject:updated.subject,deadlineH:updated.deadlineH}; localStorage.setItem('DIAMINES_WRITE_ALL',JSON.stringify(w));}
+  if(newCat!=='writing'){let w2=JSON.parse(localStorage.getItem('DIAMINES_WRITE_ALL')||'[]'); localStorage.setItem('DIAMINES_WRITE_ALL',JSON.stringify(w2.filter(x=>x.id!==id))); let g=JSON.parse(localStorage.getItem('DIAMINES_TASKS_ALL')||'[]'); g.unshift({id,title:updated.title,description:updated.desc,price:updated.price,words:updated.words,level:updated.level,subject:updated.subject,deadlineH:updated.deadlineH,category:newCat,source:'generic'}); localStorage.setItem('DIAMINES_TASKS_ALL',JSON.stringify(g));}
+ }else if(j.type==='trans'){
+  let t=JSON.parse(localStorage.getItem('DIAMINES_TRANS_ALL')||'[]'); let i=t.findIndex(x=>x.id===id); if(i>-1){t[i]={...t[i],title:updated.title,desc:updated.desc,price:updated.price,time:updated.time,difficulty:updated.level,deadlineHours:updated.deadlineH}; localStorage.setItem('DIAMINES_TRANS_ALL',JSON.stringify(t));}
+ }else{
+  let g=JSON.parse(localStorage.getItem('DIAMINES_TASKS_ALL')||'[]'); let i=g.findIndex(x=>x.id===id); if(i>-1){g[i]={...g[i],title:updated.title,description:updated.desc,price:updated.price,words:updated.words,level:updated.level,subject:updated.subject,deadlineH:updated.deadlineH,category:newCat}; localStorage.setItem('DIAMINES_TASKS_ALL',JSON.stringify(g));}
+ }
+ document.getElementById('editModal').classList.remove('show'); render();
+}
+function delJob(id){
+ if(!confirm('DELETE '+id+'? Full power delete - disappears from users')) return;
+ let w=JSON.parse(localStorage.getItem('DIAMINES_WRITE_ALL')||'[]'); localStorage.setItem('DIAMINES_WRITE_ALL',JSON.stringify(w.filter(x=>x.id!==id)));
+ let t=JSON.parse(localStorage.getItem('DIAMINES_TRANS_ALL')||'[]'); localStorage.setItem('DIAMINES_TRANS_ALL',JSON.stringify(t.filter(x=>x.id!==id)));
+ let g=JSON.parse(localStorage.getItem('DIAMINES_TASKS_ALL')||'[]'); localStorage.setItem('DIAMINES_TASKS_ALL',JSON.stringify(g.filter(x=>x.id!==id)));
+ render();
+}
+render();
+</script>
+</body>
+</html>

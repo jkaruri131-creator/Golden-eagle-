@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES - Withdraw</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',system-ui}
+body{background:#070711;color:#fff;min-height:100vh;padding:14px;max-width:600px;margin:0 auto}
+a{color:#888;text-decoration:none;font-size:13px}
+h2{margin:14px 0;font-size:22px;font-weight:800}
+.box{border-radius:14px;padding:14px;border:1px solid;display:flex;justify-content:space-between;align-items:center}
+.bal{background:linear-gradient(135deg,#7a4a00,#c67c00);border-color:#facc15;box-shadow:0 0 20px rgba(250,204,21,0.15)}
+.wit{background:linear-gradient(135deg,#064e3b,#0a7a5c);border-color:#22c55e}
+.card{background:#1a1a35;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:18px;margin-top:10px}
+.input,select{width:100%;padding:14px;border-radius:12px;border:1px solid #333;background:#000;color:#fff;margin-bottom:12px;font-size:16px;outline:none}
+.input:focus{border-color:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,0.15)}
+.btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#00e676,#00c853);color:#000;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 6px 20px rgba(0,230,118,0.3)}
+.btn:disabled{opacity:0.5}
+.info{background:rgba(250,204,21,0.08);border:1px solid rgba(250,204,21,0.2);border-radius:12px;padding:10px;font-size:11px;color:#facc15;margin-bottom:12px;line-height:1.4}
+
+/* DECORATED POPUPS */
+.stk{position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);z-index:99;display:none;align-items:center;justify-content:center;padding:20px}
+.stk.show{display:flex;animation:fadeIn 0.3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.stk-card{background:radial-gradient(500px at 50% 0%, rgba(0,230,118,0.18), transparent), linear-gradient(180deg,#1e2a2a,#12122a);border:1px solid rgba(0,230,118,0.4);border-radius:24px;padding:24px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 40px rgba(0,230,118,0.15),inset 0 1px 0 rgba(255,255,255,0.1);animation:popUp 0.4s cubic-bezier(0.34,1.56,0.64,1);position:relative;overflow:hidden}
+.stk-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#00e676,transparent)}
+@keyframes popUp{0%{transform:scale(0.8) translateY(20px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+.icon-wrap{width:72px;height:72px;margin:0 auto 12px;border-radius:20px;background:linear-gradient(135deg,#00e676,#00c853);display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 8px 24px rgba(0,230,118,0.4);animation:float 2s ease-in-out infinite}
+.icon-wrap.orange{background:linear-gradient(135deg,#ffb700,#ff8c00)}
+.icon-wrap.blue{background:linear-gradient(135deg,#448aff,#2962ff)}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.loader{width:48px;height:48px;border:3px solid rgba(255,255,255,0.1);border-top-color:#00e676;border-radius:50%;margin:14px auto;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.p-list{margin-top:16px}
+.p-item{background:#1e1e3a;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;font-size:12px}
+.badge{padding:4px 8px;border-radius:6px;font-size:9px;font-weight:800}
+.wait{background:#7a4a00;color:#facc15}
+.ok{background:#064e3b;color:#22c55e}
+.no{background:#4a0a0a;color:#ff4d8d}
+</style>
+</head>
+<body>
+<a href="dashboard.html">← Dashboard</a>
+<h2>Withdraw Funds</h2>
+
+<div class="box bal"><span>💎 AVAILABLE</span><b id="mainBal">KES 0</b></div>
+<div class="box wit"><span>🏦 TOTAL WITHDRAWN</span><b id="totalWit">KES 0</b></div>
+
+<div class="card">
+<div class="info">💡 Min KES 200. Balance will be <b>deducted immediately</b> and held pending admin approval. Refunded if rejected.</div>
+
+<select id="method" class="input" style="border-color:#333">
+<option value="mpesa">M-Pesa</option>
+<option value="airtel">Airtel Money</option>
+</select>
+<input id="phone" class="input" placeholder="Withdraw Phone 07XX" value="07">
+<input id="amount" class="input" type="number" min="200" placeholder="Amount Min 200">
+
+<button id="btn" class="btn" onclick="requestWithdraw()">💸 REQUEST WITHDRAWAL</button>
+<p id="log" style="font-size:12px;margin-top:10px"></p>
+</div>
+
+<div class="p-list" id="myList"></div>
+
+<!-- POPUP 1 : REQUESTING -->
+<div class="stk" id="reqModal"><div class="stk-card">
+<div class="icon-wrap orange">💸</div>
+<h3 style="font-size:18px;font-weight:800">Processing Request</h3>
+<p style="font-size:12px;color:#a5a5c2;margin-top:6px">Deducting <b id="reqAmount" style="color:#fff">KES 0</b> from balance<br>Sending request to admin...</p>
+<div class="loader" style="border-top-color:#ffb700"></div>
+</div></div>
+
+<!-- POPUP 2 : PENDING DECORATED -->
+<div class="stk" id="pendModal"><div class="stk-card" style="border-color:#facc15;box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 40px rgba(250,204,21,0.15)">
+<div class="icon-wrap orange" style="background:linear-gradient(135deg,#facc15,#ff8c00)">⏳</div>
+<h3 style="font-size:18px;font-weight:800;color:#facc15">Request Sent to Admin!</h3>
+<div style="margin-top:12px;background:linear-gradient(135deg,rgba(250,204,21,0.15),rgba(255,140,0,0.08));border:1px solid rgba(250,204,21,0.3);border-radius:14px;padding:12px">
+<div style="font-size:10px;color:#facc15;letter-spacing:1px">WITHDRAWAL ID</div>
+<b id="pendId" style="font-size:14px;color:#fff">#DIAM123</b>
+<div style="font-size:20px;font-weight:900;margin-top:6px;color:#fff" id="pendAmount">KES 0</div>
+<div style="font-size:10px;color:#a5a5c2;margin-top:4px" id="pendPhone">To 07xx via M-Pesa</div>
+</div>
+<div style="margin-top:12px;background:rgba(250,204,21,0.08);border-radius:10px;padding:8px;font-size:11px;color:#facc15">🔒 Balance deducted & held. Will be paid after admin approval. Refunded if rejected.</div>
+<button onclick="closePend()" style="margin-top:14px;width:100%;padding:12px;border-radius:12px;border:none;background:#facc15;color:#000;font-weight:800">OKAY, GOT IT</button>
+</div></div>
+
+<script>
+function getUser(){try{return JSON.parse(localStorage.getItem("DIAMINES_CURRENT")||"null")}catch(e){return null}}
+if(!getUser()||!getUser().email) location.href="login.html";
+function getEmail(){return String(getUser().email).toLowerCase().trim()}
+function getBal(){return Number(localStorage.getItem("DIAMINES_BAL_"+getEmail())||0)||0}
+function getWitTotal(){return Number(localStorage.getItem("DIAMINES_TOTAL_WITHDRAW_"+getEmail())||0)||0}
+function render(){
+ document.getElementById("mainBal").innerText="KES "+getBal().toLocaleString();
+ document.getElementById("totalWit").innerText="KES "+getWitTotal().toLocaleString();
+ let all=JSON.parse(localStorage.getItem("DIAMINES_WITHDRAW_ALL")||"[]");
+ let mine=all.filter(w=>w.email===getEmail()).reverse();
+ let html="<h4 style='font-size:10px;color:#5a5a78;letter-spacing:1px;margin-bottom:8px'>MY WITHDRAWALS</h4>";
+ mine.forEach(w=>{
+  let cls=w.status==="pending"?"wait":w.status==="approved"?"ok":"no";
+  html+=`<div class="p-item"><span><b>KES ${w.amount}</b> → ${w.phone}<br><small>${w.date} | ${w.id}</small></span><span class="badge ${cls}">${w.status.toUpperCase()}</span></div>`;
+ });
+ document.getElementById("myList").innerHTML=html;
+}
+render();
+
+function requestWithdraw(){
+ let phone=document.getElementById("phone").value.trim();
+ let amount=Number(document.getElementById("amount").value);
+ let method=document.getElementById("method").value;
+ if(phone.length<10){alert("Valid phone");return}
+ if(amount<200){alert("Min 200");return}
+ if(amount>getBal()){alert("Insufficient balance");return}
+
+ document.getElementById("reqAmount").innerText="KES "+amount.toLocaleString();
+ document.getElementById("reqModal").classList.add("show");
+
+ setTimeout(()=>{
+  document.getElementById("reqModal").classList.remove("show");
+  // DEDUCT BALANCE IMMEDIATELY - HOLD
+  let email=getEmail();
+  let newBal=getBal()-amount;
+  localStorage.setItem("DIAMINES_BAL_"+email, String(newBal));
+  let u=getUser(); u.balance=newBal; localStorage.setItem("DIAMINES_CURRENT", JSON.stringify(u));
+
+  let id="DIAM"+Date.now().toString().slice(-6);
+  let all=JSON.parse(localStorage.getItem("DIAMINES_WITHDRAW_ALL")||"[]");
+  all.push({id:id,email:email,phone:phone,amount:amount,method:method,status:"pending",date:new Date().toLocaleString()});
+  localStorage.setItem("DIAMINES_WITHDRAW_ALL", JSON.stringify(all));
+
+  document.getElementById("pendId").innerText="#"+id;
+  document.getElementById("pendAmount").innerText="KES "+amount.toLocaleString();
+  document.getElementById("pendPhone").innerText="To "+phone+" via "+method.toUpperCase();
+  document.getElementById("pendModal").classList.add("show");
+  document.getElementById("log").innerHTML="<span style='color:#facc15'>⏳ Request sent. KES "+amount+" deducted and pending admin approval.</span>";
+  render();
+  document.getElementById("amount").value="";
+ },1500);
+}
+function closePend(){document.getElementById("pendModal").classList.remove("show");}
+</script>
+</body>
+</html>

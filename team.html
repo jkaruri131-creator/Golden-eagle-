@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES - My Team</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',system-ui}
+body{background:#070711;color:#fff;min-height:100vh;padding:14px;max-width:640px;margin:0 auto}
+a{color:#888;text-decoration:none;font-size:13px}
+h2{margin:14px 0 4px;font-size:22px;font-weight:800}
+.sub{font-size:11px;color:#8b8ba7;margin-bottom:14px}
+.box{border-radius:14px;padding:14px;border:1px solid;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.bal{background:linear-gradient(135deg,#064e3b,#0a7a5c);border-color:#22c55e}
+.team{background:linear-gradient(135deg,#1a0a3a,#2a1a5a);border-color:#8b5cf6}
+.card{background:#1a1a35;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:16px;margin-top:10px}
+.levels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0}
+.lvl{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px;text-align:center;cursor:pointer}
+.lvl b{font-size:20px;display:block}
+.lvl span{font-size:9px;color:#8b8ba7;letter-spacing:1px}
+.lvl.active{border-color:#facc15;background:rgba(250,204,21,0.08)}
+.lvl.active b{color:#facc15}
+.ref-box{background:#000;border:1px dashed #facc15;border-radius:12px;padding:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.ref-code{font-weight:800;color:#facc15;letter-spacing:1px;font-size:14px}
+.btn{padding:10px 14px;border-radius:10px;border:none;background:#facc15;color:#000;font-weight:800;font-size:12px;cursor:pointer}
+.member{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:10px;display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px;align-items:center}
+.badge{padding:3px 6px;border-radius:5px;font-size:8px;font-weight:800}
+.yes{background:#064e3b;color:#22c55e}
+.no{background:#4a1a0a;color:#ff8c00}
+.stk{position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);z-index:99;display:none;align-items:center;justify-content:center;padding:20px}
+.stk.show{display:flex}
+.stk-card{background:linear-gradient(180deg,#1e1e3f,#12122a);border:1px solid rgba(250,204,21,0.4);border-radius:20px;padding:20px;max-width:360px;width:100%;text-align:center}
+</style>
+</head>
+<body>
+<a href="dashboard.html">← Dashboard</a>
+<h2>My Team & Referrals</h2>
+<p class="sub">6 Levels: L1 10% | L2 5% | L3 3% | L4 2% | L5 1% | L6 0.5% - Commission after activation</p>
+
+<div class="box bal"><span>💰 REFERRAL COMMISSION</span><b id="refBal">KES 0</b></div>
+<div class="box team"><span>👥 TOTAL TEAM (6 Levels)</span><b id="totalTeam">0 Members</b></div>
+
+<div class="card">
+<div class="ref-box"><div><div style="font-size:9px;color:#8b8ba7;letter-spacing:1px">MY REFERRAL CODE</div><div class="ref-code" id="myCode">DIAM...</div></div><button class="btn" onclick="copyLink()">COPY LINK</button></div>
+<div style="font-size:10px;color:#5a5a78;background:rgba(255,255,255,0.03);padding:8px;border-radius:8px;word-break:break-all" id="refLink"></div>
+
+<div class="levels">
+<div class="lvl active" onclick="showLevel(1)"><b id="c1">0</b><span>LEVEL 1<br>10%</span></div>
+<div class="lvl" onclick="showLevel(2)"><b id="c2">0</b><span>LEVEL 2<br>5%</span></div>
+<div class="lvl" onclick="showLevel(3)"><b id="c3">0</b><span>LEVEL 3<br>3%</span></div>
+<div class="lvl" onclick="showLevel(4)"><b id="c4">0</b><span>LEVEL 4<br>2%</span></div>
+<div class="lvl" onclick="showLevel(5)"><b id="c5">0</b><span>LEVEL 5<br>1%</span></div>
+<div class="lvl" onclick="showLevel(6)"><b id="c6">0</b><span>LEVEL 6<br>0.5%</span></div>
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+<h4 style="font-size:11px;letter-spacing:1px;color:#8b8ba7">LEVEL <span id="curLvl">1</span> MEMBERS</h4>
+<input id="search" placeholder="Search email/username..." style="background:#000;border:1px solid #333;border-radius:8px;padding:6px 8px;color:#fff;font-size:11px;width:140px" oninput="renderMembers()">
+</div>
+<div id="memberList" style="margin-top:8px"></div>
+</div>
+
+<div class="stk" id="pop"><div class="stk-card" id="popCard"></div></div>
+
+<script>
+function getUser(){try{return JSON.parse(localStorage.getItem("DIAMINES_CURRENT")||"null")}catch(e){return null}}
+let cur=getUser(); if(!cur||!cur.email) location.href="login.html";
+function getEmail(){return String(getUser().email).toLowerCase().trim()}
+function initReferralSystem(){
+ let email=getEmail();
+ let code=localStorage.getItem("DIAMINES_REF_CODE_"+email) || localStorage.getItem("DIAMINES_MYCODE_"+email);
+ if(!code){
+  code="DIAM"+email.substring(0,3).toUpperCase()+Math.floor(1000+Math.random()*9000);
+  localStorage.setItem("DIAMINES_REF_CODE_"+email, code);
+  localStorage.setItem("DIAMINES_MYCODE_"+email, code);
+  localStorage.setItem("DIAMINES_REF_MAP_"+code, email);
+ }
+ return code;
+}
+function getRefBal(){return Number(localStorage.getItem("DIAMINES_REF_BAL_"+getEmail())||0)||0}
+let curLevel=1;
+
+function getTree(){
+ let email=getEmail();
+ let rel=JSON.parse(localStorage.getItem("DIAMINES_REF_RELATIONS")||"[]");
+ let level1=rel.filter(r=>r.parent===email).map(r=>r.child);
+ let level2=[]; level1.forEach(l1=>{ rel.filter(r=>r.parent===l1).forEach(r=>level2.push(r.child)); });
+ let level3=[]; level2.forEach(l2=>{ rel.filter(r=>r.parent===l2).forEach(r=>level3.push(r.child)); });
+ let level4=[]; level3.forEach(l3=>{ rel.filter(r=>r.parent===l3).forEach(r=>level4.push(r.child)); });
+ let level5=[]; level4.forEach(l4=>{ rel.filter(r=>r.parent===l4).forEach(r=>level5.push(r.child)); });
+ let level6=[]; level5.forEach(l5=>{ rel.filter(r=>r.parent===l5).forEach(r=>level6.push(r.child)); });
+ return [level1,level2,level3,level4,level5,level6];
+}
+
+function render(){
+ let code=initReferralSystem();
+ document.getElementById("myCode").innerText=code;
+ document.getElementById("refLink").innerText=window.location.origin+"/register.html?ref="+code;
+ document.getElementById("refBal").innerText="KES "+getRefBal().toLocaleString();
+ let tree=getTree();
+ document.getElementById("c1").innerText=tree[0].length;
+ document.getElementById("c2").innerText=tree[1].length;
+ document.getElementById("c3").innerText=tree[2].length;
+ document.getElementById("c4").innerText=tree[3].length;
+ document.getElementById("c5").innerText=tree[4].length;
+ document.getElementById("c6").innerText=tree[5].length;
+ document.getElementById("totalTeam").innerText=(tree.flat().length)+" Members";
+ renderMembers();
+}
+
+function renderMembers(){
+ let q=(document.getElementById("search").value||"").toLowerCase();
+ let tree=getTree();
+ let all=JSON.parse(localStorage.getItem("DIAMINES_ALL_USERS")||"[]");
+ let list=tree[curLevel-1]||[];
+ let html="";
+ list.filter(e=>{
+   let u=all.find(x=>String(x.email).toLowerCase()===String(e).toLowerCase());
+   return String(e).toLowerCase().includes(q) || (u && String(u.username||"").toLowerCase().includes(q));
+ }).forEach(childEmail=>{
+  let u=all.find(x=>String(x.email).toLowerCase()===String(childEmail).toLowerCase());
+  let username = u? (u.username||"User") : "User";
+  let bal=Number(localStorage.getItem("DIAMINES_BAL_"+childEmail)||0);
+  let activated = u? u.activated : false;
+  html+=`<div class="member"><div><b style="color:#fff">${username}</b><br><small style="color:#8b8ba7">${childEmail}</small><br><small style="color:#5a5a78">${u?u.joinDate:''} | BAL KES ${bal.toLocaleString()}</small></div><span class="badge ${activated?'yes':'no'}">${activated?'ACTIVATED':'NOT ACTIVE'}</span></div>`;
+ });
+ document.getElementById("memberList").innerHTML=html||`<p style="text-align:center;color:#555;font-size:11px;margin-top:12px">No members in Level ${curLevel}<br>Share your link to refer</p>`;
+}
+
+function showLevel(l){
+ curLevel=l; document.getElementById("curLvl").innerText=l;
+ document.querySelectorAll(".lvl").forEach((e,i)=>e.className=i+1===l?"lvl active":"lvl");
+ renderMembers();
+}
+function copyLink(){
+ let link=document.getElementById("refLink").innerText;
+ navigator.clipboard.writeText(link);
+ showPopup(`<div style="width:56px;height:56px;margin:0 auto 10px;border-radius:14px;background:linear-gradient(135deg,#facc15,#ff8c00);display:flex;align-items:center;justify-content:center;font-size:26px">🔗</div><h3>Copied!</h3><p style="font-size:11px;color:#8b8ba7;margin-top:6px">${link}</p>`);
+}
+function showPopup(html){
+ document.getElementById("popCard").innerHTML=html+`<button onclick="document.getElementById('pop').classList.remove('show')" style="margin-top:12px;width:100%;padding:10px;border-radius:10px;border:none;background:#facc15;color:#000;font-weight:800">OKAY</button>`;
+ document.getElementById("pop").classList.add("show");
+}
+render();
+</script>
+</body>
+</html>

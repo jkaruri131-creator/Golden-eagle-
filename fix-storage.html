@@ -1,0 +1,63 @@
+<!DOCTYPE html><html><body style="background:#070711;color:#fff;padding:20px;font-family:system-ui"><h2 style="color:#ff4d8d">🔧 FIXING STORAGE...</h2><pre id="log" style="background:#000;padding:12px;border-radius:8px;white-space:pre-wrap"></pre><script>
+let log='';
+function add(t){log+=t+'\n';document.getElementById('log').innerText=log;}
+add('Starting fix...');
+let allKeys=['DIAMINES_ALL_USERS','DIAMINES_USERS','users','allUsers'];
+let master=[];
+let deleted=(JSON.parse(localStorage.getItem('DIAMINES_DELETED_BLACKLIST')||'[]')).map(e=>e.toLowerCase());
+let banned=(JSON.parse(localStorage.getItem('DIAMINES_BANNED')||'[]')).map(e=>e.toLowerCase());
+add('Deleted blacklist: '+deleted.length+' | Banned: '+banned.length);
+
+allKeys.forEach(k=>{
+  try{
+    let v=JSON.parse(localStorage.getItem(k)||'[]');
+    if(Array.isArray(v)){
+      add(k+': '+v.length+' users found');
+      v.forEach(u=>{
+        if(u.email &&!deleted.includes(u.email.toLowerCase()) &&!master.find(m=>m.email.toLowerCase()===u.email.toLowerCase())){
+          master.push({id:u.id||Date.now(),username:u.username||u.email.split('@')[0],email:u.email.toLowerCase(),password:u.password||'1234',joined:u.joined||new Date().toISOString(),banned:banned.includes(u.email.toLowerCase())||u.banned||false,package:u.package||'lion',balance:u.balance||'0',upline:u.upline||localStorage.getItem('DIAMINES_UPLINE_'+u.email)||'Official'});
+        }
+      });
+    }
+  }catch(e){add('Error reading '+k+': '+e);}
+});
+
+// Also scan all localStorage keys that look like user objects
+for(let i=0;i<localStorage.length;i++){
+  let key=localStorage.key(i);
+  if(key.includes('DELETED')||key.includes('BANNED')||key.includes('BAL_')||key.includes('MYCODE')||key.includes('UPLINE')) continue;
+  try{
+    let v=JSON.parse(localStorage.getItem(key));
+    if(v && v.email &&!deleted.includes(v.email.toLowerCase()) &&!master.find(m=>m.email.toLowerCase()===v.email.toLowerCase())){
+      master.push({id:v.id||Date.now(),username:v.username||v.email.split('@')[0],email:v.email.toLowerCase(),password:v.password||'1234',joined:v.joined||new Date().toISOString(),banned:false,package:'lion',balance:'0',upline:'Official'});
+      add('Found single user in key: '+key+' -> '+v.email);
+    }
+    if(Array.isArray(v)){
+      v.forEach(u=>{
+        if(u.email &&!deleted.includes(u.email.toLowerCase()) &&!master.find(m=>m.email.toLowerCase()===u.email.toLowerCase())){
+          master.push({id:u.id||Date.now(),username:u.username||u.email.split('@')[0],email:u.email.toLowerCase(),password:u.password||'1234',joined:u.joined||new Date().toISOString(),banned:false,package:'lion',balance:'0',upline:'Official'});
+        }
+      });
+    }
+  }catch(e){}
+}
+
+if(!master.find(u=>u.email==='jkaruri131@gmail.com')){
+  master.push({id:1,username:'Jkaruri',email:'jkaruri131@gmail.com',password:'admin123',joined:new Date().toISOString(),banned:false,package:'lion',balance:'940',upline:'Official',isSuperAdmin:true});
+  add('Added super admin jkaruri131@gmail.com');
+}
+
+add('\nMASTER LIST: '+master.length+' unique users');
+master.forEach(u=>add(' - '+u.email+' ('+u.username+') banned='+u.banned));
+
+// SAVE TO ALL KEYS - NOW ADMIN WILL SEE THEM
+localStorage.setItem('DIAMINES_ALL_USERS',JSON.stringify(master));
+localStorage.setItem('DIAMINES_USERS',JSON.stringify(master));
+localStorage.setItem('users',JSON.stringify(master));
+localStorage.setItem('DIAMINES_BANNED',JSON.stringify(master.filter(u=>u.banned).map(u=>u.email.toLowerCase())));
+
+add('\n✅ FIXED! Saved '+master.length+' users to ALL 3 keys:');
+add(' DIAMINES_ALL_USERS, DIAMINES_USERS, users');
+add('\nNow open admin.html - you will see all '+master.length+' users');
+add('\nBan will work because BANNED list now synced');
+</script><button onclick="location.href='admin.html'" style="background:#ff0055;color:#fff;border:none;padding:12px 20px;border-radius:8px;font-weight:800;margin-top:12px;width:100%">OPEN admin.html NOW - IT WILL WORK</button></body></html>
