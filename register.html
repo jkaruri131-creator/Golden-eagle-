@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES - Register</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#070711;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+.box{width:100%;max-width:380px;background:#111126;border:1px solid #222;border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.logo{text-align:center;margin-bottom:16px}
+.logo h1{font-size:28px;font-weight:900;letter-spacing:2px;color:#facc15;text-shadow:0 0 20px rgba(250,204,21,0.4)}
+.logo p{font-size:10px;color:#8b8ba7;letter-spacing:3px;margin-top:2px}
+.input{width:100%;background:#1a1a35;border:1px solid #333;border-radius:10px;padding:13px 12px;color:#fff;margin-bottom:12px;outline:none;font-size:14px}
+.input:focus{border-color:#facc15;box-shadow:0 0 0 3px rgba(250,204,21,0.1)}
+.btn{width:100%;padding:14px;border-radius:10px;border:none;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#facc15,#ffb700);color:#000;font-size:15px;box-shadow:0 6px 20px rgba(250,204,21,0.3);margin-top:6px}
+.btn:active{transform:scale(0.98)}
+.msg{display:none;padding:10px;border-radius:8px;font-size:11px;margin-bottom:12px;text-align:center}
+.msg.err{background:rgba(255,23,68,0.15);border:1px solid #ff1744;color:#ff8da1;display:block}
+.msg.ok{background:rgba(0,230,118,0.15);border:1px solid #00e676;color:#86efac;display:block}
+.ref-tag{display:none;background:rgba(250,204,21,0.1);border:1px dashed #facc15;border-radius:8px;padding:8px 10px;font-size:10px;color:#facc15;margin-bottom:12px;text-align:center}
+</style>
+</head><body>
+<div class="box">
+<div class="logo"><h1>DIAMINES</h1><p>CREATE ACCOUNT</p></div>
+<div id="refTag" class="ref-tag"></div>
+<div id="msg" class="msg" style="display:none"></div>
+
+<input id="username" class="input" placeholder="Username">
+<input id="email" class="input" placeholder="Email" type="email">
+<input id="password" class="input" placeholder="Password" type="password">
+<input id="cpassword" class="input" placeholder="Confirm Password" type="password">
+
+<button class="btn" id="regBtn">REGISTER</button>
+<p style="text-align:center;margin-top:14px;font-size:11px;color:#8b8ba7">Already have account? <a href="login.html" style="color:#facc15;text-decoration:none;font-weight:700">Login</a></p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",
+  authDomain: "diamines-agencies.firebaseapp.com",
+  projectId: "diamines-agencies",
+  storageBucket: "diamines-agencies.firebasestorage.app",
+  messagingSenderId: "438413306857",
+  appId: "1:438413306857:web:3c7f736794be6a49b0f978",
+  measurementId: "G-4PBTTCZ1YK"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// REF CAPTURE
+let urlRef = new URLSearchParams(window.location.search).get("ref");
+if(urlRef){
+  urlRef = urlRef.toUpperCase().trim();
+  localStorage.setItem("DIAMINES_PENDING_REF", urlRef);
+  document.getElementById("refTag").style.display="block";
+  document.getElementById("refTag").innerText="🔗 Referred by: "+urlRef+" - You will appear in Level 1";
+}
+function showMsg(t,ok){
+  let m=document.getElementById('msg');
+  m.innerText=t;
+  m.className= ok? 'msg ok' : 'msg err';
+  m.style.display='block';
+}
+
+document.getElementById('regBtn').onclick = async ()=>{
+  let u=document.getElementById('username').value.trim();
+  let e=document.getElementById('email').value.trim().toLowerCase();
+  let p=document.getElementById('password').value;
+  let cp=document.getElementById('cpassword').value;
+  let pendingRef = localStorage.getItem("DIAMINES_PENDING_REF") || "";
+
+  if(!u||!e||!p||!cp){ showMsg("Fill all fields"); return; }
+  if(p!==cp){ showMsg("Passwords do not match"); return; }
+  if(p.length<6){ showMsg("Password min 6 chars for Firebase"); return; }
+
+  showMsg("Creating account... please wait", true);
+  try{
+    // Create Auth user - THIS MAKES SAFE RULES WORK
+    const cred = await createUserWithEmailAndPassword(auth, e, p);
+    const uid = cred.user.uid;
+
+    let myCode = (u.toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,5) || 'DIAM') + Math.floor(1000+Math.random()*9000);
+    
+    let parentEmail = null;
+    if(pendingRef){
+      // Find parent by code (simple: check Firestore if you have mapping collection later)
+      parentEmail = localStorage.getItem('DIAMINES_REF_MAP_'+pendingRef);
+    }
+
+    const userData = {
+      uid: uid,
+      username: u,
+      email: e,
+      refCode: myCode,
+      myCode: myCode,
+      parent: parentEmail ? parentEmail.toLowerCase() : null,
+      upline: parentEmail ? parentEmail.toLowerCase() : 'Official',
+      activated: false,
+      commissionPaid: false,
+      joined: new Date().toISOString(),
+      balance: 0,
+      package: 'none'
+    };
+
+    // SAVE TO FIRESTORE - SAFE RULES WILL ALLOW (auth.uid == userId)
+    await setDoc(doc(db, "users", uid), userData);
+
+    // ALSO KEEP LOCALSTORAGE FOR YOUR OLD SYSTEM (so nothing breaks)
+    let allUsers=JSON.parse(localStorage.getItem('DIAMINES_ALL_USERS')||'[]');
+    allUsers.push({...userData, id: Date.now()});
+    localStorage.setItem('DIAMINES_ALL_USERS',JSON.stringify(allUsers));
+    localStorage.setItem('DIAMINES_REF_MAP_'+myCode, e);
+
+    showMsg("✅ Account created in Firebase! Redirecting...", true);
+    setTimeout(()=>{ location.href='login.html'; },1200);
+  }catch(err){
+    showMsg("❌ "+err.message);
+  }
+};
+</script>
+</body></html>
