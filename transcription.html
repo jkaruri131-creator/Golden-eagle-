@@ -44,7 +44,6 @@ textarea{width:100%;background:#0a0a14;border:1.5px solid rgba(255,255,255,0.1);
 textarea:focus{border-color:#facc15;box-shadow:0 0 0 3px rgba(250,204,21,0.1)}
 .empty{text-align:center;padding:50px 20px;color:#4b5563}
 .empty-icon{font-size:52px;margin-bottom:12px;filter:grayscale(0.3)}
-/* SUPER DECORATED MODALS */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(12px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
 .modal-overlay.show{display:flex}
 .modal{width:100%;max-width:380px;border-radius:26px;padding:22px;position:relative;overflow:hidden;animation:pop 0.4s cubic-bezier(0.175,0.885,0.32,1.275);box-shadow:0 20px 60px rgba(0,0,0,0.6)}
@@ -70,6 +69,13 @@ textarea:focus{border-color:#facc15;box-shadow:0 0 0 3px rgba(250,204,21,0.1)}
 </style>
 </head>
 <body>
+
+<!-- TITLE ADDED - DIAMINES TRANSCRIPTION JOBS IN CAPITAL -->
+<div style="max-width:620px;margin:0 auto 12px;background:#111126;border:1px solid #222;border-radius:16px;padding:14px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5)">
+<h1 style="font-size:22px;font-weight:900;letter-spacing:2px;color:#facc15;text-shadow:0 0 20px rgba(250,204,21,0.4);font-family:'Space Grotesk'">DIAMINES TRANSCRIPTION JOBS</h1>
+<p style="font-size:8px;color:#8b8ba7;letter-spacing:3px;margin-top:4px;font-weight:800">PROFESSIONAL TRANSCRIPTION PLATFORM</p>
+</div>
+
 <div class="top">
 <a class="back" href="dashboard.html">←</a>
 <div class="title">🎙️ <span>Transcription</span> Jobs</div>
@@ -86,7 +92,6 @@ textarea:focus{border-color:#facc15;box-shadow:0 0 0 3px rgba(250,204,21,0.1)}
 
 <div class="wrap" id="content"></div>
 
-<!-- SUPER DECORATED ACCEPT PROMPT -->
 <div class="modal-overlay" id="mAccept" onclick="if(event.target===this)closeM('mAccept')">
 <div class="modal modal-accept">
 <div class="confetti-line"></div>
@@ -107,7 +112,6 @@ textarea:focus{border-color:#facc15;box-shadow:0 0 0 3px rgba(250,204,21,0.1)}
 </div>
 </div>
 
-<!-- SUPER DECORATED SUCCESS ACCEPTED -->
 <div class="modal-overlay" id="mSuccess" onclick="if(event.target===this)closeM('mSuccess')">
 <div class="modal modal-success">
 <div class="confetti-line"></div>
@@ -122,7 +126,6 @@ textarea:focus{border-color:#facc15;box-shadow:0 0 0 3px rgba(250,204,21,0.1)}
 </div>
 </div>
 
-<!-- SUPER DECORATED SUBMIT SUCCESS -->
 <div class="modal-overlay" id="mSub" onclick="if(event.target===this)closeM('mSub')">
 <div class="modal modal-success">
 <div class="confetti-line"></div>
