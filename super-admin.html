@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUPER ADMIN - DIAMINES</title>
+<script type="module" src="secure.js"></script>
+<style>
+body{margin:0;background:#0f172a;color:#fff;font-family:Arial;padding:15px}
+h2{color:#3b82f6;text-align:center}
+.card{background:#1e293b;padding:12px;border-radius:10px;margin:12px 0;border:1px solid #334155}
+input,select{padding:9px;border-radius:6px;border:none;margin:4px;width:180px}
+button{padding:9px 12px;border:none;border-radius:6px;background:#3b82f6;color:#fff;cursor:pointer;margin:3px;font-weight:bold}
+.green{background:#22c55e;color:#000} .orange{background:#f59e0b;color:#000} .red{background:#ef4444}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid #334155;padding:6px;text-align:left} th{background:#334155}
+.search{background:#334155;width:90%;padding:10px;margin:10px 0;border-radius:8px;color:#fff}
+</style>
+</head><body>
+<h2>🔒 SUPER ADMIN - EDIT EVERYTHING</h2>
+
+<div class="card">
+<h3>🔍 Search User by Email</h3>
+<input id="searchEmail" class="search" placeholder="type email e.g. john@gmail.com" oninput="searchUser()">
+<div id="userResult"></div>
+</div>
+
+<div class="card">
+<h3>👑 Change Package (Lion / Tiger / etc)</h3>
+<input id="pkgEmail" placeholder="user email">
+<select id="pkgSelect">
+<option value="lion">🦁 LION - 1000 KES</option>
+<option value="tiger">🐯 TIGER - 2000 KES</option>
+<option value="cheetah">🐆 CHEETAH - 5000 KES</option>
+<option value="eagle">🦅 EAGLE - 10000 KES</option>
+<option value="free">FREE</option>
+</select>
+<button class="green" onclick="changePackage()">CHANGE PACKAGE</button>
+<span id="pkgStatus"></span>
+</div>
+
+<div class="card">
+<h3>💰 Edit Balances</h3>
+<input id="balEmail" placeholder="user email">
+<input id="balAmount" type="number" placeholder="Balance e.g. 1000000">
+<input id="depAmount" type="number" placeholder="Deposit e.g. 50000">
+<input id="accBal" type="number" placeholder="Account Balance">
+<button class="green" onclick="editBalances()">UPDATE ALL BALANCES</button>
+<span id="balStatus"></span>
+</div>
+
+<div class="card">
+<h3>💸 Edit Withdrawals</h3>
+<button onclick="loadWithdrawals()">LOAD ALL WITHDRAWALS</button>
+<input id="withSearch" placeholder="filter by email" oninput="loadWithdrawals()" style="width:200px">
+<div id="withList"></div>
+</div>
+
+<div class="card">
+<h3>📥 Edit Deposits</h3>
+<button onclick="loadDeposits()">LOAD ALL DEPOSITS</button>
+<div id="depList"></div>
+</div>
+
+<div class="card">
+<h3>👥 All Users (Quick Edit)</h3>
+<button onclick="loadUsers()">LOAD USERS</button>
+<div id="usersList"></div>
+</div>
+
+<script type="module">
+import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const db = getFirestore();
+
+async function findUserByEmail(email){
+ email=email.toLowerCase().trim();
+ const snap = await getDocs(collection(db,"users"));
+ let found=null;
+ snap.forEach(d=>{ if((d.data().email||"").toLowerCase()===email) found={id:d.id, ...d.data()}; });
+ return found;
+}
+
+window.searchUser = async()=>{
+ const email=document.getElementById('searchEmail').value.trim();
+ if(email.length<3){document.getElementById('userResult').innerHTML="";return;}
+ const u = await findUserByEmail(email);
+ if(!u){document.getElementById('userResult').innerHTML="❌ Not found";return;}
+ document.getElementById('userResult').innerHTML=`
+ <table><tr><th>Email</th><td>${u.email}</td></tr>
+ <tr><th>Package</th><td>${u.package||u.membership||'N/A'}</td></tr>
+ <tr><th>Balance</th><td>${u.balance||0}</td></tr>
+ <tr><th>Deposit</th><td>${u.deposit||0}</td></tr>
+ <tr><th>Account Balance</th><td>${u.accountBalance||u.balance||0}</td></tr></table>
+ <button onclick="document.getElementById('pkgEmail').value='${u.email}';document.getElementById('balEmail').value='${u.email}'">USE THIS USER</button>`;
+}
+
+window.changePackage = async()=>{
+ const email=document.getElementById('pkgEmail').value.trim();
+ const pkg=document.getElementById('pkgSelect').value;
+ const status=document.getElementById('pkgStatus');
+ if(!email){status.innerText=" Enter email";return;}
+ status.innerText=" Updating...";
+ try{
+  const u=await findUserByEmail(email);
+  if(!u){status.innerText=" ❌ User not found";return;}
+  await updateDoc(doc(db,"users",u.id),{package:pkg, membership:pkg, plan:pkg, packageType:pkg});
+  status.innerText=" ✅ Changed to "+pkg.toUpperCase();
+ }catch(e){status.innerText=" ❌ "+e.message;}
+}
+
+window.editBalances = async()=>{
+ const email=document.getElementById('balEmail').value.trim();
+ const bal=document.getElementById('balAmount').value;
+ const dep=document.getElementById('depAmount').value;
+ const acc=document.getElementById('accBal').value;
+ const status=document.getElementById('balStatus');
+ if(!email){status.innerText=" Enter email";return;}
+ status.innerText=" Updating...";
+ try{
+  const u=await findUserByEmail(email);
+  if(!u){status.innerText=" ❌ User not found";return;}
+  let data={};
+  if(bal!=="") data.balance=parseFloat(bal);
+  if(dep!=="") data.deposit=parseFloat(dep);
+  if(acc!=="") {data.accountBalance=parseFloat(acc); data.balance=parseFloat(acc);}
+  if(bal!=="" && acc==="") data.accountBalance=parseFloat(bal);
+  await updateDoc(doc(db,"users",u.id),data);
+  status.innerText=" ✅ Balances updated: "+JSON.stringify(data);
+ }catch(e){status.innerText=" ❌ "+e.message;}
+}
+
+window.loadUsers = async()=>{
+ const list=document.getElementById('usersList');
+ list.innerHTML="Loading...";
+ const snap=await getDocs(collection(db,"users"));
+ let html="<table><tr><th>Email</th><th>Package</th><th>Balance</th><th>Action</th></tr>";
+ snap.forEach(d=>{
+  const u=d.data();
+  html+=`<tr><td>${u.email||''}</td><td>${u.package||u.membership||''}</td><td>${u.balance||0}</td><td><button onclick="quickSet('${u.email}')">EDIT</button></td></tr>`;
+ });
+ html+="</table>"; list.innerHTML=html;
+}
+window.quickSet = (email)=>{
+ document.getElementById('pkgEmail').value=email;
+ document.getElementById('balEmail').value=email;
+ document.getElementById('searchEmail').value=email;
+ searchUser();
+ window.scrollTo(0,0);
+}
+
+window.loadWithdrawals = async()=>{
+ const list=document.getElementById('withList');
+ const filter=document.getElementById('withSearch').value.toLowerCase();
+ list.innerHTML="Loading...";
+ const snap=await getDocs(collection(db,"withdrawals"));
+ let html="<table><tr><th>Email</th><th>Amount</th><th>Status</th><th>Edit Amount</th><th>Action</th></tr>";
+ snap.forEach(d=>{
+  const w=d.data();
+  if(filter && !(w.email||"").toLowerCase().includes(filter)) return;
+  html+=`<tr>
+  <td>${w.email||''}</td>
+  <td>${w.amount||0}</td>
+  <td>${w.status||'pending'}</td>
+  <td><input id="w_${d.id}" type="number" value="${w.amount||0}" style="width:100px"></td>
+  <td>
+   <button class="orange" onclick="editWithdrawal('${d.id}')">SET TO 1M</button>
+   <button class="green" onclick="updateWithAmount('${d.id}')">UPDATE AMOUNT</button>
+   <button class="green" onclick="updateWithStatus('${d.id}','approved')">APPROVE</button>
+   <button class="red" onclick="updateWithStatus('${d.id}','rejected')">REJECT</button>
+  </td></tr>`;
+ });
+ html+="</table>"; list.innerHTML=html;
+}
+
+window.editWithdrawal = async(id)=>{
+ try{
+  await updateDoc(doc(db,"withdrawals",id),{amount:1000000});
+  alert("✅ Changed to 1,000,000"); loadWithdrawals();
+ }catch(e){alert("❌ "+e.message);}
+}
+window.updateWithAmount = async(id)=>{
+ const val=document.getElementById('w_'+id).value;
+ try{
+  await updateDoc(doc(db,"withdrawals",id),{amount:parseFloat(val)});
+  alert("✅ Amount updated to "+val); loadWithdrawals();
+ }catch(e){alert("❌ "+e.message);}
+}
+window.updateWithStatus = async(id,status)=>{
+ try{
+  await updateDoc(doc(db,"withdrawals",id),{status});
+  alert("✅ Status: "+status); loadWithdrawals();
+ }catch(e){alert("❌ "+e.message);}
+}
+
+window.loadDeposits = async()=>{
+ const list=document.getElementById('depList');
+ list.innerHTML="Loading...";
+ const snap=await getDocs(collection(db,"deposits"));
+ let html="<table><tr><th>Email</th><th>Amount</th><th>Status</th><th>Edit</th></tr>";
+ snap.forEach(d=>{
+  const dep=d.data();
+  html+=`<tr><td>${dep.email||''}</td><td>${dep.amount||0}</td><td>${dep.status||'pending'}</td><td><input id="d_${d.id}" type="number" value="${dep.amount||0}" style="width:100px"><button class="green" onclick="updateDep('${d.id}')">UPDATE</button></td></tr>`;
+ });
+ html+="</table>"; list.innerHTML=html;
+}
+window.updateDep = async(id)=>{
+ const val=document.getElementById('d_'+id).value;
+ try{
+  await updateDoc(doc(db,"deposits",id),{amount:parseFloat(val)});
+  alert("✅ Deposit updated"); loadDeposits();
+ }catch(e){alert("❌ "+e.message);}
+}
+</script>
+</body></html>

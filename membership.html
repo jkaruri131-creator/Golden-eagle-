@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES - Membership</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',system-ui}
+body{background:#070711;color:#fff;padding:14px;max-width:600px;margin:0 auto;min-height:100vh}
+a{color:#888;text-decoration:none;font-size:13px}
+h2{margin:14px 0;font-size:22px;font-weight:800}
+.card{background:#1a1a35;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:16px;margin-top:12px}
+.box{border-radius:14px;padding:14px;border:1px solid;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.bal{background:linear-gradient(135deg,#7a4a00,#c67c00);border-color:#facc15}
+.dep{background:linear-gradient(135deg,#0e2a6a,#1a4db5);border-color:#3b82f6}
+.input{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#000;color:#fff;margin-bottom:10px}
+.btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#facc15,#ffb700);color:#000;font-weight:800;font-size:14px;cursor:pointer}
+.btn-green{background:linear-gradient(135deg,#00e676,#00c853)}
+.pkg{border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px;background:#12122a;margin-bottom:12px;cursor:pointer;position:relative;overflow:hidden}
+.pkg.active{border-color:#facc15;background:radial-gradient(600px at 0% 0%, rgba(250,204,21,0.18), transparent), #1e1e3a;box-shadow:0 0 24px rgba(250,204,21,0.15)}
+.animal{font-size:42px;position:absolute;right:8px;top:8px;opacity:0.14}
+.price{font-size:22px;font-weight:900;color:#facc15}
+.jobs-col{display:flex;flex-direction:column;gap:6px;margin-top:12px;background:rgba(0,0,0,0.3);border-radius:12px;padding:10px}
+.job-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:600}
+.job-row.yes{background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);color:#fff}
+.job-row.no{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);color:#555}
+.dot{width:6px;height:6px;border-radius:50%}
+.dot.yes{background:#22c55e;box-shadow:0 0 6px #22c55e}
+.dot.no{background:#555}
+.pay{font-size:10px;color:#8b8ba7}
+.pay.yes{color:#4ade80;font-weight:800}
+.stk{position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);z-index:99;display:none;align-items:center;justify-content:center;padding:20px}
+.stk.show{display:flex}
+.stk-card{background:linear-gradient(180deg,#1e1e3f,#12122a);border:1px solid #facc15;border-radius:24px;padding:24px;max-width:380px;width:100%;text-align:center}
+.loader{width:44px;height:44px;border:3px solid rgba(255,255,255,0.1);border-top-color:#facc15;border-radius:50%;margin:12px auto;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<a href="dashboard.html">← Dashboard</a>
+<h2>💎 DIAMINES Membership</h2>
+<div class="box bal"><span>💰 BALANCE</span><b id="mainBal">KES 0</b></div>
+<div class="box dep"><span>📊 DEPOSIT</span><b id="totalDep">KES 0</b></div>
+<div id="statusBox"></div>
+<div class="card">
+<h4 style="font-size:12px;margin-bottom:8px">💳 Deposit</h4>
+<input id="phone" class="input" placeholder="07XX" value="07">
+<input id="amount" class="input" type="number" placeholder="Amount">
+<button class="btn" onclick="deposit()">DEPOSIT</button>
+</div>
+<div class="card">
+<h4 style="font-size:12px;margin-bottom:10px">🦁 Animal Packages</h4>
+<div id="pkgList"></div>
+<button class="btn btn-green" style="margin-top:12px" onclick="activatePackage()">🔓 ACTIVATE</button>
+</div>
+<div class="stk" id="stkModal"><div class="stk-card"><h3>STK Push Sent!</h3><p style="font-size:11px;color:#8b8ba7">PIN on <b id="stkPhone">07xx</b> for <b id="stkAmount" style="color:#facc15">KES 0</b></p><div class="loader"></div><div id="count" style="font-size:26px;font-weight:900;color:#facc15">10</div></div></div>
+<div class="stk" id="confModal"><div class="stk-card" style="border-color:#448aff"><h3>Confirming</h3><div class="loader" style="border-top-color:#448aff"></div></div></div>
+<div class="stk" id="succModal"><div class="stk-card" style="border-color:#00e676"><h3 id="succTitle" style="color:#00e676">Success!</h3><p id="succMsg" style="font-size:11px;color:#8b8ba7"></p><b id="succCode">QJ...</b></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc, increment, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",
+  authDomain: "diamines-agencies.firebaseapp.com",
+  projectId: "diamines-agencies",
+  storageBucket: "diamines-agencies.firebasestorage.app",
+  messagingSenderId: "438413306857",
+  appId: "1:438413306857:web:3c7f736794be6a49b0f978",
+  measurementId: "G-4PBTTCZ1YK"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let currentData = null;
+
+function getUser(){try{return JSON.parse(localStorage.getItem("DIAMINES_CURRENT")||"null")}catch(e){return null}}
+
+onAuthStateChanged(auth, async (user)=>{
+  if(!user){ if(!getUser()||!getUser().email) location.href="login.html"; return; }
+  currentUser = user;
+  try{ const snap = await getDoc(doc(db, "users", user.uid)); if(snap.exists()) currentData = snap.data(); }catch(e){}
+  render();
+});
+
+function getEmail(){ if(currentData&&currentData.email) return String(currentData.email).toLowerCase(); return String(getUser()?.email||"").toLowerCase().trim(); }
+function getBal(){ if(currentData&&currentData.balance!==undefined) return Number(currentData.balance)||0; return Number(localStorage.getItem("DIAMINES_BAL_"+getEmail())||0)||0; }
+function getDep(){ if(currentData&&currentData.totalDeposit!==undefined) return Number(currentData.totalDeposit)||0; return Number(localStorage.getItem("DIAMINES_TOTAL_DEPOSIT_"+getEmail())||0)||0; }
+
+let allJobsList = [
+ {id:"writings", name:"Writings", pay:25, icon:"✍️"},
+ {id:"editing", name:"Editing", pay:40, icon:"📝"},
+ {id:"transcription", name:"Transcription", pay:65, icon:"🎧"},
+ {id:"translation", name:"Translation", pay:85, icon:"🌍"},
+ {id:"digital", name:"Digital Marketing", pay:110, icon:"📢"},
+ {id:"affiliate", name:"Affiliate Marketing", pay:95, icon:"🛒"},
+ {id:"gaming", name:"Gaming", pay:150, icon:"🎮"}
+];
+let packages=[
+ {id:"lion", name:"LION", animal:"🦁", price:500, color:"#facc15", desc:"Cub", daily:5, earning:"KES 150/day", allowed:["digital","affiliate","writings"]},
+ {id:"tiger", name:"TIGER", animal:"🐯", price:1500, color:"#ff8c00", desc:"Hunter", daily:10, earning:"KES 500/day", allowed:["digital","affiliate","writings","editing"]},
+ {id:"cheetah", name:"CHEETAH", animal:"🐆", price:3000, color:"#00e5ff", desc:"Elite", daily:20, earning:"KES 1500/day", allowed:["digital","affiliate","writings","editing","transcription","translation"]},
+ {id:"elephant", name:"ELEPHANT", animal:"🐘", price:5500, color:"#a78bfa", desc:"KING", daily:30, earning:"KES 4500/day", allowed:["digital","affiliate","writings","editing","transcription","translation","gaming"]}
+];
+let selectedPkg=packages[0];
+
+function getCurrentPkgObj(){
+  let pkgId = (currentData&&currentData.package)? currentData.package : (localStorage.getItem("DIAMINES_PACKAGE_"+getEmail())||"none");
+  return packages.find(x=>x.id===pkgId) || null;
+}
+
+window.render = ()=>{
+ document.getElementById("mainBal").innerText="KES "+getBal().toLocaleString();
+ document.getElementById("totalDep").innerText="KES "+getDep().toLocaleString();
+ let curr = getCurrentPkgObj();
+ if(curr){
+  document.getElementById("statusBox").innerHTML=`<div style='background:#064e3b;border:1px solid #22c55e;border-radius:12px;padding:12px;text-align:center'><b style='color:#22c55e'>✅ ACTIVE - ${curr.animal} ${curr.name} (KES ${curr.price})</b><br><small style="color:#86efac">Upgrade pays difference only - uplines earn again!</small></div>`;
+ }else{
+  document.getElementById("statusBox").innerHTML="<div style='background:#7a4a00;border:1px solid #facc15;border-radius:12px;padding:10px;text-align:center;font-size:11px;color:#facc15'>🔒 Not active - Select package</div>";
+ }
+ let html="";
+ packages.forEach(p=>{
+  let active = selectedPkg.id===p.id? "active":"";
+  let currPkg = getCurrentPkgObj();
+  let diff = currPkg? p.price - currPkg.price : p.price;
+  let label = "";
+  if(currPkg){
+    if(p.id===currPkg.id) label = `<span style="font-size:9px;background:#22c55e;color:#000;padding:2px 6px;border-radius:6px;font-weight:800">CURRENT</span>`;
+    else if(diff>0) label = `<span style="font-size:9px;background:#facc15;color:#000;padding:2px 6px;border-radius:6px;font-weight:800">UPGRADE KES ${diff}</span>`;
+    else label = `<span style="font-size:9px;background:#555;color:#fff;padding:2px 6px;border-radius:6px">LOWER</span>`;
+  }
+  let sorted = [...allJobsList].sort((a,b)=>{ let aAcc = p.allowed.includes(a.id)?0:1; let bAcc = p.allowed.includes(b.id)?0:1; return aAcc-bAcc; });
+  let jobsHtml = `<div class="jobs-col">`;
+  sorted.forEach(j=>{
+   let allowed = p.allowed.includes(j.id);
+   let rowClass = allowed? "yes" : "no";
+   let payClass = allowed? "yes" : "";
+   let dotClass = allowed? "yes" : "no";
+   let icon = allowed? "✅" : "🔒";
+   jobsHtml+=`<div class="job-row ${rowClass}"><div style="display:flex;gap:8px;align-items:center"><div class="dot ${dotClass}"></div><span>${j.icon}</span><span style="color:${allowed?'#fff':'#555'}">${j.name}</span></div><div style="display:flex;gap:8px;align-items:center"><span class="pay ${payClass}">${allowed?`KES ${j.pay}`:''}</span><span>${icon}</span></div></div>`;
+  });
+  jobsHtml+=`</div>`;
+  html+=`<div class="pkg ${active}" onclick="selectPkg('${p.id}')" style="border-left:4px solid ${p.color}">
+   <div class="animal">${p.animal}</div>
+   <div style="display:flex;justify-content:space-between"><div><b>${p.animal} ${p.name}</b> ${label}<br><small style="font-size:10px;color:#8b8ba7">${p.desc} • ${p.earning}</small></div><span class="price">KES ${p.price}</span></div>
+   ${jobsHtml}
+  </div>`;
+ });
+ document.getElementById("pkgList").innerHTML=html;
+}
+window.selectPkg = (id)=>{selectedPkg=packages.find(x=>x.id===id); render();}
+
+window.deposit = ()=>{
+ let phone=document.getElementById("phone").value.trim();
+ let amount=Number(document.getElementById("amount").value);
+ if(phone.length<10||amount<100){alert("Valid phone & min 100");return}
+ document.getElementById("stkPhone").innerText=phone;
+ document.getElementById("stkAmount").innerText="KES "+amount.toLocaleString();
+ document.getElementById("stkModal").classList.add("show");
+ let c=10; document.getElementById("count").innerText=c;
+ let t=setInterval(()=>{c--; document.getElementById("count").innerText=c; if(c<=0){clearInterval(t); document.getElementById("stkModal").classList.remove("show"); confirmDeposit(phone,amount);}},1000);
+}
+
+window.confirmDeposit = async (phone,amount)=>{
+ document.getElementById("confModal").classList.add("show");
+ setTimeout(async ()=>{
+  document.getElementById("confModal").classList.remove("show");
+  document.getElementById("succTitle").innerText="Deposit Success!";
+  document.getElementById("succMsg").innerText="KES "+amount+" added";
+  document.getElementById("succCode").innerText="QJ"+Math.random().toString(36).substring(2,6).toUpperCase();
+  document.getElementById("succModal").classList.add("show");
+  setTimeout(()=>document.getElementById("succModal").classList.remove("show"),2000);
+  if(currentUser){
+    try{
+      await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(amount), totalDeposit: increment(amount) });
+      if(!currentData) currentData={};
+      currentData.balance = (Number(currentData.balance)||0)+amount;
+      currentData.totalDeposit = (Number(currentData.totalDeposit)||0)+amount;
+    }catch(e){}
+  }
+  localStorage.setItem("DIAMINES_BAL_"+getEmail(), String(getBal()));
+  localStorage.setItem("DIAMINES_TOTAL_DEPOSIT_"+getEmail(), String(getDep()));
+  let u=getUser(); if(u){ u.balance=getBal(); u.totalDeposit=getDep(); localStorage.setItem("DIAMINES_CURRENT", JSON.stringify(u)); }
+  render();
+ },1800);
+}
+
+// ===== COMMISSION 6 LEVELS - FIRST + UPGRADE =====
+async function payReferralCommission(childEmail, amountForCommission){
+  try{
+    if(amountForCommission<=0) return;
+    const percents = [0.10,0.05,0.03,0.02,0.01,0.005];
+    let current = childEmail.toLowerCase();
+    let chain = [];
+    for(let i=0;i<6;i++){
+      let q = query(collection(db, "referrals"), where("child","==",current));
+      let snap = await getDocs(q);
+      if(snap.empty) break;
+      let parent = String(snap.docs[0].data().parent||"").toLowerCase().trim();
+      if(!parent) break;
+      chain.push(parent);
+      current = parent;
+    }
+    for(let i=0;i<chain.length;i++){
+      let parentEmail = chain[i];
+      let comm = Math.floor(amountForCommission * percents[i]);
+      if(comm<=0) continue;
+      let uq = query(collection(db, "users"), where("email","==",parentEmail));
+      let usnap = await getDocs(uq);
+      if(!usnap.empty){
+        await updateDoc(usnap.docs[0].ref, {
+          balance: increment(comm),
+          refCommission: increment(comm),
+          totalRefEarnings: increment(comm),
+          totalRefCommission: increment(comm)
+        });
+      }
+    }
+  }catch(e){ console.log("commission error", e); }
+}
+
+window.activatePackage = async ()=>{
+ let email=getEmail();
+ let currPkg = getCurrentPkgObj();
+ let currPrice = currPkg? currPkg.price : 0;
+ let isUpgrade = currPkg? true : false;
+ let toPay = selectedPkg.price - currPrice;
+ if(toPay<=0){
+   if(currPkg && currPkg.id===selectedPkg.id){ alert("You already have "+selectedPkg.name); return; }
+   if(currPkg && selectedPkg.price < currPkg.price){ alert("Cannot downgrade!"); return; }
+   toPay = selectedPkg.price;
+ }
+ if(getBal() < toPay){alert(`You have ${currPkg?currPkg.name:''} KES ${currPrice}. Need KES ${toPay} more to upgrade to ${selectedPkg.name} (KES ${selectedPkg.price} total)`);return;}
+
+ // Deduct difference
+ if(currentUser){
+   try{
+     await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-toPay), package: selectedPkg.id, allowedJobs: selectedPkg.allowed, activated: true });
+     if(!currentData) currentData={};
+     currentData.balance-=toPay;
+     currentData.package=selectedPkg.id;
+   }catch(e){}
+ }
+
+ // COMMISSION: First activation = full price, Upgrade = difference only
+ if(isUpgrade){
+   await payReferralCommission(email, toPay);
+ }else{
+   if(!currentData ||!currentData.commissionPaid){
+     await payReferralCommission(email, selectedPkg.price);
+     try{ await updateDoc(doc(db, "users", currentUser.uid), {commissionPaid:true}); if(currentData) currentData.commissionPaid=true; }catch(e){}
+   }
+ }
+
+ localStorage.setItem("DIAMINES_BAL_"+email, String(getBal()));
+ localStorage.setItem("DIAMINES_PACKAGE_"+email, selectedPkg.id);
+ localStorage.setItem("DIAMINES_PACKAGE", selectedPkg.id);
+ localStorage.setItem("DIAMINES_ALLOWED_JOBS_"+email, JSON.stringify(selectedPkg.allowed));
+ localStorage.setItem("DIAMINES_JOBS", JSON.stringify(selectedPkg.allowed));
+ localStorage.setItem("DIAMINES_DAILY_LIMIT_"+email, String(selectedPkg.daily));
+ let u=getUser(); if(u){ u.balance=getBal(); u.package=selectedPkg.id; u.allowedJobs=selectedPkg.allowed; localStorage.setItem("DIAMINES_CURRENT", JSON.stringify(u)); }
+
+ document.getElementById("succTitle").innerText=`${selectedPkg.animal} ${selectedPkg.name} Activated!`;
+ document.getElementById("succMsg").innerHTML=isUpgrade?`Upgraded! Paid KES ${toPay}<br>Uplines earned ${toPay} commission`:`Paid KES ${toPay}<br>${selectedPkg.allowed.length} jobs unlocked + uplines paid`;
+ document.getElementById("succCode").innerText=selectedPkg.name;
+ document.getElementById("succModal").classList.add("show");
+ render();
+ setTimeout(()=>location.href="dashboard.html",1500);
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIAMINES - MASTER + SUPER ADMIN</title>
+<script type="module" src="secure.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#fff;font-family:Arial}
+.top{background:#1e293b;padding:12px;text-align:center;border-bottom:3px solid #3b82f6;position:sticky;top:0;z-index:99}
+.top h2{color:#3b82f6;font-size:18px}
+.menu{display:flex;flex-wrap:wrap;gap:5px;padding:10px;justify-content:center;background:#0f172a}
+.menu button{padding:9px 11px;border:none;border-radius:7px;font-weight:bold;cursor:pointer;color:#fff;font-size:12px}
+.b1{background:#8b5cf6} .b2{background:#f59e0b;color:#000} .b3{background:#22c55e;color:#000} .b-super{background:#ef4444}
+.active{outline:2px solid #fff}
+.frame{padding:10px} iframe{width:100%;height:88vh;border:none;border-radius:10px;background:#fff}
+.card{background:#1e293b;padding:12px;border-radius:10px;margin:10px 0;border:1px solid #334155}
+input,select{padding:9px;border-radius:6px;border:none;margin:4px;width:170px;background:#334155;color:#fff}
+button.action{padding:9px 12px;border:none;border-radius:6px;background:#3b82f6;color:#fff;cursor:pointer;margin:3px;font-weight:bold}
+.green{background:#22c55e;color:#000} .orange{background:#f59e0b;color:#000} .red{background:#ef4444}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+th,td{border:1px solid #334155;padding:5px;text-align:left} th{background:#334155}
+.search{width:95%;padding:10px}
+</style>
+</head><body>
+<div class="top"><h2>🔒 DIAMINES - MASTER + SUPER ADMIN - ONE PAGE</h2></div>
+
+<div class="menu">
+<button class="b-super active" onclick="show('super',this)">🔥 SUPER ADMIN</button>
+<button class="b1" onclick="show('overview',this)">📊 ALL LINKS</button>
+<button class="b1" onclick="show('admin',this)">admin.html</button>
+<button class="b2" onclick="show('withdraw',this)">adminwithdraw</button>
+<button class="b1" onclick="show('t1',this)">admintranscription</button>
+<button class="b1" onclick="show('t2',this)">adminediting</button>
+<button class="b1" onclick="show('t3',this)">adminwriting</button>
+<button class="b1" onclick="show('t4',this)">admintranslation</button>
+<button class="b3" onclick="show('j1',this)">editing-jobs</button>
+<button class="b3" onclick="show('j2',this)">translation-jobs</button>
+<button class="b3" onclick="show('j3',this)">transcription-jobs</button>
+<button class="b3" onclick="show('j4',this)">writing-jobs</button>
+</div>
+
+<!-- SUPER ADMIN TAB - YOUR REQUEST -->
+<div id="super" class="frame">
+<div class="card">
+<h3>🔍 Search User</h3>
+<input id="searchEmail" class="search" placeholder="type email e.g. john@gmail.com" oninput="searchUser()">
+<div id="userResult"></div>
+</div>
+
+<div class="card">
+<h3>👑 Change Package Lion -> Tiger</h3>
+<input id="pkgEmail" placeholder="user email">
+<select id="pkgSelect">
+<option value="lion">🦁 LION - 1000</option>
+<option value="tiger">🐯 TIGER - 2000</option>
+<option value="cheetah">🐆 CHEETAH - 5000</option>
+<option value="eagle">🦅 EAGLE - 10000</option>
+<option value="free">FREE</option>
+</select>
+<button class="green action" onclick="changePackage()">CHANGE PACKAGE</button>
+<span id="pkgStatus"></span>
+</div>
+
+<div class="card">
+<h3>💰 Edit Balances (Balance / Deposit / Account Balance)</h3>
+<input id="balEmail" placeholder="user email">
+<input id="balAmount" type="number" placeholder="Balance e.g. 1000000">
+<input id="depAmount" type="number" placeholder="Deposit">
+<input id="accBal" type="number" placeholder="Account Balance">
+<button class="green action" onclick="editBalances()">UPDATE ALL</button>
+<span id="balStatus"></span>
+</div>
+
+<div class="card">
+<h3>💸 Edit Withdrawals (Set to 1M)</h3>
+<button class="action" onclick="loadWithdrawals()">LOAD WITHDRAWALS</button>
+<input id="withSearch" placeholder="filter email" oninput="loadWithdrawals()">
+<div id="withList"></div>
+</div>
+
+<div class="card">
+<h3>📥 Deposits</h3>
+<button class="action" onclick="loadDeposits()">LOAD DEPOSITS</button>
+<div id="depList"></div>
+</div>
+
+<div class="card">
+<h3>👥 All Users Quick Edit</h3>
+<button class="action" onclick="loadUsers()">LOAD USERS</button>
+<div id="usersList"></div>
+</div>
+</div>
+
+<!-- OVERVIEW WITH LINKS -->
+<div id="overview" class="frame" style="display:none">
+<div class="card"><h3>📊 ALL YOUR 10 FILES - Click to open</h3>
+<p style="margin:10px 0"><a href="admin.html" target="_blank" style="color:#8b5cf6">admin.html</a> | <a href="adminwithdraw.html" target="_blank" style="color:#f59e0b">adminwithdraw.html</a> | <a href="admintranscription.html" target="_blank" style="color:#22c55e">admintranscription.html</a> | <a href="adminediting.html" target="_blank" style="color:#22c55e">adminediting.html</a> | <a href="adminwriting.html" target="_blank" style="color:#22c55e">adminwriting.html</a> | <a href="admintranslation.html" target="_blank" style="color:#22c55e">admintranslation.html</a></p>
+</div>
+</div>
+
+<div id="admin" class="frame" style="display:none"><iframe src="admin.html"></iframe></div>
+<div id="withdraw" class="frame" style="display:none"><iframe src="adminwithdraw.html"></iframe></div>
+<div id="t1" class="frame" style="display:none"><iframe src="admintranscription.html"></iframe></div>
+<div id="t2" class="frame" style="display:none"><iframe src="adminediting.html"></iframe></div>
+<div id="t3" class="frame" style="display:none"><iframe src="adminwriting.html"></iframe></div>
+<div id="t4" class="frame" style="display:none"><iframe src="admintranslation.html"></iframe></div>
+<div id="j1" class="frame" style="display:none"><iframe src="editing-jobs.html"></iframe></div>
+<div id="j2" class="frame" style="display:none"><iframe src="translation-jobs.html"></iframe></div>
+<div id="j3" class="frame" style="display:none"><iframe src="transcription-jobs.html"></iframe></div>
+<div id="j4" class="frame" style="display:none"><iframe src="writing-jobs.html"></iframe></div>
+
+<script type="module">
+import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const db = getFirestore();
+
+window.show = (id,btn)=>{
+ document.querySelectorAll('.frame').forEach(e=>e.style.display='none');
+ document.getElementById(id).style.display='block';
+ document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
+ btn.classList.add('active');
+}
+
+async function findUserByEmail(email){
+ email=email.toLowerCase().trim();
+ const snap = await getDocs(collection(db,"users"));
+ let found=null;
+ snap.forEach(d=>{ if((d.data().email||"").toLowerCase()===email) found={id:d.id, ...d.data()}; });
+ return found;
+}
+
+window.searchUser = async()=>{
+ const email=document.getElementById('searchEmail').value.trim();
+ if(email.length<3){document.getElementById('userResult').innerHTML="";return;}
+ const u = await findUserByEmail(email);
+ if(!u){document.getElementById('userResult').innerHTML="❌ Not found";return;}
+ document.getElementById('userResult').innerHTML=`<table><tr><th>Email</th><td>${u.email}</td></tr><tr><th>Package</th><td>${u.package||u.membership||'N/A'}</td></tr><tr><th>Balance</th><td>${u.balance||0}</td></tr><tr><th>Deposit</th><td>${u.deposit||0}</td></tr><tr><th>Acc Bal</th><td>${u.accountBalance||u.balance||0}</td></tr></table><button class="action" onclick="document.getElementById('pkgEmail').value='${u.email}';document.getElementById('balEmail').value='${u.email}'">USE THIS USER</button>`;
+}
+
+window.changePackage = async()=>{
+ const email=document.getElementById('pkgEmail').value.trim();
+ const pkg=document.getElementById('pkgSelect').value;
+ const status=document.getElementById('pkgStatus');
+ if(!email){status.innerText=" Enter email";return;}
+ status.innerText=" Updating...";
+ try{
+  const u=await findUserByEmail(email);
+  if(!u){status.innerText=" ❌ Not found";return;}
+  await updateDoc(doc(db,"users",u.id),{package:pkg, membership:pkg, plan:pkg, packageType:pkg});
+  status.innerText=" ✅ Changed to "+pkg.toUpperCase();
+ }catch(e){status.innerText=" ❌ "+e.message;}
+}
+
+window.editBalances = async()=>{
+ const email=document.getElementById('balEmail').value.trim();
+ const bal=document.getElementById('balAmount').value;
+ const dep=document.getElementById('depAmount').value;
+ const acc=document.getElementById('accBal').value;
+ const status=document.getElementById('balStatus');
+ if(!email){status.innerText=" Enter email";return;}
+ status.innerText=" Updating...";
+ try{
+  const u=await findUserByEmail(email);
+  if(!u){status.innerText=" ❌ Not found";return;}
+  let data={};
+  if(bal!=="") data.balance=parseFloat(bal);
+  if(dep!=="") data.deposit=parseFloat(dep);
+  if(acc!=="") {data.accountBalance=parseFloat(acc); data.balance=parseFloat(acc);}
+  if(bal!=="" && acc==="") data.accountBalance=parseFloat(bal);
+  await updateDoc(doc(db,"users",u.id),data);
+  status.innerText=" ✅ Updated: "+JSON.stringify(data);
+ }catch(e){status.innerText=" ❌ "+e.message;}
+}
+
+window.loadUsers = async()=>{
+ const list=document.getElementById('usersList');
+ list.innerHTML="Loading...";
+ const snap=await getDocs(collection(db,"users"));
+ let html="<table><tr><th>Email</th><th>Package</th><th>Balance</th><th>Action</th></tr>";
+ snap.forEach(d=>{
+  const u=d.data();
+  html+=`<tr><td>${u.email||''}</td><td>${u.package||u.membership||''}</td><td>${u.balance||0}</td><td><button class="action" onclick="quickSet('${u.email}')">EDIT</button></td></tr>`;
+ });
+ html+="</table>"; list.innerHTML=html;
+}
+window.quickSet = (email)=>{
+ document.getElementById('pkgEmail').value=email;
+ document.getElementById('balEmail').value=email;
+ document.getElementById('searchEmail').value=email;
+ searchUser(); window.scrollTo(0,0);
+}
+
+window.loadWithdrawals = async()=>{
+ const list=document.getElementById('withList');
+ const filter=document.getElementById('withSearch').value.toLowerCase();
+ list.innerHTML="Loading...";
+ const snap=await getDocs(collection(db,"withdrawals"));
+ let html="<table><tr><th>Email</th><th>Amount</th><th>Status</th><th>Edit</th><th>Action</th></tr>";
+ snap.forEach(d=>{
+  const w=d.data();
+  if(filter && !(w.email||"").toLowerCase().includes(filter)) return;
+  html+=`<tr><td>${w.email||''}</td><td>${w.amount||0}</td><td>${w.status||'pending'}</td><td><input id="w_${d.id}" type="number" value="${w.amount||0}" style="width:90px"></td><td><button class="orange action" onclick="editWithdrawal('${d.id}')">SET 1M</button><button class="green action" onclick="updateWithAmount('${d.id}')">UPDATE</button><button class="green action" onclick="updateWithStatus('${d.id}','approved')">APPROVE</button><button class="red action" onclick="updateWithStatus('${d.id}','rejected')">REJECT</button></td></tr>`;
+ });
+ html+="</table>"; list.innerHTML=html;
+}
+window.editWithdrawal = async(id)=>{
+ try{ await updateDoc(doc(db,"withdrawals",id),{amount:1000000}); alert("✅ 1,000,000 set"); loadWithdrawals(); }catch(e){alert("❌ "+e.message);}
+}
+window.updateWithAmount = async(id)=>{
+ const val=document.getElementById('w_'+id).value;
+ try{ await updateDoc(doc(db,"withdrawals",id),{amount:parseFloat(val)}); alert("✅ Updated to "+val); loadWithdrawals(); }catch(e){alert("❌ "+e.message);}
+}
+window.updateWithStatus = async(id,status)=>{
+ try{ await updateDoc(doc(db,"withdrawals",id),{status}); alert("✅ "+status); loadWithdrawals(); }catch(e){alert("❌ "+e.message);}
+}
+
+window.loadDeposits = async()=>{
+ const list=document.getElementById('depList');
+ list.innerHTML="Loading...";
+ const snap=await getDocs(collection(db,"deposits"));
+ let html="<table><tr><th>Email</th><th>Amount</th><th>Status</th><th>Edit</th></tr>";
+ snap.forEach(d=>{
+  const dep=d.data();
+  html+=`<tr><td>${dep.email||''}</td><td>${dep.amount||0}</td><td>${dep.status||'pending'}</td><td><input id="d_${d.id}" type="number" value="${dep.amount||0}" style="width:90px"><button class="green action" onclick="updateDep('${d.id}')">UPDATE</button></td></tr>`;
+ });
+ html+="</table>"; list.innerHTML=html;
+}
+window.updateDep = async(id)=>{
+ const val=document.getElementById('d_'+id).value;
+ try{ await updateDoc(doc(db,"deposits",id),{amount:parseFloat(val)}); alert("✅ Deposit updated"); loadDeposits(); }catch(e){alert("❌ "+e.message);}
+}
+</script>
+</body></html>
