@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIAMINES MASTER PANEL - SECURE</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#fff;font-family:Arial}
+.header{background:#1e293b;padding:15px;text-align:center;border-bottom:3px solid #3b82f6}
+.header h1{color:#3b82f6;font-size:19px}
+.menu{display:flex;flex-wrap:wrap;gap:6px;padding:10px;justify-content:center;background:#0f172a;border-bottom:1px solid #334155}
+.menu button{padding:9px 13px;border:none;border-radius:7px;font-weight:bold;cursor:pointer;color:#fff;font-size:12px}
+.b-super{background:#ef4444} .b-admin{background:#8b5cf6} .b-with{background:#f59e0b;color:#000} .b-jobs{background:#22c55e;color:#000} .b-set{background:#06b6d4;color:#000}
+.active{outline:3px solid #fff}
+.container{padding:10px} iframe{width:100%;height:85vh;border:none;border-radius:12px;background:#fff}
+.card{background:#1e293b;padding:15px;border-radius:12px;margin-bottom:12px;border:1px solid #334155}
+input,select{padding:10px;border-radius:7px;border:1px solid #475569;background:#334155;color:#fff;margin:4px;width:200px}
+.btn{padding:10px 14px;border:none;border-radius:7px;font-weight:bold;cursor:pointer;margin:3px}
+.btn-blue{background:#3b82f6;color:#fff} .btn-green{background:#22c55e;color:#000}
+#loginScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:#0f172a;display:flex;justify-content:center;align-items:center;z-index:9999}
+.loginBox{background:#1e293b;padding:30px;border-radius:15px;border:2px solid #3b82f6;text-align:center;width:90%;max-width:350px}
+</style>
+</head><body>
+
+<div id="loginScreen">
+<div class="loginBox">
+<h2>🔒 MASTER ADMIN LOGIN</h2>
+<p style="font-size:12px;color:#94a3b8;margin:10px 0">Enter Password to Access</p>
+<input id="loginPass" type="password" placeholder="Enter Password" style="width:90%">
+<br><br>
+<button class="btn btn-blue" onclick="doLogin()" style="width:90%;padding:12px">LOGIN</button>
+<p id="loginError" style="color:#ef4444;font-size:13px;margin-top:10px"></p>
+<p style="font-size:11px;color:#64748b;margin-top:15px">Default Password:</p>
+<p style="font-size:14px;color:#f59e0b;font-weight:bold">CEO2026</p>
+</div>
+</div>
+
+<div class="header"><h1>🔒 DIAMINES - MASTER PANEL</h1></div>
+
+<div class="menu">
+<button id="btn-super" class="b-super active" onclick="openPanel('super')">🔥 SUPER ADMIN</button>
+<button id="btn-overview" class="b-admin" onclick="openPanel('overview')">📊 OVERVIEW</button>
+<button id="btn-admin" class="b-admin" onclick="openPanel('admin')">👑 admin.html</button>
+<button id="btn-withdraw" class="b-with" onclick="openPanel('withdraw')">💸 adminwithdraw</button>
+<button id="btn-t1" class="b-admin" onclick="openPanel('t1')">🎧 transcription</button>
+<button id="btn-t2" class="b-admin" onclick="openPanel('t2')">✏️ editing</button>
+<button id="btn-t3" class="b-admin" onclick="openPanel('t3')">📝 writing</button>
+<button id="btn-t4" class="b-admin" onclick="openPanel('t4')">🌐 translation</button>
+<button id="btn-j1" class="b-jobs" onclick="openPanel('j1')">editing-jobs</button>
+<button id="btn-j2" class="b-jobs" onclick="openPanel('j2')">translation-jobs</button>
+<button id="btn-j3" class="b-jobs" onclick="openPanel('j3')">transcription-jobs</button>
+<button id="btn-j4" class="b-jobs" onclick="openPanel('j4')">writing-jobs</button>
+<button id="btn-settings" class="b-set" onclick="openPanel('settings')">⚙️ SETTINGS</button>
+<button class="b-super" onclick="doLogout()">🚪 LOGOUT</button>
+</div>
+
+<div class="container">
+<div id="super" class="panel"><div class="card"><h3>🔍 Search</h3><input id="searchEmail" placeholder="email" oninput="searchUser()" style="width:90%"><div id="userResult"></div></div><div class="card"><h3>👑 Change Package</h3><input id="pkgEmail" placeholder="user email"><select id="pkgSelect"><option value="lion">LION</option><option value="tiger">TIGER</option><option value="cheetah">CHEETAH</option><option value="eagle">EAGLE</option></select><button class="btn btn-green" onclick="changePackage()">CHANGE</button><span id="pkgStatus"></span></div><div class="card"><h3>💰 Edit Balances</h3><input id="balEmail" placeholder="email"><input id="balAmount" type="number" placeholder="Balance"><input id="accBal" type="number" placeholder="Account"><button class="btn btn-green" onclick="editBalances()">UPDATE</button><span id="balStatus"></span></div><div class="card"><h3>💸 Withdrawals</h3><button class="btn btn-blue" onclick="loadWithdrawals()">LOAD</button><div id="withList"></div></div></div>
+<div id="overview" class="panel" style="display:none"><div class="card"><h3>Overview</h3><p>All files linked via buttons above</p></div></div>
+<div id="admin" class="panel" style="display:none"><iframe src="admin.html"></iframe></div>
+<div id="withdraw" class="panel" style="display:none"><iframe src="adminwithdraw.html"></iframe></div>
+<div id="t1" class="panel" style="display:none"><iframe src="admintranscription.html"></iframe></div>
+<div id="t2" class="panel" style="display:none"><iframe src="adminediting.html"></iframe></div>
+<div id="t3" class="panel" style="display:none"><iframe src="adminwriting.html"></iframe></div>
+<div id="t4" class="panel" style="display:none"><iframe src="admintranslation.html"></iframe></div>
+<div id="j1" class="panel" style="display:none"><iframe src="editing-jobs.html"></iframe></div>
+<div id="j2" class="panel" style="display:none"><iframe src="translation-jobs.html"></iframe></div>
+<div id="j3" class="panel" style="display:none"><iframe src="transcription-jobs.html"></iframe></div>
+<div id="j4" class="panel" style="display:none"><iframe src="writing-jobs.html"></iframe></div>
+<div id="settings" class="panel" style="display:none"><div class="card"><h3>⚙️ Change Password</h3><input id="oldPass" type="password" placeholder="Current Password"><br><input id="newPass" type="password" placeholder="New Password"><br><input id="confirmPass" type="password" placeholder="Confirm New"><br><button class="btn btn-green" onclick="changePassword()">SAVE NEW PASSWORD</button><span id="passStatus"></span><br><br><button class="btn btn-blue" onclick="resetPass()">RESET TO CEO2026</button></div></div>
+</div>
+
+<!-- LOGIN SCRIPT - SIMPLE - WILL WORK -->
+<script>
+const DEFAULT = "CEO2026";
+function getPass(){ return localStorage.getItem("masterAdminPass") || DEFAULT; }
+function doLogin(){
+  var input = document.getElementById('loginPass').value.trim();
+  var correct = getPass();
+  if(input === correct){
+    localStorage.setItem("masterLoggedIn","true");
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('loginError').innerText="";
+  } else {
+    document.getElementById('loginError').innerText="❌ Wrong! Correct is: "+correct+" (Default CEO2026)";
+  }
+}
+function doLogout(){ localStorage.removeItem("masterLoggedIn"); location.reload(); }
+if(localStorage.getItem("masterLoggedIn")==="true"){ document.getElementById('loginScreen').style.display='none'; }
+document.getElementById('loginPass').addEventListener('keyup', function(e){ if(e.key==="Enter") doLogin(); });
+
+function openPanel(id){
+ document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
+ document.getElementById(id).style.display='block';
+ document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
+ var btn=document.getElementById('btn-'+id); if(btn) btn.classList.add('active');
+}
+function changePassword(){
+ var oldP=document.getElementById('oldPass').value;
+ var newP=document.getElementById('newPass').value;
+ var conf=document.getElementById('confirmPass').value;
+ var status=document.getElementById('passStatus');
+ if(oldP !== getPass()){ status.innerText=" ❌ Wrong current"; return; }
+ if(newP.length < 3){ status.innerText=" ❌ Too short"; return; }
+ if(newP !== conf){ status.innerText=" ❌ Not matching"; return; }
+ localStorage.setItem("masterAdminPass", newP);
+ status.innerText=" ✅ Changed to: "+newP;
+ document.getElementById('oldPass').value=""; document.getElementById('newPass').value=""; document.getElementById('confirmPass').value="";
+}
+function resetPass(){ localStorage.setItem("masterAdminPass","CEO2026"); alert("Reset to CEO2026"); }
+</script>
+
+<!-- FIREBASE FUNCTIONS - SEPARATE -->
+<script type="module">
+import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+const firebaseConfig = { apiKey: "AIzaSyC...", authDomain: "YOUR_PROJECT.firebaseapp.com", projectId: "YOUR_PROJECT_ID" };
+// If secure.js already initializes, this will be ignored - we try to get existing
+let db;
+try{ db = getFirestore(); }catch(e){ /* will try again after secure.js */ setTimeout(()=>{ try{ db=getFirestore(); }catch(err){} },1000); }
+
+async function findUser(email){
+ email=email.toLowerCase().trim();
+ const snap=await getDocs(collection(db,"users"));
+ let f=null; snap.forEach(d=>{ if((d.data().email||"").toLowerCase()===email) f={id:d.id,...d.data()}; });
+ return f;
+}
+window.searchUser=async()=>{
+ if(!db) { try{ db=getFirestore(); }catch(e){ document.getElementById('userResult').innerHTML="Wait for Firebase..."; return; } }
+ const e=document.getElementById('searchEmail').value.trim();
+ if(e.length<3) return;
+ const u=await findUser(e);
+ document.getElementById('userResult').innerHTML= u ? `<table><tr><th>Email</th><td>${u.email}</td></tr><tr><th>Package</th><td>${u.package||'-'}</td></tr><tr><th>Bal</th><td>${u.balance||0}</td></tr></table>` : "❌ Not found";
+}
+window.changePackage=async()=>{
+ const email=document.getElementById('pkgEmail').value.trim(); const pkg=document.getElementById('pkgSelect').value;
+ const u=await findUser(email); if(!u){ document.getElementById('pkgStatus').innerText=" Not found"; return; }
+ await updateDoc(doc(db,"users",u.id),{package:pkg,membership:pkg,plan:pkg});
+ document.getElementById('pkgStatus').innerText=" ✅ "+pkg;
+}
+window.editBalances=async()=>{
+ const email=document.getElementById('balEmail').value.trim(); const bal=document.getElementById('balAmount').value; const acc=document.getElementById('accBal').value;
+ const u=await findUser(email); if(!u) return;
+ let d={}; if(bal!=="") d.balance=parseFloat(bal); if(acc!=="") {d.accountBalance=parseFloat(acc); d.balance=parseFloat(acc);}
+ await updateDoc(doc(db,"users",u.id),d);
+ document.getElementById('balStatus').innerText=" ✅ Updated";
+}
+window.loadWithdrawals=async()=>{
+ const list=document.getElementById('withList'); list.innerHTML="Loading...";
+ const snap=await getDocs(collection(db,"withdrawals"));
+ let h="<table><tr><th>Email</th><th>Amt</th><th>Act</th></tr>";
+ snap.forEach(d=>{ const w=d.data(); h+=`<tr><td>${w.email||''}</td><td>${w.amount||0}</td><td><button class="btn btn-green" onclick="set1M('${d.id}')">Set 1M</button></td></tr>`; });
+ h+="</table>"; list.innerHTML=h;
+}
+window.set1M=async(id)=>{ await updateDoc(doc(db,"withdrawals",id),{amount:1000000}); alert("Set 1M"); loadWithdrawals(); }
+</script>
+
+<script type="module" src="secure.js"></script>
+</body></html>
