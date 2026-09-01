@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DIAMINES - UPLINE CHANGE + BAN + DELETE</title>
+<style>*{box-sizing:border-box;font-family:system-ui;margin:0;padding:0}body{background:#070711;color:#fff;padding:12px}.top{background:#0f0f23;border-bottom:2px solid #ff0055;padding:12px;display:flex;justify-content:space-between;align-items:center;border-radius:12px;margin-bottom:12px}.card{background:#15152d;border:1px solid #222;border-radius:12px;padding:14px;margin-bottom:12px}.input{width:100%;padding:11px;background:#1e1e3a;border:1px solid #333;border-radius:8px;color:#fff;margin-bottom:8px}.btn{padding:8px 10px;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-size:10px;margin:2px}.btn-p{background:linear-gradient(135deg,#ff0055,#ff4d8d);color:#fff;width:100%}.btn-g{background:#00e676;color:#000}.btn-r{background:#ff1744;color:#fff}.btn-y{background:#ffb700;color:#000}.btn-b{background:#2962ff;color:#fff}.btn-c{background:#00b8d4;color:#000}.btn-d{background:#222;color:#888}table{width:100%;border-collapse:collapse}th{font-size:7px;color:#666;text-align:left;padding:6px;border-bottom:1px solid #222}td{padding:7px;font-size:11px;border-bottom:1px solid #1a1a2e;word-break:break-all}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.popupOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;z-index:9999}.popupOverlay.show{display:flex}.popupBox{background:#111126;border:2px solid #ffb700;border-radius:16px;padding:24px;text-align:center;max-width:360px;width:90%}.popupBox.ban{border-color:#ffb700}.popupBox.del{border-color:#ff1744}.popupBox.up{border-color:#00b8d4}.popupIcon{font-size:42px;margin-bottom:8px}
+</style>
+<script type="module" src="secure.js"></script>
+</head><body>
+<div class="top"><b style="color:#ff4d8d">👑 DIAMINES - UPLINE + BAN + DELETE - LIVE</b><div><span id="count" style="background:#ff0055;padding:4px 12px;border-radius:99px;font-size:11px">0 users</span> <span id="liveStatus" style="background:#00e676;color:#000;padding:4px 8px;border-radius:99px;font-size:9px">LIVE FIREBASE</span></div></div>
+
+<div class="grid">
+<div class="card" style="border-color:#00e676"><h3 style="color:#00e676;margin-bottom:8px">➕ Register New User</h3><input id="username" class="input" placeholder="Username"><input id="email" class="input" placeholder="Email"><input id="password" class="input" placeholder="Password"><input id="uplineInput" class="input" placeholder="Upline email (optional, default Official)"><button class="btn btn-p" onclick="registerUser()">CREATE ACCOUNT</button><div id="regMsg" style="font-size:11px;margin-top:8px"></div>
+<div style="margin-top:12px;padding:10px;background:#000;border-radius:8px;border:1px solid #2962ff"><small style="font-size:10px;color:#448aff;font-weight:800">🔐 TEST LOGIN - BAN POPUP:</small><br><input id="loginUser" class="input" placeholder="Email to test login" style="margin-top:6px"><button class="btn btn-b" style="width:100%" onclick="testLogin()">LOGIN AS USER</button><div id="loginMsg" style="font-size:11px;margin-top:6px"></div></div>
+</div>
+
+<div class="card" style="border-color:#00b8d4"><h3 style="color:#00b8d4;margin-bottom:8px">🔗 Upline Power + Stats</h3><p style="font-size:12px">Total: <b id="statTotal">0</b> | Banned: <b id="statBanned">0</b> | Deleted: <b id="statDeleted">0</b></p><div style="margin-top:8px"><input id="search" class="input" placeholder="Search email or upline..." oninput="render()"><button class="btn btn-d" onclick="loadFirebaseUsers()" style="width:100%">🔄 Refresh LIVE from Firebase</button></div><div id="blacklist" style="margin-top:8px"></div><div id="lastLog" style="margin-top:8px;font-size:9px;color:#00e676;background:#000;padding:6px;border-radius:6px;display:none"></div></div>
+</div>
+
+<div class="card" style="border-color:#ff0055"><h3>👥 All Users - Change Uplines + Ban + Delete - LIVE CONTROL</h3><div style="overflow-x:auto"><table><thead><tr><th>USER</th><th>EMAIL</th><th>UPLINE - CHANGE POWER</th><th>TEAM</th><th>BAL</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="body"></tbody></table></div></div>
+
+<div id="banPopup" class="popupOverlay" onclick="if(event.target===this) closePopup()"><div class="popupBox ban"><div class="popupIcon">⚠️</div><h2 style="color:#ffb700;margin-bottom:8px">Account On Hold</h2><p style="color:#fff;font-weight:700;font-size:14px">Account temporarily on hold, contact admin for fixation</p><p id="banEmailShow" style="color:#666;font-size:10px;margin-top:8px"></p><button class="btn btn-y" style="margin-top:14px;padding:12px 24px" onclick="closePopup()">OK</button></div></div>
+<div id="delPopup" class="popupOverlay" onclick="if(event.target===this) closePopup()"><div class="popupBox del"><div class="popupIcon">⛔</div><h2 style="color:#ff1744">Account Deleted</h2><p style="color:#fff;font-weight:700;font-size:13px">Permanently deleted - cannot re-register</p><p id="delEmailShow" style="color:#666;font-size:10px;margin-top:8px"></p><button class="btn btn-r" style="margin-top:14px" onclick="closePopup()">OK</button></div></div>
+
+<div id="uplineModal" class="popupOverlay" onclick="if(event.target===this) closePopup()"><div class="popupBox up"><div class="popupIcon">🔗</div><h2 style="color:#00b8d4;margin-bottom:8px">Change Upline</h2><p id="uplineUserShow" style="color:#fff;font-size:12px;margin-bottom:8px"></p><p style="font-size:9px;color:#888;margin-bottom:6px">Current upline: <b id="currentUplineShow" style="color:#ffb700"></b></p><input id="newUplineInput" class="input" placeholder="New upline email or Official"><select id="uplineSelect" class="input"><option value="">-- Or select existing user --</option></select><div style="display:flex;gap:6px"><button class="btn btn-c" style="flex:1" onclick="saveUplineChange()">Save Upline</button><button class="btn btn-d" style="flex:1" onclick="closePopup()">Cancel</button></div><div id="teamPreview" style="font-size:9px;color:#666;margin-top:8px;text-align:left"></div></div></div>
+
+<script type="module">
+import { getFirestore, collection, getDocs, doc, updateDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const db = getFirestore();
+
+let SUPER='jkaruri131@gmail.com';
+let editingUplineEmail='';
+let FIREBASE_USERS = []; // REAL USERS FROM FIREBASE
+
+// LOAD REAL USERS FROM FIREBASE - THIS IS THE FIX
+window.loadFirebaseUsers = async()=>{
+ document.getElementById('body').innerHTML='<tr><td colspan=7 style="text-align:center;padding:20px;color:#00b8d4">🔄 Loading REAL users from Firebase...</td></tr>';
+ try{
+  const snap = await getDocs(collection(db, "users"));
+  FIREBASE_USERS = [];
+  snap.forEach(d=>{
+   const data = d.data();
+   FIREBASE_USERS.push({
+     id: d.id,
+     firestoreId: d.id,
+     username: data.username || data.name || data.email?.split('@')[0] || 'User',
+     email: (data.email || '').toLowerCase(),
+     password: data.password || '',
+     package: data.package || data.membership || 'lion',
+     balance: data.balance || data.accountBalance || 0,
+     upline: data.upline || data.referrer || localStorage.getItem('DIAMINES_UPLINE_'+(data.email||'').toLowerCase()) || 'Official',
+     banned: data.banned || data.isBanned || false,
+     joined: data.createdAt || data.joined || new Date().toISOString(),
+    ...data
+   });
+  });
+  console.log("Loaded", FIREBASE_USERS.length, "real users");
+  document.getElementById('liveStatus').innerText = FIREBASE_USERS.length + ' LIVE';
+  render();
+ }catch(e){
+  console.error(e);
+  document.getElementById('body').innerHTML='<tr><td colspan=7 style="color:#ff1744">❌ Error loading: '+e.message+' - Check Firebase rules</td></tr>';
+ }
+}
+
+function getUsers(){
+ // MERGE FIREBASE + LOCAL
+ let del=JSON.parse(localStorage.getItem('DIAMINES_DELETED_BLACKLIST')||'[]').map(x=>x.toLowerCase());
+ let filtered = FIREBASE_USERS.filter(u=>!del.includes(u.email.toLowerCase()));
+ return filtered;
+}
+
+window.registerUser=async()=>{
+ let u=document.getElementById('username').value.trim();
+ let e=document.getElementById('email').value.trim().toLowerCase();
+ let p=document.getElementById('password').value;
+ let up=document.getElementById('uplineInput').value.trim().toLowerCase()||'official';
+ if(!u||!e||!p){ document.getElementById('regMsg').innerHTML='<span style="color:#ff1744">Fill all</span>'; return; }
+ let del=JSON.parse(localStorage.getItem('DIAMINES_DELETED_BLACKLIST')||'[]').map(x=>x.toLowerCase());
+ if(del.includes(e)){ document.getElementById('regMsg').innerHTML='<span style="color:#ff1744">⛔ Deleted - cannot re-register</span>'; showDelPopup(e); return; }
+ try{
+  await setDoc(doc(db, "users", e), { username:u, email:e, password:p, upline:up, balance:0, package:'lion', banned:false, createdAt: new Date().toISOString() }, { merge:true });
+  localStorage.setItem('DIAMINES_UPLINE_'+e, up);
+  document.getElementById('regMsg').innerHTML='<span style="color:#00e676">✅ '+e+' created in FIREBASE with upline '+up+'</span>';
+  document.getElementById('username').value=''; document.getElementById('email').value=''; document.getElementById('password').value=''; document.getElementById('uplineInput').value='';
+  loadFirebaseUsers();
+ }catch(err){ document.getElementById('regMsg').innerHTML='<span style="color:#ff1744">❌ '+err.message+'</span>'; }
+}
+
+window.testLogin=()=>{
+ let e=document.getElementById('loginUser').value.trim().toLowerCase();
+ if(!e) return;
+ let del=JSON.parse(localStorage.getItem('DIAMINES_DELETED_BLACKLIST')||'[]').map(x=>x.toLowerCase());
+ let ban=JSON.parse(localStorage.getItem('DIAMINES_BANNED')||'[]').map(x=>x.toLowerCase());
+ let all=getUsers();
+ let user=all.find(x=>x.email.toLowerCase()===e);
+ if(del.includes(e)){ showDelPopup(e); return; }
+ if(ban.includes(e) || (user && user.banned)){ showBanPopup(e); return; }
+ if(!user){ document.getElementById('loginMsg').innerHTML='<span style="color:#ff1744">Not found in Firebase</span>'; return; }
+ document.getElementById('loginMsg').innerHTML='<span style="color:#00e676">✅ Login OK - Upline: '+(user.upline||'Official')+' | Bal: '+user.balance+'</span>';
+}
+
+window.showBanPopup=(email)=>{ document.getElementById('banEmailShow').innerText=email; document.getElementById('banPopup').classList.add('show'); }
+window.showDelPopup=(email)=>{ document.getElementById('delEmailShow').innerText=email; document.getElementById('delPopup').classList.add('show'); }
+window.closePopup=()=>{ document.getElementById('banPopup').classList.remove('show'); document.getElementById('delPopup').classList.remove('show'); document.getElementById('uplineModal').classList.remove('show'); }
+
+window.openUplineModal=(email)=>{
+ editingUplineEmail=email.toLowerCase();
+ let all=getUsers();
+ let user=all.find(x=>x.email.toLowerCase()===email.toLowerCase());
+ let currentUp=localStorage.getItem('DIAMINES_UPLINE_'+email.toLowerCase())||user?.upline||'Official';
+ document.getElementById('uplineUserShow').innerText='Change upline for: '+user.username+' ('+user.email+')';
+ document.getElementById('currentUplineShow').innerText=currentUp;
+ document.getElementById('newUplineInput').value=currentUp;
+ let sel=document.getElementById('uplineSelect');
+ sel.innerHTML='<option value="">-- Select existing user --</option><option value="official">Official</option>';
+ all.forEach(u=>{ if(u.email.toLowerCase()!==email.toLowerCase()){ sel.innerHTML+=`<option value="${u.email.toLowerCase()}">${u.username} - ${u.email}</option>`; } });
+ let team=all.filter(x=> (x.upline||'').toLowerCase()===email.toLowerCase());
+ document.getElementById('teamPreview').innerHTML='<b>Current team ('+team.length+' members):</b><br>'+(team.map(t=>t.email).join('<br>')||'No team');
+ document.getElementById('uplineModal').classList.add('show');
+}
+
+window.saveUplineChange=async()=>{
+ let newUp=document.getElementById('newUplineInput').value.trim().toLowerCase();
+ let selVal=document.getElementById('uplineSelect').value.toLowerCase();
+ if(selVal) newUp=selVal;
+ if(!newUp) return alert('Enter new upline');
+ if(newUp===editingUplineEmail){ alert('Cannot set self as own upline'); return; }
+ try{
+  let all=getUsers();
+  let user=all.find(x=>x.email.toLowerCase()===editingUplineEmail);
+  if(user){
+   await updateDoc(doc(db,"users",user.firestoreId),{upline:newUp, referrer:newUp});
+   localStorage.setItem('DIAMINES_UPLINE_'+editingUplineEmail,newUp);
+   document.getElementById('lastLog').style.display='block';
+   document.getElementById('lastLog').innerText='UPLINE CHANGED: '+editingUplineEmail+' → '+newUp+' (FIREBASE UPDATED)';
+   closePopup();
+   loadFirebaseUsers();
+   alert('✅ Upline changed in FIREBASE\n'+editingUplineEmail+' → '+newUp);
+  }
+ }catch(e){ alert('❌ '+e.message); }
+}
+
+window.viewTeam=(email)=>{
+ let all=getUsers();
+ let team=all.filter(x=> (x.upline||'').toLowerCase()===email.toLowerCase());
+ alert('Team of '+email+' ('+team.length+'):\n'+(team.map(t=>t.username+' - '+t.email).join('\n')||'No members'));
+}
+
+window.render=()=>{
+ let q=(document.getElementById('search').value||'').toLowerCase();
+ let users=getUsers().filter(u=>!q||u.email.toLowerCase().includes(q)||u.username.toLowerCase().includes(q)||(u.upline||'').toLowerCase().includes(q));
+ let banned=JSON.parse(localStorage.getItem('DIAMINES_BANNED')||'[]').map(x=>x.toLowerCase());
+ let del=JSON.parse(localStorage.getItem('DIAMINES_DELETED_BLACKLIST')||'[]');
+ let html='';
+ users.forEach(u=>{
+  let isBanned=banned.includes(u.email.toLowerCase())||u.banned;
+  let isSuper=u.email.toLowerCase()===SUPER.toLowerCase();
+  let up=u.upline||'Official';
+  let teamCount=getUsers().filter(x=> (x.upline||'').toLowerCase()===u.email.toLowerCase()).length;
+  html+=`<tr style="${isSuper?'background:rgba(255,0,85,0.1)':''}"><td><b>${u.username}</b> ${isSuper?'<span style="background:#ff0055;padding:2px 6px;border-radius:99px;font-size:7px">SUPER</span>':''}</td><td>${u.email}</td><td><span style="background:#1e1e3a;padding:3px 6px;border-radius:6px;font-size:10px;color:#00b8d4">${up}</span><br><button class="btn btn-c" onclick="openUplineModal('${u.email}')">Change Upline</button></td><td><span style="background:rgba(0,184,212,0.15);color:#00b8d4;padding:3px 8px;border-radius:99px;font-size:9px">${teamCount}</span> <button class="btn btn-d" onclick="viewTeam('${u.email}')">View</button></td><td style="color:#00e676">KES ${u.balance||0}</td><td><span style="padding:3px 8px;border-radius:99px;font-size:8px;background:${isBanned?'rgba(255,23,68,0.15)':'rgba(0,230,118,0.15)'};color:${isBanned?'#ff1744':'#00e676'}">${isSuper?'PROTECTED':isBanned?'BANNED':'ACTIVE'}</span></td><td>${isSuper?'<small style="color:#666">Protected</small>':`<button class="btn ${isBanned?'btn-g':'btn-y'}" onclick="toggleBan('${u.email}')">${isBanned?'UNBAN':'BAN'}</button><button class="btn btn-r" onclick="permanentlyDeleteUser('${u.email}','${u.firestoreId}')">DEL</button>`}</td></tr>`;
+ });
+ document.getElementById('body').innerHTML=html||'<tr><td colspan=7 style="text-align:center;color:#666;padding:20px">No users - Click Refresh LIVE</td></tr>';
+ document.getElementById('count').innerText=users.length+' users';
+ document.getElementById('statTotal').innerText=getUsers().length;
+ document.getElementById('statBanned').innerText=banned.length;
+ document.getElementById('statDeleted').innerText=del.length;
+ document.getElementById('blacklist').innerHTML=del.length?'<small style="color:#ff1744">⛔ Deleted:</small> '+del.map(e=>`<span style="background:#1a1a35;padding:2px 6px;border-radius:6px;font-size:9px;margin:2px;display:inline-block">${e} <a href="#" onclick="unblock('${e}');return false" style="color:#00e676">unblock</a></span>`).join(''):'';
+}
+
+window.toggleBan=async(email)=>{
+ email=email.toLowerCase();
+ if(email===SUPER.toLowerCase()) return alert('Cannot ban super');
+ let banned=JSON.parse(localStorage.getItem('DIAMINES_BANNED')||'[]').map(x=>x.toLowerCase());
+ let all=getUsers();
+ let user=all.find(x=>x.email.toLowerCase()===email);
+ try{
+  if(banned.includes(email)){
+   banned=banned.filter(x=>x!==email);
+   if(user) await updateDoc(doc(db,"users",user.firestoreId),{banned:false, isBanned:false});
+   alert('UNBANNED '+email+' in FIREBASE');
+  }else{
+   banned.push(email);
+   if(user) await updateDoc(doc(db,"users",user.firestoreId),{banned:true, isBanned:true});
+   alert('BANNED '+email+' in FIREBASE');
+  }
+  localStorage.setItem('DIAMINES_BANNED',JSON.stringify(banned));
+  render();
+ }catch(e){ alert('❌ '+e.message); }
+}
+
+window.permanentlyDeleteUser=async(email,firestoreId)=>{
+ email=email.toLowerCase();
+ if(email===SUPER.toLowerCase()) return alert('Cannot delete super');
+ if(!confirm('DELETE '+email+' permanently from FIREBASE?')) return;
+ try{
+  await deleteDoc(doc(db,"users",firestoreId));
+  let del=JSON.parse(localStorage.getItem('DIAMINES_DELETED_BLACKLIST')||'[]').map(x=>x.toLowerCase());
+  if(!del.includes(email)) del.push(email);
+  localStorage.setItem('DIAMINES_DELETED_BLACKLIST',JSON.stringify(del));
+  alert('DELETED '+email+' from FIREBASE - Cannot re-register now');
+  loadFirebaseUsers();
+ }catch(e){ alert('❌ '+e.message); }
+}
+window.unblock=(e)=>{ let del=JSON.parse(localStorage.getItem('DIAMINES_DELETED_BLACKLIST')||'[]').filter(x=>x.toLowerCase()!==e.toLowerCase()); localStorage.setItem('DIAMINES_DELETED_BLACKLIST',JSON.stringify(del)); render(); }
+
+// AUTO LOAD REAL USERS ON START
+loadFirebaseUsers();
+setInterval(loadFirebaseUsers, 8000);
+</script>
+</body></html>
