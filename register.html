@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES - Register</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#070711;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+.box{width:100%;max-width:380px;background:#111126;border:1px solid #222;border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.logo{text-align:center;margin-bottom:16px}
+.logo h1{font-size:28px;font-weight:900;letter-spacing:2px;color:#facc15;text-shadow:0 0 20px rgba(250,204,21,0.4)}
+.logo p{font-size:10px;color:#8b8ba7;letter-spacing:3px;margin-top:2px}
+.input{width:100%;background:#1a1a35;border:1px solid #333;border-radius:10px;padding:13px 12px;color:#fff;margin-bottom:12px;outline:none;font-size:14px}
+.input:focus{border-color:#facc15;box-shadow:0 0 0 3px rgba(250,204,21,0.1)}
+.btn{width:100%;padding:14px;border-radius:10px;border:none;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#facc15,#ffb700);color:#000;font-size:15px;box-shadow:0 6px 20px rgba(250,204,21,0.3);margin-top:6px}
+.btn:active{transform:scale(0.98)}
+.msg{display:none;padding:10px;border-radius:8px;font-size:11px;margin-bottom:12px;text-align:center}
+.msg.err{background:rgba(255,23,68,0.15);border:1px solid #ff1744;color:#ff8da1;display:block}
+.msg.ok{background:rgba(0,230,118,0.15);border:1px solid #00e676;color:#86efac;display:block}
+.ref-tag{display:none;background:rgba(250,204,21,0.1);border:1px dashed #facc15;border-radius:8px;padding:8px 10px;font-size:10px;color:#facc15;margin-bottom:12px;text-align:center}
+</style>
+</head><body>
+<div class="box">
+<div class="logo"><h1>DIAMINES</h1><p>CREATE ACCOUNT</p></div>
+<div id="refTag" class="ref-tag"></div>
+<div id="msg" class="msg" style="display:none"></div>
+
+<input id="username" class="input" placeholder="Username">
+<input id="email" class="input" placeholder="Email" type="email">
+<input id="password" class="input" placeholder="Password" type="password">
+<input id="cpassword" class="input" placeholder="Confirm Password" type="password">
+
+<button class="btn" id="regBtn">REGISTER</button>
+<p style="text-align:center;margin-top:14px;font-size:11px;color:#8b8ba7">Already have account? <a href="login.html" style="color:#facc15;text-decoration:none;font-weight:700">Login</a></p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",
+  authDomain: "diamines-agencies.firebaseapp.com",
+  projectId: "diamines-agencies",
+  storageBucket: "diamines-agencies.firebasestorage.app",
+  messagingSenderId: "438413306857",
+  appId: "1:438413306857:web:3c7f736794be6a49b0f978",
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let urlRef = new URLSearchParams(window.location.search).get("ref");
+if(urlRef){
+  let raw = urlRef.trim();
+  localStorage.setItem("DIAMINES_PENDING_REF", raw);
+  document.getElementById("refTag").style.display="block";
+  document.getElementById("refTag").innerText="🔗 Referred by: "+raw+" - You will appear in Level 1";
+}
+function showMsg(t,ok){
+  let m=document.getElementById('msg'); m.innerText=t; m.className= ok? 'msg ok' : 'msg err'; m.style.display='block';
+}
+
+// === NEW ROBUST FUNCTION TO FIND PARENT BY USERNAME ===
+async function findParentEmail(refRaw){
+  if(!refRaw) return {email:null, username:null};
+  let ref = refRaw.trim();
+  let refLow = ref.toLowerCase();
+  let refUp = ref.toUpperCase();
+  const usersRef = collection(db, "users");
+
+  // 1. If ref is email, return it directly
+  if(refLow.includes("@")) return {email: refLow, username: refLow.split("@")[0]};
+
+  // 2. Try localStorage map first (fast)
+  let local = localStorage.getItem('DIAMINES_REF_MAP_'+refUp) || localStorage.getItem('DIAMINES_REF_MAP_'+refLow) || localStorage.getItem('DIAMINES_REF_MAP_'+ref);
+  if(local) return {email: local.toLowerCase(), username: refLow};
+
+  // 3. Try Firestore - username exact
+  try{
+    let s = await getDocs(query(usersRef, where("username","==", ref)));
+    if(!s.empty) return {email: s.docs[0].data().email.toLowerCase(), username: s.docs[0].data().username};
+  }catch(e){}
+  try{
+    let s = await getDocs(query(usersRef, where("username","==", refLow)));
+    if(!s.empty) return {email: s.docs[0].data().email.toLowerCase(), username: s.docs[0].data().username};
+  }catch(e){}
+  // 4. Try usernameLower field (for new users)
+  try{
+    let s = await getDocs(query(usersRef, where("usernameLower","==", refLow)));
+    if(!s.empty) return {email: s.docs[0].data().email.toLowerCase(), username: s.docs[0].data().username};
+  }catch(e){}
+  // 5. Try refCode
+  try{
+    let s = await getDocs(query(usersRef, where("refCode","==", refUp)));
+    if(!s.empty) return {email: s.docs[0].data().email.toLowerCase(), username: s.docs[0].data().username};
+  }catch(e){}
+  // 6. LAST RESORT: Fetch all and compare lowercase (fixes case issue like Jkaruri132 vs jkaruri132)
+  try{
+    let all = await getDocs(usersRef);
+    for(let d of all.docs){
+      let data = d.data();
+      let uname = String(data.username||"").toLowerCase();
+      let unameLow = String(data.usernameLower||"").toLowerCase();
+      let email = String(data.email||"").toLowerCase();
+      let code = String(data.refCode||"").toUpperCase();
+      if(uname===refLow || unameLow===refLow || email===refLow || code===refUp){
+        return {email: email, username: data.username||refLow};
+      }
+    }
+  }catch(e){ console.log("all fetch error", e); }
+
+  return {email:null, username:null};
+}
+
+document.getElementById('regBtn').onclick = async ()=>{
+  let u=document.getElementById('username').value.trim();
+  let e=document.getElementById('email').value.trim().toLowerCase();
+  let p=document.getElementById('password').value;
+  let cp=document.getElementById('cpassword').value;
+  let pendingRefRaw = localStorage.getItem("DIAMINES_PENDING_REF") || "";
+
+  if(!u||!e||!p||!cp){ showMsg("Fill all fields"); return; }
+  if(p!==cp){ showMsg("Passwords do not match"); return; }
+  if(p.length<6){ showMsg("Password min 6 chars"); return; }
+  if(u.length<3){ showMsg("Username min 3 chars"); return; }
+
+  document.getElementById('regBtn').disabled = true;
+  document.getElementById('regBtn').innerText = "CHECKING...";
+
+  try{
+    const usersRef = collection(db, "users");
+    let emailSnap = await getDocs(query(usersRef, where("email","==", e)));
+    if(!emailSnap.empty){ showMsg("❌ Email exists! Login."); document.getElementById('regBtn').disabled=false; document.getElementById('regBtn').innerText="REGISTER"; return; }
+
+    // Check username case-insensitive
+    let allForCheck = await getDocs(usersRef);
+    let exists = allForCheck.docs.some(d=> String(d.data().username||"").toLowerCase()===u.toLowerCase());
+    if(exists){ showMsg("❌ Username '"+u+"' taken!"); document.getElementById('regBtn').disabled=false; document.getElementById('regBtn').innerText="REGISTER"; return; }
+
+    showMsg("Resolving upline "+pendingRefRaw+"...", true);
+    document.getElementById('regBtn').innerText = "FINDING UPLINE...";
+
+    let parentInfo = await findParentEmail(pendingRefRaw);
+    let parentEmail = parentInfo.email;
+    let parentUsername = parentInfo.username;
+
+    if(pendingRefRaw &&!parentEmail){
+      showMsg("⚠️ Referral '"+pendingRefRaw+"' not found in Firebase! Will save as Official. Check username spelling.", false);
+      await new Promise(r=>setTimeout(r,1500));
+    } else if(parentEmail){
+      showMsg("✅ Upline found: "+parentUsername+" ("+parentEmail+") - Creating...", true);
+    }
+
+    document.getElementById('regBtn').innerText = "CREATING...";
+    const cred = await createUserWithEmailAndPassword(auth, e, p);
+    const uid = cred.user.uid;
+    let myCode = (u.toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,5) || 'DIAM') + Math.floor(1000+Math.random()*9000);
+
+    const userData = {
+      uid, username: u, usernameLower: u.toLowerCase(), email: e,
+      refCode: myCode, myCode,
+      parent: parentEmail? parentEmail.toLowerCase() : null,
+      parentUsername: parentUsername||null,
+      upline: parentEmail? parentEmail.toLowerCase() : 'Official',
+      referrer: parentEmail? parentEmail.toLowerCase() : null,
+      referrerUsername: parentUsername||null,
+      activated:false, commissionPaid:false, joined: new Date().toISOString(),
+      balance:0, totalDeposit:0, refCommission:0, totalRefEarnings:0, package:'none'
+    };
+    await setDoc(doc(db, "users", uid), userData);
+
+    if(parentEmail && parentEmail.toLowerCase()!== e){
+      try{
+        await setDoc(doc(db, "referrals", uid), {
+          parent: parentEmail.toLowerCase(),
+          parentUsername: parentUsername||pendingRefRaw,
+          child: e.toLowerCase(),
+          childUsername: u,
+          childUid: uid,
+          parentCode: pendingRefRaw,
+          date: new Date(), createdAt: new Date().toISOString(), package:"none"
+        });
+        let rels = JSON.parse(localStorage.getItem("DIAMINES_REF_RELATIONS")||"[]");
+        rels.push({parent: parentEmail.toLowerCase(), child: e.toLowerCase(), date: new Date().toISOString()});
+        localStorage.setItem("DIAMINES_REF_RELATIONS", JSON.stringify(rels));
+      }catch(eRef){ console.log(eRef); }
+    }
+
+    localStorage.setItem('DIAMINES_CURRENT', JSON.stringify(userData));
+    localStorage.setItem('DIAMINES_CURRENT_USER', JSON.stringify(userData));
+    localStorage.setItem('DIAMINES_USERNAME_'+e, u.toLowerCase());
+    localStorage.setItem('DIAMINES_REF_MAP_'+myCode, e);
+    localStorage.setItem('DIAMINES_REF_MAP_'+myCode.toLowerCase(), e);
+    localStorage.setItem('DIAMINES_REF_MAP_'+u.toLowerCase(), e);
+
+    let allUsers=JSON.parse(localStorage.getItem('DIAMINES_ALL_USERS')||'[]');
+    allUsers.push({...userData, id: Date.now()});
+    localStorage.setItem('DIAMINES_ALL_USERS',JSON.stringify(allUsers));
+    localStorage.removeItem("DIAMINES_PENDING_REF");
+
+    showMsg("✅ Account created! Upline: "+(parentUsername||parentEmail||"Official")+" - Go login!", true);
+    setTimeout(()=>{ location.href='login.html'; },1500);
+
+  }catch(err){
+    console.error(err);
+    if(err.code==='auth/network-request-failed'){
+      showMsg("❌ Network failed! Use https://diamines-agencies.web.app link, not Render! Charge phone!", false);
+    } else {
+      showMsg("❌ "+err.message, false);
+    }
+    document.getElementById('regBtn').disabled = false;
+    document.getElementById('regBtn').innerText = "REGISTER";
+  }
+};
+</script>
+</body></html>
