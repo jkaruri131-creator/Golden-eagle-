@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin - Withdrawals</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#070711;color:#fff;padding:14px;max-width:800px;margin:0 auto}
+.input{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#000;color:#fff;margin-bottom:12px}
+.card{background:linear-gradient(135deg,#1a1a35,#12122a);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.btn{padding:8px 14px;border-radius:8px;border:none;font-weight:700;cursor:pointer;margin-left:6px;font-size:12px}
+.approve{background:linear-gradient(135deg,#00e676,#00c853);color:#000}
+.reject{background:linear-gradient(135deg,#ff1744,#ff4d8d);color:#fff}
+.badge{font-size:9px;padding:4px 8px;border-radius:6px;font-weight:800}
+.pending{background:#7a4a00;color:#facc15}
+.approved{background:#064e3b;color:#22c55e}
+.rejected{background:#4a0a0a;color:#ff4d8d}
+.stk{position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);z-index:99;display:none;align-items:center;justify-content:center;padding:20px}
+.stk.show{display:flex}
+.stk-card{background:linear-gradient(180deg,#1e1e3f,#12122a);border-radius:20px;padding:22px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+</style>
+</head>
+<body>
+<h2>💎 DIAMINES - Withdraw Approvals</h2>
+<p style="font-size:11px;color:#8b8ba7;margin-bottom:6px">Balance deducted on request. Approve to pay, Reject to refund. 10% hidden fee profit.</p>
+<div style="background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);border-radius:10px;padding:8px;font-size:11px;color:#22c55e;margin-bottom:10px">💰 Total Profit (10% fee): <b id="totalProfit">KES 0</b> • Pending Payout: <b id="totalPending" style="color:#facc15">KES 0</b></div>
+<input id="search" class="input" placeholder="Search email, phone, ID, amount..." oninput="render()">
+<div style="display:flex;gap:8px;margin-bottom:12px">
+<button onclick="filter='all';render()" style="padding:6px 12px;border-radius:20px;border:1px solid #333;background:#1a1a35;color:#fff;font-size:11px">All</button>
+<button onclick="filter='pending';render()" style="padding:6px 12px;border-radius:20px;border:1px solid #facc15;background:#1a1600;color:#facc15;font-size:11px">Pending</button>
+<button onclick="filter='approved';render()" style="padding:6px 12px;border-radius:20px;border:1px solid #22c55e;background:#002a12;color:#22c55e;font-size:11px">Approved</button>
+</div>
+<div id="list"></div>
+<div class="stk" id="modal"><div class="stk-card" id="modalCard"></div></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, increment, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",
+  authDomain: "diamines-agencies.firebaseapp.com",
+  projectId: "diamines-agencies",
+  storageBucket: "diamines-agencies.firebasestorage.app",
+  messagingSenderId: "438413306857",
+  appId: "1:438413306857:web:3c7f736794be6a49b0f978"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+let filter='all';
+let firebaseList = [];
+async function loadFirebase(){
+  try{
+    let snap = await getDocs(collection(db, "withdrawals"));
+    firebaseList = [];
+    snap.forEach(d=> firebaseList.push({firestoreId:d.id, ...d.data()}));
+  }catch(e){}
+}
+window.render = async ()=>{
+ if(firebaseList.length===0) await loadFirebase();
+ let q=document.getElementById("search").value.toLowerCase();
+ let localAll=JSON.parse(localStorage.getItem("DIAMINES_WITHDRAW_ALL")||"[]").reverse();
+ let all = [...firebaseList];
+ localAll.forEach(l=>{
+   if(!all.find(f=>f.id===l.id || f.requestedAmount===l.amount && f.email===l.email && f.date===l.date)){
+     if(!l.fee){
+       l.fee = Math.floor((l.requestedAmount||l.amount) * 0.10);
+       l.receiveAmount = (l.requestedAmount||l.amount) - l.fee;
+       l.requestedAmount = l.requestedAmount||l.amount;
+     }
+     all.push(l);
+   }
+ });
+ all.sort((a,b)=> new Date(b.date||b.createdAt) - new Date(a.date||a.createdAt));
+ let profit = 0;
+ let pendingPayout = 0;
+ all.forEach(w=>{
+   if(w.status==='approved') profit += Number(w.fee||0);
+   if(w.status==='pending') pendingPayout += Number(w.receiveAmount||0);
+ });
+ document.getElementById("totalProfit").innerText = "KES "+profit.toLocaleString();
+ document.getElementById("totalPending").innerText = "KES "+pendingPayout.toLocaleString();
+ let html="";
+ all.filter(w=>{
+  if(filter!=='all'&&w.status!==filter) return false;
+  let s=(w.email+" "+w.phone+" "+(w.id||"")+" "+(w.requestedAmount||w.amount)+" "+w.status).toLowerCase();
+  return s.includes(q);
+ }).forEach(w=>{
+  let req = w.requestedAmount||w.amount||0;
+  let fee = w.fee!==undefined ? w.fee : Math.floor(req*0.10);
+  let rec = w.receiveAmount!==undefined ? w.receiveAmount : req - fee;
+  html+=`<div class="card">
+   <div><b style="font-size:14px">KES ${req}</b> <span class="badge ${w.status}">${w.status.toUpperCase()}</span><br>
+   <small style="color:#8b8ba7">${w.email}<br>📱 ${w.phone} via ${(w.method||'mpesa').toUpperCase()} | <b style="color:#facc15">${w.id||w.firestoreId?.slice(0,6)}</b><br>${w.date||''}</small>
+   <div style="margin-top:6px;background:rgba(0,0,0,0.4);border-radius:8px;padding:6px;font-size:10px;line-height:1.4">
+   <span style="color:#8b8ba7">User requested:</span> <b>KES ${req}</b><br>
+   <span style="color:#ff4d8d">Fee 10% (YOUR PROFIT):</span> <b style="color:#ff4d8d">KES ${fee}</b><br>
+   <span style="color:#22c55e">SEND to user:</span> <b style="color:#22c55e">KES ${rec}</b>
+   </div>
+   </div>
+   <div>${w.status==='pending'?`<button class="btn approve" onclick="approve('${w.firestoreId||w.id}')">✓ PAY ${rec}</button><button class="btn reject" onclick="reject('${w.firestoreId||w.id}')">✕ REJECT</button>`:'✓ DONE'}</div>
+  </div>`;
+ });
+ document.getElementById("list").innerHTML=html||"<p style='text-align:center;color:#555;margin-top:20px'>No withdrawals</p>";
+}
+// FIXED: NOW SAME LOGIC AS DEPOSIT - ADDS TO TOTAL WITHDRAW
+window.approve = async (id)=>{
+ let all=JSON.parse(localStorage.getItem("DIAMINES_WITHDRAW_ALL")||"[]");
+ let wLocal = all.find(x=>x.id===id);
+ let wFire = firebaseList.find(x=>x.firestoreId===id || x.id===id);
+ let w = wFire || wLocal;
+ if(!w) return;
+ let req = w.requestedAmount||w.amount;
+ let fee = w.fee!==undefined ? w.fee : Math.floor(req*0.10);
+ let rec = w.receiveAmount!==undefined ? w.receiveAmount : req - fee;
+ let email = String(w.email||"").toLowerCase();
+ if(!confirm("Approve?\n"+w.email+"\nRequested KES "+req+"\nFee KES "+fee+" (YOU KEEP)\nSEND KES "+rec+" to "+w.phone+"\n\nConfirm you sent "+rec+" M-Pesa!")) return;
+ // 1. Firebase withdrawal status
+ if(wFire && wFire.firestoreId){
+   try{ await updateDoc(doc(db, "withdrawals", wFire.firestoreId), {status:"approved"}); wFire.status="approved"; }catch(e){}
+ }
+ // 2. FIXED: Add to totalWithdraw in Firebase users - SAME AS DEPOSIT LOGIC!
+ try{
+   if(w.uid && w.uid.includes('@')===false){
+     await updateDoc(doc(db, "users", w.uid), { totalWithdraw: increment(req), totalWithdrawn: increment(req) });
+   } else {
+     let qy = query(collection(db,"users"), where("email","==", w.email));
+     let qsnap = await getDocs(qy);
+     qsnap.forEach(async(u)=>{ await updateDoc(doc(db,"users", u.id), { totalWithdraw: increment(req), totalWithdrawn: increment(req) }); });
+   }
+ }catch(e){ console.log("totalWithdraw update error", e); }
+ // 3. FIXED: Update localStorage SAME KEY as dashboard + withdraw.html uses
+ if(wLocal){
+   wLocal.status="approved";
+   localStorage.setItem("DIAMINES_WITHDRAW_ALL", JSON.stringify(all));
+ }
+ let tot=Number(localStorage.getItem("DIAMINES_TOTAL_WITHDRAW_"+email)||0)+ req;
+ localStorage.setItem("DIAMINES_TOTAL_WITHDRAW_"+email, String(tot));
+ showModal(`<div style="width:60px;height:60px;margin:0 auto 10px;border-radius:16px;background:linear-gradient(135deg,#00e676,#00c853);display:flex;align-items:center;justify-content:center;font-size:28px">✅</div><h3 style="color:#00e676">Approved!</h3><p style="font-size:12px;color:#8b8ba7;margin-top:6px">Requested KES ${req}<br>Fee KES ${fee} profit<br><b style="color:#00e676">Paid KES ${rec} to ${w.phone}</b><br>ID ${w.id||id}<br><br>Total Withdrawn updated!</p>`, "#00e676");
+ render();
+}
+window.reject = async (id)=>{
+ let all=JSON.parse(localStorage.getItem("DIAMINES_WITHDRAW_ALL")||"[]");
+ let wLocal = all.find(x=>x.id===id);
+ let wFire = firebaseList.find(x=>x.firestoreId===id || x.id===id);
+ let w = wFire || wLocal;
+ if(!w) return;
+ let req = w.requestedAmount||w.amount;
+ if(!confirm("Reject and REFUND?\nKES "+req+" to "+w.email)) return;
+ if(wFire && wFire.firestoreId){
+   try{ await updateDoc(doc(db, "withdrawals", wFire.firestoreId), {status:"rejected"}); wFire.status="rejected"; }catch(e){}
+   try{
+     if(w.uid && w.uid.includes('@')===false){
+       let usnap = await getDoc(doc(db,"users", w.uid));
+       if(usnap.exists()){ await updateDoc(doc(db,"users", w.uid), { balance: increment(req) }); }
+     } else {
+       let qy = query(collection(db,"users"), where("email","==", w.email));
+       let qsnap = await getDocs(qy);
+       qsnap.forEach(async(u)=>{ await updateDoc(doc(db,"users", u.id), { balance: increment(req) }); });
+     }
+   }catch(e){}
+ }
+ if(wLocal){
+   wLocal.status="rejected";
+   localStorage.setItem("DIAMINES_WITHDRAW_ALL", JSON.stringify(all));
+   let bal=Number(localStorage.getItem("DIAMINES_BAL_"+wLocal.email)||0)+req;
+   localStorage.setItem("DIAMINES_BAL_"+wLocal.email, String(bal));
+   let cur = JSON.parse(localStorage.getItem("DIAMINES_CURRENT")||"null");
+   if(cur && String(cur.email).toLowerCase()===String(wLocal.email).toLowerCase()){ cur.balance = bal; localStorage.setItem("DIAMINES_CURRENT", JSON.stringify(cur)); }
+ }
+ showModal(`<div style="width:60px;height:60px;margin:0 auto 10px;border-radius:16px;background:linear-gradient(135deg,#ff4d8d,#ff1744);display:flex;align-items:center;justify-content:center;font-size:28px">↩️</div><h3 style="color:#ff4d8d">Rejected & Refunded</h3><p style="font-size:12px;color:#8b8ba7;margin-top:6px">KES ${req} refunded to ${w.email}</p>`, "#ff4d8d");
+ render();
+}
+function showModal(html,color){
+ document.getElementById("modalCard").innerHTML=html+`<button onclick="document.getElementById('modal').classList.remove('show')" style="margin-top:14px;width:100%;padding:10px;border-radius:10px;border:none;background:${color};color:#000;font-weight:800">CLOSE</button>`;
+ document.getElementById("modalCard").style.border="1px solid "+color;
+ document.getElementById("modal").classList.add("show");
+}
+render();
+loadFirebase().then(()=>render());
+</script>
+</body>
+</html>
