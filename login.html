@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES - Login</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#070711;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+.box{width:100%;max-width:380px;background:#111126;border:1px solid #222;border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.logo{text-align:center;margin-bottom:16px}
+.logo h1{font-size:28px;font-weight:900;letter-spacing:2px;color:#facc15;text-shadow:0 0 20px rgba(250,204,21,0.4)}
+.logo p{font-size:10px;color:#8b8ba7;letter-spacing:3px;margin-top:2px}
+.input{width:100%;background:#1a1a35;border:1px solid #333;border-radius:10px;padding:13px 12px;color:#fff;margin-bottom:12px;outline:none;font-size:14px}
+.input:focus{border-color:#facc15;box-shadow:0 0 0 3px rgba(250,204,21,0.1)}
+.btn{width:100%;padding:14px;border-radius:10px;border:none;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#facc15,#ffb700);color:#000;font-size:15px;box-shadow:0 6px 20px rgba(250,204,21,0.3);margin-top:6px}
+.btn:active{transform:scale(0.98)}
+.btn:disabled{opacity:0.6;cursor:not-allowed}
+.msg{display:none;padding:10px;border-radius:8px;font-size:11px;margin-bottom:12px;text-align:center}
+.msg.err{background:rgba(255,23,68,0.15);border:1px solid #ff1744;color:#ff8da1;display:block}
+.msg.ok{background:rgba(0,230,118,0.15);border:1px solid #00e676;color:#86efac;display:block}
+.popup{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;z-index:9999}
+.popupBox{background:#111126;border:2px solid #facc15;border-radius:16px;padding:20px;max-width:320px;text-align:center;width:90%}
+</style>
+</head><body>
+<div class="box">
+<div class="logo"><h1>DIAMINES</h1><p>LOGIN TO ACCOUNT</p></div>
+<div id="msg" class="msg" style="display:none"></div>
+
+<input id="user" class="input" placeholder="Username or Email">
+<input id="password" type="password" class="input" placeholder="Password">
+
+<button class="btn" id="loginBtn">LOGIN</button>
+<p style="text-align:center;margin-top:14px;font-size:11px;color:#8b8ba7">Don't have account? <a href="register.html" style="color:#facc15;text-decoration:none;font-weight:700">Register</a></p>
+</div>
+
+<script type="module">
+// Hide backend logs
+console.log = function(){}; console.warn = function(){}; console.error = function(){};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",
+  authDomain: "diamines-agencies.firebaseapp.com",
+  projectId: "diamines-agencies",
+  storageBucket: "diamines-agencies.firebasestorage.app",
+  messagingSenderId: "438413306857",
+  appId: "1:438413306857:web:3c7f736794be6a49b0f978",
+  measurementId: "G-4PBTTCZ1YK"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+function showMsg(t,ok){
+  let m=document.getElementById('msg');
+  m.innerText=t;
+  m.className= ok? 'msg ok' : 'msg err';
+  m.style.display='block';
+}
+function showPopup(title,msg,color){
+  let d=document.createElement('div');
+  d.className='popup';
+  d.innerHTML=`<div class="popupBox" style="border-color:${color}"><h2 style="color:${color}">${title}</h2><p style="color:#fff;margin:12px 0;font-weight:700;font-size:13px">${msg}</p><button onclick="this.closest('.popup').remove()" style="background:${color};color:#000;border:none;padding:10px 20px;border-radius:8px;font-weight:800">OK</button></div>`;
+  document.body.appendChild(d);
+}
+
+function saveSession(userData, uid){
+  localStorage.removeItem('DIAMINES_CURRENT');
+  localStorage.removeItem('DIAMINES_CURRENT_USER');
+  localStorage.removeItem('DIAMINES_USER');
+  localStorage.removeItem('username');
+  localStorage.removeItem('email');
+  localStorage.setItem('DIAMINES_CURRENT', JSON.stringify(userData));
+  localStorage.setItem('DIAMINES_CURRENT_USER', JSON.stringify(userData));
+  localStorage.setItem('DIAMINES_USER', JSON.stringify(userData));
+  localStorage.setItem('DIAMINES_CURRENT_EMAIL', userData.email.toLowerCase());
+  localStorage.setItem('DIAMINES_CURRENT_UID', uid);
+  localStorage.setItem('username', userData.username);
+  localStorage.setItem('email', userData.email);
+  localStorage.setItem('DIAMINES_USERNAME_'+userData.email.toLowerCase(), String(userData.username).toLowerCase());
+}
+
+document.getElementById('loginBtn').onclick = async ()=>{
+  let u=document.getElementById('user').value.trim();
+  let p=document.getElementById('password').value;
+  if(!u||!p) return showMsg('Please fill all fields');
+
+  document.getElementById('loginBtn').disabled = true;
+  document.getElementById('loginBtn').innerText = "Checking Account...";
+
+  let emailToLogin = u.includes('@')? u.toLowerCase() : null;
+
+  if(!emailToLogin){
+    showMsg('Checking your account...', true);
+    try{
+      const usersRef = collection(db, "users");
+      // Try username exact
+      let q1 = query(usersRef, where("username","==", u));
+      let s1 = await getDocs(q1);
+      let found = null;
+      if(!s1.empty) found = s1.docs[0].data();
+      else {
+        // Try lowercase username
+        let q2 = query(usersRef, where("username","==", u.toLowerCase()));
+        let s2 = await getDocs(q2);
+        if(!s2.empty) found = s2.docs[0].data();
+        else {
+          // Last resort: fetch all and compare lowercase (handles Jkaruri vs jkaruri)
+          let allSnap = await getDocs(usersRef);
+          allSnap.forEach(docSnap=>{
+            const data = docSnap.data();
+            if(String(data.username||'').toLowerCase() === u.toLowerCase()){
+              found = data;
+            }
+          });
+        }
+      }
+      if(found){
+        emailToLogin = String(found.email).toLowerCase();
+      } else {
+        let allLocal=JSON.parse(localStorage.getItem('DIAMINES_ALL_USERS')||'[]');
+        let foundLocal = allLocal.find(x=>String(x.username||'').toLowerCase()===u.toLowerCase());
+        if(foundLocal) emailToLogin = String(foundLocal.email).toLowerCase();
+        else {
+          showMsg('❌ Username not found');
+          document.getElementById('loginBtn').disabled = false;
+          document.getElementById('loginBtn').innerText = "LOGIN";
+          return;
+        }
+      }
+    }catch(e){
+      showMsg('❌ Unable to verify account, try again');
+      document.getElementById('loginBtn').disabled = false;
+      document.getElementById('loginBtn').innerText = "LOGIN";
+      return;
+    }
+  }
+
+  showMsg('Logging in, please wait...', true);
+  document.getElementById('loginBtn').innerText = "Logging In...";
+
+  try{
+    const cred = await signInWithEmailAndPassword(auth, emailToLogin, p);
+    const uid = cred.user.uid;
+    const snap = await getDoc(doc(db, "users", uid));
+
+    if(!snap.exists()){
+      showMsg('❌ Account not found, please register');
+      document.getElementById('loginBtn').disabled = false;
+      document.getElementById('loginBtn').innerText = "LOGIN";
+      return;
+    }
+
+    let userData = snap.data();
+
+    let deleted=(JSON.parse(localStorage.getItem('DIAMINES_DELETED_BLACKLIST')||'[]')).map(x=>String(x).toLowerCase());
+    let banned=(JSON.parse(localStorage.getItem('DIAMINES_BANNED')||'[]')).map(x=>String(x).toLowerCase());
+    if(deleted.includes(emailToLogin)){showPopup('⛔ Account Deleted','Your account was permanently deleted','#ff1744'); document.getElementById('loginBtn').disabled=false; document.getElementById('loginBtn').innerText="LOGIN"; return;}
+    if(banned.includes(emailToLogin)){showPopup('⚠️ Account On Hold','Your account is on hold, contact support','#facc15'); document.getElementById('loginBtn').disabled=false; document.getElementById('loginBtn').innerText="LOGIN"; return;}
+
+    saveSession(userData, uid);
+
+    let isActivated = userData.isActivated || userData.isMembershipActive || userData.membershipActive || userData.accountActivated || userData.isActive || userData.activated || false;
+    let totalDeposit = Number(userData.totalDeposit || userData.balance || 0);
+    let localActive = localStorage.getItem('DIAMINES_MEMBERSHIP_'+emailToLogin) === 'active' || localStorage.getItem('DIAMINES_ACTIVATED_'+emailToLogin) === 'true';
+
+    if(!isActivated &&!localActive && totalDeposit < 1){
+      showMsg('✅ Welcome '+userData.username+'! Redirecting...',true);
+      setTimeout(()=>location.href='membership.html',900);
+    } else {
+      showMsg('✅ Welcome '+userData.username+'! Opening dashboard...',true);
+      setTimeout(()=>location.href='dashboard.html',900);
+    }
+
+  }catch(err){
+    if(err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential' || err.code === 'auth/invalid-email'){
+      showMsg('❌ Wrong username/email or password');
+    } else if(err.code === 'auth/network-request-failed'){
+      showMsg('❌ Network error, check internet and try again');
+    } else {
+      showMsg('❌ Login failed, please try again');
+    }
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginBtn').innerText = "LOGIN";
+  }
+};
+</script>
+</body></html>
