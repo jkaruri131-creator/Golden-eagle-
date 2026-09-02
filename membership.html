@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES AGENCIES</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',system-ui}
+body{background:#070711;color:#fff;padding:14px;max-width:600px;margin:0 auto;min-height:100vh}
+a{color:#888;text-decoration:none;font-size:13px}
+h2{margin:14px 0 4px;font-size:24px;font-weight:800;letter-spacing:1px}
+.sub{font-size:11px;color:#8b8ba7;margin-bottom:14px}
+.top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.box{border-radius:14px;padding:10px;border:1px solid;display:flex;flex-direction:column;justify-content:center}
+.bal{background:linear-gradient(135deg,#7a4a00,#c67c00);border-color:#facc15}
+.dep{background:linear-gradient(135deg,#0e2a6a,#1a4db5);border-color:#3b82f6}
+.pkgbox{background:linear-gradient(135deg,#064e3b,#0a7a5c);border-color:#22c55e}
+.box small{font-size:7px;font-weight:800;letter-spacing:1px;opacity:0.8}
+.box b{font-size:12px;margin-top:2px}
+.card{background:#1a1a35;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:16px;margin-top:12px}
+.input{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#000;color:#fff;margin-bottom:10px;font-size:14px;outline:none}
+.input:focus{border-color:#facc15}
+.btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#facc15,#ffb700);color:#000;font-weight:800;font-size:14px;cursor:pointer}
+.btn-green{background:linear-gradient(135deg,#00e676,#00c853)}
+.btn-blue{background:linear-gradient(135deg,#448aff,#2962ff);color:#fff}
+.pkg{border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px;background:#12122a;margin-bottom:12px;cursor:pointer;position:relative;overflow:hidden}
+.pkg.active{border-color:#facc15;background:radial-gradient(600px at 0% 0%, rgba(250,204,21,0.18), transparent), #1e1e3a;box-shadow:0 0 24px rgba(250,204,21,0.15)}
+.animal{font-size:42px;position:absolute;right:8px;top:8px;opacity:0.14}
+.price{font-size:22px;font-weight:900;color:#facc15}
+.jobs-col{display:flex;flex-direction:column;gap:6px;margin-top:12px;background:rgba(0,0,0,0.3);border-radius:12px;padding:10px}
+.job-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:600}
+.job-row.yes{background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);color:#fff}
+.job-row.no{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);color:#555}
+.dot{width:6px;height:6px;border-radius:50%}
+.dot.yes{background:#22c55e;box-shadow:0 0 6px #22c55e}
+.dot.no{background:#555}
+.pay{font-size:10px;color:#8b8ba7}
+.pay.yes{color:#4ade80;font-weight:800}
+.pay-box{background:linear-gradient(135deg,#1a0a00,#2a1500);border:1px solid #ff8c00;border-radius:16px;padding:14px;margin-bottom:12px}
+.pay-box b{color:#facc15;font-size:20px;letter-spacing:1px}
+.info{background:rgba(250,204,21,0.08);border:1px solid rgba(250,204,21,0.15);border-radius:10px;padding:10px;font-size:11px;color:#facc15;margin-bottom:10px;line-height:1.4}
+.stk{position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);z-index:99;display:none;align-items:center;justify-content:center;padding:20px}
+.stk.show{display:flex}
+.stk-card{background:linear-gradient(180deg,#1e1e3f,#12122a);border:1px solid #facc15;border-radius:24px;padding:24px;max-width:380px;width:100%;text-align:center}
+.p-item{background:#1e1e3a;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;font-size:11px;align-items:center}
+.badge{padding:4px 8px;border-radius:6px;font-size:8px;font-weight:800}
+.wait{background:#7a4a00;color:#facc15}
+.ok{background:#064e3b;color:#22c55e}
+.no{background:#4a0a0a;color:#ff4d8d}
+.loader{width:40px;height:40px;border:4px solid rgba(250,204,21,0.2);border-top-color:#facc15;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<a href="dashboard.html">← Dashboard</a>
+<h2>DIAMINES AGENCIES</h2>
+<p class="sub">Pay to 0141416120 - Linked to admin-deposit.html</p>
+
+<div class="top">
+<div class="box bal"><small>💰 BALANCE</small><b id="mainBal">KES 0</b></div>
+<div class="box dep"><small>📊 TOTAL DEPOSIT</small><b id="totalDep">KES 0</b></div>
+<div class="box pkgbox"><small>📦 PACKAGE</small><b id="curPkg">NONE</b></div>
+</div>
+
+<div id="statusBox"></div>
+
+<div class="card">
+<h4 style="font-size:12px;margin-bottom:10px">💳 Deposit for Membership</h4>
+<div class="pay-box">
+<div style="font-size:9px;color:#ff8c00;font-weight:800;letter-spacing:1px">SEND MONEY TO M-PESA:</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+<div><div style="font-size:10px;color:#8b8ba7">DIAMINES AGENCIES OFFICIAL</div><b>0141416120</b></div>
+<button onclick="navigator.clipboard.writeText('0141416120');alert('Copied 0141416120')" style="padding:8px 14px;border-radius:10px;border:none;background:#facc15;color:#000;font-weight:800;font-size:11px">📋 COPY</button>
+</div>
+<div style="margin-top:10px;background:rgba(0,0,0,0.4);border-radius:8px;padding:8px;font-size:10px;color:#facc15">📌 Send to 0141416120, then paste Code + Phone + Amount below</div>
+</div>
+<div class="info">💡 Code must be 10 chars - Cannot reuse same code twice - Same logic as deposit.html</div>
+<input id="phonePaid" class="input" placeholder="Phone You Paid From (07XX)" value="07">
+<input id="mpesaCode" class="input" placeholder="M-Pesa Code (10 chars e.g QJL8A9B2C1)" maxlength="12">
+<input id="amount" class="input" type="number" placeholder="Amount You Sent">
+<select id="method" class="input"><option value="mpesa">M-Pesa</option><option value="airtel">Airtel Money</option></select>
+<button class="btn btn-blue" onclick="submitDeposit()">📤 SUBMIT TO 0141416120</button>
+<p id="log" style="font-size:11px;margin-top:8px;color:#8b8ba7"></p>
+</div>
+
+<div id="myList"></div>
+
+<div class="card">
+<h4 style="font-size:12px;margin-bottom:10px">🦁 Animal Packages</h4>
+<div id="pkgList"></div>
+<button class="btn btn-green" style="margin-top:12px" onclick="activatePackage()">🔓 ACTIVATE PACKAGE</button>
+</div>
+
+<!-- SENDING POPUP - Like deposit.html -->
+<div class="stk" id="sendingModal"><div class="stk-card" id="sendingCard"></div></div>
+<div class="stk" id="succModal"><div class="stk-card" style="border-color:#00e676"><h3 id="succTitle" style="color:#00e676">Success!</h3><p id="succMsg" style="font-size:11px;color:#8b8ba7"></p><b id="succCode">CODE</b><div style="margin-top:12px"><button onclick="document.getElementById('succModal').classList.remove('show')" style="width:100%;padding:10px;border-radius:10px;border:none;background:#00e676;color:#000;font-weight:800">OKAY</button></div></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc, increment, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",
+  authDomain: "diamines-agencies.firebaseapp.com",
+  projectId: "diamines-agencies",
+  storageBucket: "diamines-agencies.firebasestorage.app",
+  messagingSenderId: "438413306857",
+  appId: "1:438413306857:web:3c7f736794be6a49b0f978"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+let currentUser=null, currentData=null;
+const MY_TILL="0141416120";
+function getUser(){try{return JSON.parse(localStorage.getItem("DIAMINES_CURRENT")||"null")}catch(e){return null}}
+function getEmail(){ if(currentData?.email) return String(currentData.email).toLowerCase().trim(); return String(getUser()?.email||"").toLowerCase().trim(); }
+function getBal(){ let e=getEmail(); let fb=currentData?.balance!==undefined?Number(currentData.balance)||0:0; let local=Number(localStorage.getItem("DIAMINES_BAL_"+e)||0)||0; return Math.max(fb,local); }
+function getDep(){ let e=getEmail(); let fb=currentData?.totalDeposit!==undefined?Number(currentData.totalDeposit)||0:0; let local=Number(localStorage.getItem("DIAMINES_TOTAL_DEPOSIT_"+e)||0)||0; try{ let all1=JSON.parse(localStorage.getItem("DIAMINES_DEPOSITS_ALL")||"[]"); let all2=JSON.parse(localStorage.getItem("DIAMINES_MEMBERSHIP_DEPOSITS_ALL")||"[]"); let all=[...all1,...all2]; let sum=all.filter(d=> String(d.email||"").toLowerCase()===e && d.status==="approved").reduce((s,d)=> s+Number(d.amount||0),0); return Math.max(fb,local,sum); }catch(err){ return Math.max(fb,local); } }
+onAuthStateChanged(auth, async(user)=>{
+  if(!user){ if(!getUser()?.email) location.href="login.html"; return; }
+  currentUser=user;
+  try{ let snap=await getDoc(doc(db,"users",user.uid)); if(snap.exists()){ currentData=snap.data();
+    let eLow=getEmail();
+    let fbBal=Number(currentData.balance||0); let fbDep=Number(currentData.totalDeposit||0);
+    let locBal=Number(localStorage.getItem("DIAMINES_BAL_"+eLow)||0); let locDep=Number(localStorage.getItem("DIAMINES_TOTAL_DEPOSIT_"+eLow)||0);
+    if(Math.max(fbBal,locBal)>0) localStorage.setItem("DIAMINES_BAL_"+eLow, String(Math.max(fbBal,locBal)));
+    if(Math.max(fbDep,locDep)>0) localStorage.setItem("DIAMINES_TOTAL_DEPOSIT_"+eLow, String(Math.max(fbDep,locDep)));
+    if(currentData.package) localStorage.setItem("DIAMINES_PACKAGE_"+eLow, currentData.package);
+  }}catch(e){}
+  render();
+});
+let allJobsList = [
+ {id:"writings", name:"Writings", pay:25, icon:"✍️"},
+ {id:"editing", name:"Editing", pay:40, icon:"📝"},
+ {id:"transcription", name:"Transcription", pay:65, icon:"🎧"},
+ {id:"translation", name:"Translation", pay:85, icon:"🌍"},
+ {id:"digital", name:"Digital Marketing", pay:110, icon:"📢"},
+ {id:"affiliate", name:"Affiliate Marketing", pay:95, icon:"🛒"},
+ {id:"gaming", name:"Gaming", pay:150, icon:"🎮"}
+];
+let packages=[
+ {id:"lion", name:"LION", animal:"🦁", price:500, color:"#facc15", desc:"Cub", daily:5, earning:"KES 150/day", allowed:["digital","affiliate","writings"]},
+ {id:"tiger", name:"TIGER", animal:"🐯", price:1500, color:"#ff8c00", desc:"Hunter", daily:10, earning:"KES 500/day", allowed:["digital","affiliate","writings","editing"]},
+ {id:"cheetah", name:"CHEETAH", animal:"🐆", price:3000, color:"#00e5ff", desc:"Elite", daily:20, earning:"KES 1500/day", allowed:["digital","affiliate","writings","editing","transcription","translation"]},
+ {id:"elephant", name:"ELEPHANT", animal:"🐘", price:5500, color:"#a78bfa", desc:"KING", daily:30, earning:"KES 4500/day", allowed:["digital","affiliate","writings","editing","transcription","translation","gaming"]}
+];
+let selectedPkg=packages[0];
+function getCurrentPkgObj(){ let pid=(currentData?.package)||localStorage.getItem("DIAMINES_PACKAGE_"+getEmail())||"none"; return packages.find(x=>x.id===pid)||null; }
+window.render = ()=>{
+  document.getElementById("mainBal").innerText="KES "+getBal().toLocaleString();
+  document.getElementById("totalDep").innerText="KES "+getDep().toLocaleString();
+  let cur=getCurrentPkgObj();
+  document.getElementById("curPkg").innerText=cur?cur.animal+" "+cur.name:"NONE";
+  if(cur){ document.getElementById("statusBox").innerHTML=`<div style='background:#064e3b;border:1px solid #22c55e;border-radius:12px;padding:12px;text-align:center'><b style='color:#22c55e'>✅ ACTIVE - ${cur.animal} ${cur.name} (KES ${cur.price})</b></div>`; }
+  else { document.getElementById("statusBox").innerHTML=`<div style='background:#7a4a00;border:1px solid #facc15;border-radius:12px;padding:10px;text-align:center;font-size:11px;color:#facc15'>🔒 Not active - Pay to ${MY_TILL} & activate</div>`; }
+  let html=""; packages.forEach(p=>{
+    let active=selectedPkg.id===p.id?"active":"";
+    let currPkg=getCurrentPkgObj(); let diff=currPkg? p.price - currPkg.price : p.price; let label="";
+    if(currPkg){ if(p.id===currPkg.id) label=`<span style="font-size:9px;background:#22c55e;color:#000;padding:2px 6px;border-radius:6px;font-weight:800">CURRENT</span>`; else if(diff>0) label=`<span style="font-size:9px;background:#facc15;color:#000;padding:2px 6px;border-radius:6px;font-weight:800">UPGRADE KES ${diff}</span>`; else label=`<span style="font-size:9px;background:#555;color:#fff;padding:2px 6px;border-radius:6px">LOWER</span>`; }
+    let sorted=[...allJobsList].sort((a,b)=>{ let aAcc=p.allowed.includes(a.id)?0:1; let bAcc=p.allowed.includes(b.id)?0:1; return aAcc-bAcc; });
+    let jobsHtml=`<div class="jobs-col">`; sorted.forEach(j=>{ let allowed=p.allowed.includes(j.id); let rowClass=allowed?"yes":"no"; let payClass=allowed?"yes":""; let dotClass=allowed?"yes":"no"; let icon=allowed?"✅":"🔒"; jobsHtml+=`<div class="job-row ${rowClass}"><div style="display:flex;gap:8px;align-items:center"><div class="dot ${dotClass}"></div><span>${j.icon}</span><span style="color:${allowed?'#fff':'#555'}">${j.name}</span></div><div style="display:flex;gap:8px;align-items:center"><span class="pay ${payClass}">${allowed?`KES ${j.pay}`:''}</span><span>${icon}</span></div></div>`; }); jobsHtml+=`</div>`;
+    html+=`<div class="pkg ${active}" onclick="selectPkg('${p.id}')" style="border-left:4px solid ${p.color}"><div class="animal">${p.animal}</div><div style="display:flex;justify-content:space-between"><div><b>${p.animal} ${p.name}</b> ${label}<br><small style="font-size:10px;color:#8b8ba7">${p.desc} • ${p.earning}</small></div><span class="price">KES ${p.price}</span></div>${jobsHtml}</div>`;
+  }); document.getElementById("pkgList").innerHTML=html;
+  try{
+    let all=JSON.parse(localStorage.getItem("DIAMINES_MEMBERSHIP_DEPOSITS_ALL")||"[]");
+    let mine=all.filter(d=> String(d.email||"").toLowerCase()===getEmail()).reverse();
+    let h="<h4 style='font-size:10px;color:#5a5a78;letter-spacing:1px;margin:14px 0 8px'>MY PAYMENTS TO 0141416120 (in admin-deposit.html)</h4>";
+    if(mine.length===0) h+=`<p style="color:#555;font-size:11px;text-align:center">No payments yet</p>`;
+    mine.forEach(d=>{ let cls=d.status==="pending"?"wait":d.status==="approved"?"ok":"no"; h+=`<div class="p-item"><span><b>KES ${d.amount}</b> Code: ${d.code}<br><small>${d.phonePaid} • ${d.date}</small></span><span class="badge ${cls}">${d.status.toUpperCase()}</span></div>`; });
+    document.getElementById("myList").innerHTML=h;
+  }catch(e){}
+}
+window.selectPkg = (id)=>{ selectedPkg=packages.find(x=>x.id===id); render(); }
+
+function showPopup(html,color){
+  document.getElementById("sendingCard").innerHTML=html;
+  document.getElementById("sendingCard").style.border="1px solid "+color;
+  document.getElementById("sendingModal").classList.add("show");
+}
+function hidePopup(){ document.getElementById("sendingModal").classList.remove("show"); }
+
+window.submitDeposit = async ()=>{
+  let phonePaid=document.getElementById("phonePaid").value.trim();
+  let codeRaw=document.getElementById("mpesaCode").value.trim().toUpperCase();
+  let amount=Number(document.getElementById("amount").value);
+  let method=document.getElementById("method").value;
+
+  // VALIDATIONS LIKE deposit.html
+  if(phonePaid.length<10){ showPopup(`<div style="font-size:40px">📱</div><h3 style="color:#ff4d8d">Invalid Phone</h3><p style="font-size:11px;color:#8b8ba7">Enter valid phone you paid from 07XX</p><button onclick="hidePopup()" style="margin-top:12px;width:100%;padding:10px;border-radius:10px;border:none;background:#ff4d8d;color:#fff;font-weight:800">OKAY</button>`, "#ff4d8d"); return; }
+  if(codeRaw.length<10){ showPopup(`<div style="font-size:40px">⚠️</div><h3 style="color:#ff4d8d">Code Too Short</h3><p style="font-size:11px;color:#8b8ba7">M-Pesa Code must be 10 characters<br>Example: QJL8A9B2C1<br>You entered ${codeRaw.length} chars</p><button onclick="hidePopup()" style="margin-top:12px;width:100%;padding:10px;border-radius:10px;border:none;background:#ff4d8d;color:#fff;font-weight:800">OKAY</button>`, "#ff4d8d"); return; }
+  if(codeRaw.length>12){ showPopup(`<div style="font-size:40px">⚠️</div><h3 style="color:#ff4d8d">Code Too Long</h3><p style="font-size:11px;color:#8b8ba7">Code must be 10 chars</p><button onclick="hidePopup()" style="margin-top:12px;width:100%;padding:10px;border-radius:10px;border:none;background:#ff4d8d;color:#fff;font-weight:800">OKAY</button>`, "#ff4d8d"); return; }
+  if(amount<100){ showPopup(`<div style="font-size:40px">💰</div><h3 style="color:#ff4d8d">Min 100</h3><p style="font-size:11px;color:#8b8ba7">Minimum deposit KES 100</p><button onclick="hidePopup()" style="margin-top:12px;width:100%;padding:10px;border-radius:10px;border:none;background:#ff4d8d;color:#fff;font-weight:800">OKAY</button>`, "#ff4d8d"); return; }
+
+  // DUPLICATE CODE CHECK - Like deposit.html
+  let allMem=JSON.parse(localStorage.getItem("DIAMINES_MEMBERSHIP_DEPOSITS_ALL")||"[]");
+  let allDep=JSON.parse(localStorage.getItem("DIAMINES_DEPOSITS_ALL")||"[]");
+  let allLocal=[...allMem,...allDep];
+  let dupLocal = allLocal.find(d=> String(d.code||"").toUpperCase().trim() === codeRaw);
+  if(dupLocal){
+    showPopup(`<div style="font-size:40px">🚫</div><h3 style="color:#ff4d8d">Code Already Used!</h3><p style="font-size:11px;color:#8b8ba7">Code <b style="color:#facc15">${codeRaw}</b> was already used<br>Amount: KES ${dupLocal.amount}<br>Status: ${dupLocal.status}<br>Use new M-Pesa code</p><button onclick="hidePopup()" style="margin-top:12px;width:100%;padding:10px;border-radius:10px;border:none;background:#ff4d8d;color:#fff;font-weight:800">OKAY</button>`, "#ff4d8d");
+    return;
+  }
+
+  // Check Firebase for duplicate code - like deposit.html
+  showPopup(`<div class="loader"></div><h3 style="color:#facc15">Checking Code...</h3><p style="font-size:11px;color:#8b8ba7">Verifying ${codeRaw} not used before</p>`, "#facc15");
+  try{
+    let q1 = query(collection(db, "deposits"), where("code","==", codeRaw));
+    let snap1 = await getDocs(q1);
+    let q2 = query(collection(db, "membership_deposits"), where("code","==", codeRaw));
+    let snap2 = await getDocs(q2);
+    if(!snap1.empty ||!snap2.empty){
+      showPopup(`<div style="font-size:40px">🚫</div><h3 style="color:#ff4d8d">Code Already Used!</h3><p style="font-size:11px;color:#8b8ba7">Code <b>${codeRaw}</b> exists in database<br>Cannot reuse same code</p><button onclick="hidePopup()" style="margin-top:12px;width:100%;padding:10px;border-radius:10px;border:none;background:#ff4d8d;color:#fff;font-weight:800">OKAY</button>`, "#ff4d8d");
+      return;
+    }
+  }catch(e){ console.log(e); }
+
+  // STEP 1: SENDING POPUP
+  showPopup(`<div class="loader"></div><h3 style="color:#facc15">Sending...</h3><p style="font-size:11px;color:#8b8ba7">Sending KES ${amount}<br>Code: ${codeRaw}<br>To 0141416120</p>`, "#facc15");
+
+  await new Promise(r=>setTimeout(r,1500));
+
+  // STEP 2: SENT TO ADMIN
+  showPopup(`<div style="font-size:40px">📤</div><h3 style="color:#448aff">Sent to Admin!</h3><p style="font-size:11px;color:#8b8ba7">KES ${amount} Code ${codeRaw}<br>Sent to 0141416120<br>DIAMINES AGENCIES</p>`, "#448aff");
+
+  await new Promise(r=>setTimeout(r,1500));
+
+  // NOW SAVE
+  let email=getEmail();
+  let id="MEMB"+Date.now().toString().slice(-6);
+  let data={ id:id, email:email, phonePaid:phonePaid, code:codeRaw, amount:amount, method:method, till:MY_TILL, type:"membership", status:"pending", date:new Date().toLocaleString(), createdAt:new Date() };
+
+  allMem.push(data); localStorage.setItem("DIAMINES_MEMBERSHIP_DEPOSITS_ALL", JSON.stringify(allMem));
+  allDep.push({ id:id, email:email, phone:phonePaid, code:codeRaw, amount:amount, method:method, till:MY_TILL, type:"membership", status:"pending", date:new Date().toLocaleString() });
+  localStorage.setItem("DIAMINES_DEPOSITS_ALL", JSON.stringify(allDep));
+
+  try{
+    await addDoc(collection(db, "membership_deposits"), { uid: currentUser?currentUser.uid:email, email:email, phonePaid:phonePaid, code:codeRaw, amount:amount, method:method, till:MY_TILL, type:"membership", status:"pending", date:new Date().toISOString(), createdAt:new Date() });
+    await addDoc(collection(db, "deposits"), { uid: currentUser?currentUser.uid:email, email:email, phone:phonePaid, code:codeRaw, amount:amount, method:method, till:MY_TILL, type:"membership", from:"membership.html", status:"pending", date:new Date().toISOString(), createdAt:new Date() });
+  }catch(e){}
+
+  // STEP 3: FINAL SUCCESS - DEPOSIT REQUEST SENT TO ADMIN
+  hidePopup();
+  document.getElementById("succTitle").innerText="Deposit Request Sent to Admin!";
+  document.getElementById("succMsg").innerHTML=`KES ${amount}<br>Code: ${codeRaw}<br>To: ${MY_TILL}<br><br>⏳ Wait for admin approval in<br><b>admin-deposit.html</b><br><br>Total Deposit will update after approval`;
+  document.getElementById("succCode").innerText=id;
+  document.getElementById("succModal").classList.add("show");
+
+  document.getElementById("phonePaid").value="07"; document.getElementById("mpesaCode").value=""; document.getElementById("amount").value="";
+  document.getElementById("log").innerHTML=`<span style="color:#22c55e">✅ Request sent to admin-deposit.html - Waiting approval</span>`;
+  render();
+}
+
+async function payCommission(childEmail, amt){
+  try{ if(amt<=0) return; const percents=[0.10,0.05,0.03,0.02,0.01,0.005]; let cur=childEmail.toLowerCase(); let chain=[]; for(let i=0;i<6;i++){ let q=query(collection(db,"referrals"), where("child","==",cur)); let snap=await getDocs(q); if(snap.empty) break; let parent=String(snap.docs[0].data().parent||"").toLowerCase().trim(); if(!parent) break; chain.push(parent); cur=parent; }
+  for(let i=0;i<chain.length;i++){ let pEmail=chain[i]; let comm=Math.floor(amt*percents[i]); if(comm<=0) continue; let uq=query(collection(db,"users"), where("email","==",pEmail)); let usnap=await getDocs(uq); if(!usnap.empty){ await updateDoc(usnap.docs[0].ref,{ balance: increment(comm), refCommission: increment(comm) }); } } }catch(e){}
+}
+window.activatePackage = async ()=>{
+  let email=getEmail(); let curr=getCurrentPkgObj(); let currPrice=curr?curr.price:0; let toPay=selectedPkg.price - currPrice;
+  if(toPay<=0){ if(curr&&curr.id===selectedPkg.id){ alert("Already have "+selectedPkg.name); return; } if(curr&&selectedPkg.price<curr.price){ alert("Cannot downgrade"); return; } toPay=selectedPkg.price; }
+  if(getBal()<toPay){ alert("Need KES "+toPay+" Have KES "+getBal()+". Pay to "+MY_TILL+" above first!"); return; }
+  if(currentUser){ try{ await updateDoc(doc(db,"users",currentUser.uid),{ balance: increment(-toPay), package: selectedPkg.id, allowedJobs: selectedPkg.allowed }); if(currentData){ currentData.balance=getBal()-toPay; currentData.package=selectedPkg.id; } }catch(e){} }
+  let isUpgrade=curr?true:false; if(isUpgrade) await payCommission(email, toPay); else { if(!currentData||!currentData.commissionPaid){ await payCommission(email, selectedPkg.price); try{ if(currentUser) await updateDoc(doc(db,"users",currentUser.uid),{commissionPaid:true}); }catch(e){} } }
+  let finalBal=getBal()-toPay; if(finalBal<0) finalBal=0;
+  localStorage.setItem("DIAMINES_BAL_"+email, String(finalBal));
+  localStorage.setItem("DIAMINES_PACKAGE_"+email, selectedPkg.id);
+  let u=getUser(); if(u){ u.balance=finalBal; u.package=selectedPkg.id; localStorage.setItem("DIAMINES_CURRENT", JSON.stringify(u)); currentData=u; }
+  document.getElementById("succTitle").innerText=`${selectedPkg.animal} ${selectedPkg.name} Activated!`;
+  document.getElementById("succMsg").innerHTML=`Paid KES ${toPay}<br>Total Deposit: KES ${getDep().toLocaleString()}`;
+  document.getElementById("succCode").innerText=selectedPkg.name;
+  document.getElementById("succModal").classList.add("show");
+  setTimeout(()=>location.href="dashboard.html",1500); render();
+}
+render();
+setInterval(()=>{ document.getElementById("totalDep").innerText="KES "+getDep().toLocaleString(); },2000);
+</script>
+</body>
+</html>
