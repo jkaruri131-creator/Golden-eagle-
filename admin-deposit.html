@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin - Approve Deposits</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',system-ui}
+body{background:#070711;color:#fff;min-height:100vh;padding:14px;max-width:900px;margin:0 auto}
+h2{margin:14px 0;font-size:22px;font-weight:800}
+.card{background:#1a1a35;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;margin-bottom:12px}
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800}
+.pending{background:rgba(250,204,21,0.2);color:#facc15;border:1px solid rgba(250,204,21,0.4)}
+.approved{background:rgba(0,230,118,0.2);color:#00e676;border:1px solid rgba(0,230,118,0.4)}
+.rejected{background:rgba(255,82,82,0.2);color:#ff5252;border:1px solid rgba(255,82,82,0.4)}
+.btn{padding:10px 16px;border-radius:10px;border:none;font-weight:800;font-size:13px;cursor:pointer;margin-right:6px;margin-top:8px}
+.btn-approve{background:linear-gradient(135deg,#00e676,#00c853);color:#000}
+.btn-reject{background:#000;border:1px solid #ff5252;color:#ff5252}
+.btn-refresh{background:#25254a;color:#fff;border:1px solid #444;margin-bottom:14px;width:100%}
+.input{padding:10px;border-radius:10px;border:1px solid #333;background:#000;color:#fff;width:100%;margin-bottom:10px}
+.stats{display:flex;gap:10px;margin:12px 0}
+.stat{flex:1;background:#1a1a35;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px;text-align:center}
+.stat b{font-size:20px;display:block}
+</style>
+</head>
+<body>
+<h2>🔐 Admin - 0141416120 Deposits</h2>
+<p style="font-size:11px;color:#888;margin-bottom:10px">Check M-Pesa SMS on 0141416120 before approving!</p>
+<div class="stats">
+<div class="stat"><b id="countPending">0</b><span style="font-size:10px;color:#facc15">PENDING</span></div>
+<div class="stat"><b id="countApproved">0</b><span style="font-size:10px;color:#00e676">APPROVED</span></div>
+<div class="stat"><b id="countTotal">0</b><span style="font-size:10px;color:#888">TOTAL</span></div>
+</div>
+<button class="btn btn-refresh" onclick="loadDeposits()">🔄 Refresh</button>
+<input id="search" class="input" placeholder="Search code / phone / email..." oninput="loadDeposits()">
+<div id="list"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, query, where, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M", authDomain: "diamines-agencies.firebaseapp.com", projectId: "diamines-agencies", storageBucket: "diamines-agencies.firebasestorage.app", messagingSenderId: "438413306857", appId: "1:438413306857:web:3c7f736794be6a49b0f978" };
+const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+
+// Helper to get code from any field name
+function getCode(d){
+  return String(d.code || d.mpesaCode || d.Code || "").toUpperCase().trim();
+}
+function getPhone(d){
+  return String(d.phonePaid || d.payerPhone || d.phone || "").trim();
+}
+
+async function loadDeposits(){
+ let q = document.getElementById("search").value.trim().toUpperCase();
+ let listDiv = document.getElementById("list");
+ let firestoreDeposits = [];
+ try{
+   // FIX 1: Load from BOTH collections
+   let snap1 = await getDocs(collection(db,"deposits"));
+   snap1.forEach(d=>{ firestoreDeposits.push({firestoreId: d.id, collection: "deposits", ...d.data()}); });
+   let snap2 = await getDocs(collection(db,"membership_deposits"));
+   snap2.forEach(d=>{ firestoreDeposits.push({firestoreId: d.id, collection: "membership_deposits", ...d.data()}); });
+ }catch(e){ console.log(e); }
+ 
+ let local1 = JSON.parse(localStorage.getItem("DIAMINES_DEPOSITS_ALL")||"[]");
+ let local2 = JSON.parse(localStorage.getItem("DIAMINES_MEMBERSHIP_DEPOSITS_ALL")||"[]");
+ let local = [...local1, ...local2];
+ 
+ // Merge Firebase + Local by CODE (not mpesaCode only)
+ let combinedMap = new Map();
+ firestoreDeposits.forEach(c=>{
+   let code = getCode(c);
+   if(!code) return;
+   if(!combinedMap.has(code) || c.status==="pending"){
+     combinedMap.set(code, c);
+   } else {
+     // Keep latest status if exists
+     let existing = combinedMap.get(code);
+     if(c.status!=="pending") combinedMap.set(code, c);
+   }
+ });
+ local.forEach(l=>{
+   let code = getCode(l);
+   if(!code) return;
+   if(!combinedMap.has(code)){
+     combinedMap.set(code, l);
+   }
+ });
+ 
+ let combined = Array.from(combinedMap.values());
+ combined.sort((a,b)=> {
+   let da = new Date(a.date||a.createdAt||0).getTime();
+   let dbt = new Date(b.date||b.createdAt||0).getTime();
+   return dbt - da;
+ });
+
+ if(q) combined = combined.filter(d=> getCode(d).includes(q) || getPhone(d).includes(q) || String(d.email||"").toUpperCase().includes(q) );
+ 
+ document.getElementById("countPending").innerText=combined.filter(d=> (d.status||"pending")==="pending").length;
+ document.getElementById("countApproved").innerText=combined.filter(d=> d.status==="approved").length;
+ document.getElementById("countTotal").innerText=combined.length;
+ 
+ if(combined.length===0){ listDiv.innerHTML="<div class='card' style='text-align:center;color:#888'>No deposits yet</div>"; return; }
+ 
+ listDiv.innerHTML = combined.map(d=>{
+  let status=d.status||"pending";
+  let badgeClass=status==="approved"?"approved":status==="rejected"?"rejected":"pending";
+  let code = getCode(d);
+  let phone = getPhone(d);
+  let firestoreId = d.firestoreId || "";
+  let email = d.email || "";
+  let amount = d.amount || 0;
+  let uid = d.uid || "";
+  return `<div class="card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap"><div><div style="font-size:11px;color:#888">${d.date||""} • ${email}</div><b style="font-size:16px">KES ${(amount||0).toLocaleString()}</b> Code: <b style="color:#facc15">${code}</b><div style="font-size:12px">From: <b style="color:#fff">${phone}</b> → 0141416120</div><div style="font-size:10px;color:#666">UID: ${uid||"local"} • ${d.collection||"local"}</div></div><div><span class="badge ${badgeClass}">${status.toUpperCase()}</span></div></div>${status==="pending"?`<div><button class="btn btn-approve" onclick="approve('${firestoreId}','${code}','${email}',${amount},'${uid}')">✅ APPROVE</button><button class="btn btn-reject" onclick="reject('${firestoreId}','${code}')">❌ REJECT</button></div><div style="font-size:10px;color:#eab308;margin-top:6px">⚠️ CHECK SMS on 0141416120: Received KES ${amount} Code ${code} from ${phone}?</div>`:""}</div>`;
+ }).join("");
+}
+
+window.approve=async function(firestoreId,code,email,amount,uid){
+ if(!confirm("Approve KES "+amount+" Code "+code+"? Check M-Pesa SMS on 0141416120!")) return;
+ let codeU = String(code).toUpperCase();
+
+ // FIX 2: Update BOTH collections in Firebase
+ try{
+   // Update deposits where code == codeU OR mpesaCode == codeU
+   let q1 = query(collection(db,"deposits"), where("code","==",codeU));
+   let s1 = await getDocs(q1);
+   s1.forEach(async docSnap=>{ try{ await updateDoc(doc(db,"deposits",docSnap.id),{status:"approved"}); }catch(e){} });
+   let q1b = query(collection(db,"deposits"), where("mpesaCode","==",codeU));
+   let s1b = await getDocs(q1b);
+   s1b.forEach(async docSnap=>{ try{ await updateDoc(doc(db,"deposits",docSnap.id),{status:"approved"}); }catch(e){} });
+
+   // Update membership_deposits where code == codeU
+   let q2 = query(collection(db,"membership_deposits"), where("code","==",codeU));
+   let s2 = await getDocs(q2);
+   s2.forEach(async docSnap=>{ try{ await updateDoc(doc(db,"membership_deposits",docSnap.id),{status:"approved"}); }catch(e){} });
+   let q2b = query(collection(db,"membership_deposits"), where("mpesaCode","==",codeU));
+   let s2b = await getDocs(q2b);
+   s2b.forEach(async docSnap=>{ try{ await updateDoc(doc(db,"membership_deposits",docSnap.id),{status:"approved"}); }catch(e){} });
+
+   if(firestoreId){
+     try{ await updateDoc(doc(db,"deposits",firestoreId),{status:"approved"}); }catch(e){}
+     try{ await updateDoc(doc(db,"membership_deposits",firestoreId),{status:"approved"}); }catch(e){}
+   }
+ }catch(e){ console.log(e); }
+
+ // FIX 3: Update BOTH localStorage keys
+ try{
+   let local1=JSON.parse(localStorage.getItem("DIAMINES_DEPOSITS_ALL")||"[]");
+   local1.forEach(d=>{ if(getCode(d)===codeU) d.status="approved"; });
+   localStorage.setItem("DIAMINES_DEPOSITS_ALL",JSON.stringify(local1));
+   
+   let local2=JSON.parse(localStorage.getItem("DIAMINES_MEMBERSHIP_DEPOSITS_ALL")||"[]");
+   local2.forEach(d=>{ if(getCode(d)===codeU) d.status="approved"; });
+   localStorage.setItem("DIAMINES_MEMBERSHIP_DEPOSITS_ALL",JSON.stringify(local2));
+ }catch(e){}
+
+ // FIX 4: Update user balance
+ try{
+  if(uid){
+    let userDoc=await getDoc(doc(db,"users",uid));
+    if(userDoc.exists()){
+      await updateDoc(doc(db,"users",uid),{balance:increment(amount),totalDeposit:increment(amount)});
+    } else if(email){
+      let q=query(collection(db,"users"),where("email","==",email.toLowerCase()));
+      let qsnap=await getDocs(q);
+      qsnap.forEach(async(u)=>{ await updateDoc(doc(db,"users",u.id),{balance:increment(amount),totalDeposit:increment(amount)}); });
+    }
+  } else if(email){
+    let q=query(collection(db,"users"),where("email","==",email.toLowerCase()));
+    let qsnap=await getDocs(q);
+    qsnap.forEach(async(u)=>{ await updateDoc(doc(db,"users",u.id),{balance:increment(amount),totalDeposit:increment(amount)}); });
+  }
+  // Local balance too
+  let eLow = String(email).toLowerCase();
+  if(eLow){
+    localStorage.setItem("DIAMINES_BAL_"+eLow, String((Number(localStorage.getItem("DIAMINES_BAL_"+eLow)||0)+amount)));
+    localStorage.setItem("DIAMINES_TOTAL_DEPOSIT_"+eLow, String((Number(localStorage.getItem("DIAMINES_TOTAL_DEPOSIT_"+eLow)||0)+amount)));
+  }
+  alert("✅ APPROVED KES "+amount+" to "+email+" | Code "+codeU+" - Status now APPROVED in membership.html!");
+  loadDeposits();
+ }catch(e){ alert("Approved but balance error: "+e.message); loadDeposits(); }
+}
+
+window.reject=async function(firestoreId,code){
+ if(!confirm("Reject "+code+" as fake?")) return;
+ let codeU = String(code).toUpperCase();
+ try{
+   let q1 = query(collection(db,"deposits"), where("code","==",codeU));
+   let s1 = await getDocs(q1);
+   s1.forEach(async docSnap=>{ try{ await updateDoc(doc(db,"deposits",docSnap.id),{status:"rejected"}); }catch(e){} });
+   let q1b = query(collection(db,"deposits"), where("mpesaCode","==",codeU));
+   let s1b = await getDocs(q1b);
+   s1b.forEach(async docSnap=>{ try{ await updateDoc(doc(db,"deposits",docSnap.id),{status:"rejected"}); }catch(e){} });
+
+   let q2 = query(collection(db,"membership_deposits"), where("code","==",codeU));
+   let s2 = await getDocs(q2);
+   s2.forEach(async docSnap=>{ try{ await updateDoc(doc(db,"membership_deposits",docSnap.id),{status:"rejected"}); }catch(e){} });
+   let q2b = query(collection(db,"membership_deposits"), where("mpesaCode","==",codeU));
+   let s2b = await getDocs(q2b);
+   s2b.forEach(async docSnap=>{ try{ await updateDoc(doc(db,"membership_deposits",docSnap.id),{status:"rejected"}); }catch(e){} });
+
+   if(firestoreId){
+     try{ await updateDoc(doc(db,"deposits",firestoreId),{status:"rejected"}); }catch(e){}
+     try{ await updateDoc(doc(db,"membership_deposits",firestoreId),{status:"rejected"}); }catch(e){}
+   }
+ }catch(e){}
+
+ let local1=JSON.parse(localStorage.getItem("DIAMINES_DEPOSITS_ALL")||"[]");
+ local1.forEach(d=>{ if(getCode(d)===codeU) d.status="rejected"; });
+ localStorage.setItem("DIAMINES_DEPOSITS_ALL",JSON.stringify(local1));
+ let local2=JSON.parse(localStorage.getItem("DIAMINES_MEMBERSHIP_DEPOSITS_ALL")||"[]");
+ local2.forEach(d=>{ if(getCode(d)===codeU) d.status="rejected"; });
+ localStorage.setItem("DIAMINES_MEMBERSHIP_DEPOSITS_ALL",JSON.stringify(local2));
+
+ alert("❌ Rejected "+codeU+" - Status now REJECTED in membership.html!");
+ loadDeposits();
+}
+window.loadDeposits=loadDeposits; loadDeposits();
+</script>
+</body>
+</html>
