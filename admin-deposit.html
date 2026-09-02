@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin - Approve Deposits</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',system-ui}
+body{background:#070711;color:#fff;min-height:100vh;padding:14px;max-width:900px;margin:0 auto}
+h2{margin:14px 0;font-size:22px;font-weight:800}
+.card{background:#1a1a35;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px;margin-bottom:12px}
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800}
+.pending{background:rgba(250,204,21,0.2);color:#facc15;border:1px solid rgba(250,204,21,0.4)}
+.approved{background:rgba(0,230,118,0.2);color:#00e676;border:1px solid rgba(0,230,118,0.4)}
+.rejected{background:rgba(255,82,82,0.2);color:#ff5252;border:1px solid rgba(255,82,82,0.4)}
+.btn{padding:10px 16px;border-radius:10px;border:none;font-weight:800;font-size:13px;cursor:pointer;margin-right:6px;margin-top:8px}
+.btn-approve{background:linear-gradient(135deg,#00e676,#00c853);color:#000}
+.btn-reject{background:#000;border:1px solid #ff5252;color:#ff5252}
+.btn-refresh{background:#25254a;color:#fff;border:1px solid #444;margin-bottom:14px;width:100%}
+.input{padding:10px;border-radius:10px;border:1px solid #333;background:#000;color:#fff;width:100%;margin-bottom:10px}
+.stats{display:flex;gap:10px;margin:12px 0}
+.stat{flex:1;background:#1a1a35;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px;text-align:center}
+.stat b{font-size:20px;display:block}
+</style>
+</head>
+<body>
+<h2>🔐 Admin - 0141416120 Deposits</h2>
+<p style="font-size:11px;color:#888;margin-bottom:10px">Check M-Pesa SMS on 0141416120 before approving!</p>
+<div class="stats">
+<div class="stat"><b id="countPending">0</b><span style="font-size:10px;color:#facc15">PENDING</span></div>
+<div class="stat"><b id="countApproved">0</b><span style="font-size:10px;color:#00e676">APPROVED</span></div>
+<div class="stat"><b id="countTotal">0</b><span style="font-size:10px;color:#888">TOTAL</span></div>
+</div>
+<button class="btn btn-refresh" onclick="loadDeposits()">🔄 Refresh</button>
+<input id="search" class="input" placeholder="Search code / phone / email..." oninput="loadDeposits()">
+<div id="list"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, query, where, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M", authDomain: "diamines-agencies.firebaseapp.com", projectId: "diamines-agencies", storageBucket: "diamines-agencies.firebasestorage.app", messagingSenderId: "438413306857", appId: "1:438413306857:web:3c7f736794be6a49b0f978" };
+const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+async function loadDeposits(){
+ let q = document.getElementById("search").value.trim().toUpperCase();
+ let listDiv = document.getElementById("list");
+ let firestoreDeposits = [];
+ try{ let snap = await getDocs(collection(db,"deposits")); snap.forEach(d=>{ firestoreDeposits.push({firestoreId: d.id, ...d.data()}); }); }catch(e){}
+ let local = JSON.parse(localStorage.getItem("DIAMINES_DEPOSITS_ALL")||"[]");
+ let combined = [...firestoreDeposits];
+ local.forEach(l=>{ if(!combined.find(c=> String(c.mpesaCode).toUpperCase()===String(l.mpesaCode).toUpperCase())) combined.push(l); });
+ combined.sort((a,b)=> (b.id||0)-(a.id||0));
+ if(q) combined = combined.filter(d=> String(d.mpesaCode||"").toUpperCase().includes(q) || String(d.payerPhone||"").includes(q) || String(d.email||"").toUpperCase().includes(q) );
+ document.getElementById("countPending").innerText=combined.filter(d=> (d.status||"pending")==="pending").length;
+ document.getElementById("countApproved").innerText=combined.filter(d=> d.status==="approved").length;
+ document.getElementById("countTotal").innerText=combined.length;
+ if(combined.length===0){ listDiv.innerHTML="<div class='card' style='text-align:center;color:#888'>No deposits yet</div>"; return; }
+ listDiv.innerHTML = combined.map(d=>{
+  let status=d.status||"pending";
+  let badgeClass=status==="approved"?"approved":status==="rejected"?"rejected":"pending";
+  return `<div class="card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap"><div><div style="font-size:11px;color:#888">${d.date||""} • ${d.email||""}</div><b style="font-size:16px">KES ${(d.amount||0).toLocaleString()}</b> Code: <b style="color:#facc15">${d.mpesaCode||""}</b><div style="font-size:12px">From: <b style="color:#fff">${d.payerPhone||d.phone||""}</b> → 0141416120</div><div style="font-size:10px;color:#666">UID: ${d.uid||"local"}</div></div><div><span class="badge ${badgeClass}">${status.toUpperCase()}</span></div></div>${status==="pending"?`<div><button class="btn btn-approve" onclick="approve('${d.firestoreId||''}','${d.mpesaCode}','${d.email}',${d.amount},'${d.uid||''}')">✅ APPROVE</button><button class="btn btn-reject" onclick="reject('${d.firestoreId||''}','${d.mpesaCode}')">❌ REJECT</button></div><div style="font-size:10px;color:#eab308;margin-top:6px">⚠️ CHECK SMS on 0141416120: Received KES ${d.amount} Code ${d.mpesaCode} from ${d.payerPhone}?</div>`:""}</div>`;
+ }).join("");
+}
+window.approve=async function(firestoreId,code,email,amount,uid){
+ if(!confirm("Approve KES "+amount+" Code "+code+"? Check M-Pesa SMS on 0141416120!")) return;
+ if(firestoreId){ try{ await updateDoc(doc(db,"deposits",firestoreId),{status:"approved"}); }catch(e){} }
+ let local=JSON.parse(localStorage.getItem("DIAMINES_DEPOSITS_ALL")||"[]"); let found=local.find(d=> String(d.mpesaCode).toUpperCase()===String(code).toUpperCase()); if(found){ found.status="approved"; localStorage.setItem("DIAMINES_DEPOSITS_ALL",JSON.stringify(local)); }
+ try{
+  if(uid){ let userDoc=await getDoc(doc(db,"users",uid)); if(userDoc.exists()){ await updateDoc(doc(db,"users",uid),{balance:increment(amount),totalDeposit:increment(amount)}); } else { let q=query(collection(db,"users"),where("email","==",email)); let qsnap=await getDocs(q); qsnap.forEach(async(u)=>{ await updateDoc(doc(db,"users",u.id),{balance:increment(amount),totalDeposit:increment(amount)}); }); } } else if(email){ let q=query(collection(db,"users"),where("email","==",email)); let qsnap=await getDocs(q); qsnap.forEach(async(u)=>{ await updateDoc(doc(db,"users",u.id),{balance:increment(amount),totalDeposit:increment(amount)}); }); }
+  localStorage.setItem("DIAMINES_BAL_"+String(email).toLowerCase(),String((Number(localStorage.getItem("DIAMINES_BAL_"+String(email).toLowerCase())||0)+amount)));
+  localStorage.setItem("DIAMINES_TOTAL_DEPOSIT_"+String(email).toLowerCase(),String((Number(localStorage.getItem("DIAMINES_TOTAL_DEPOSIT_"+String(email).toLowerCase())||0)+amount)));
+  alert("✅ APPROVED KES "+amount+" to "+email); loadDeposits();
+ }catch(e){ alert("Approved but balance error: "+e.message); loadDeposits(); }
+}
+window.reject=async function(firestoreId,code){
+ if(!confirm("Reject "+code+" as fake?")) return;
+ if(firestoreId){ try{ await updateDoc(doc(db,"deposits",firestoreId),{status:"rejected"}); }catch(e){} }
+ let local=JSON.parse(localStorage.getItem("DIAMINES_DEPOSITS_ALL")||"[]"); let found=local.find(d=> String(d.mpesaCode).toUpperCase()===String(code).toUpperCase()); if(found){ found.status="rejected"; localStorage.setItem("DIAMINES_DEPOSITS_ALL",JSON.stringify(local)); }
+ alert("❌ Rejected "+code); loadDeposits();
+}
+window.loadDeposits=loadDeposits; loadDeposits();
+</script>
+</body>
+</html>
