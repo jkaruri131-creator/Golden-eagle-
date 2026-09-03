@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ADMIN - Writing Jobs Manager</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui;margin:0;padding:0}
+body{background:#07070a;color:#fff;padding:12px;min-height:100vh}
+.top{max-width:700px;margin:0 auto 12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.back{padding:8px 12px;background:rgba(255,255,255,0.08);border:1px solid #333;border-radius:10px;color:#fff;text-decoration:none;font-size:10px;font-weight:800}
+.card{background:#1e1e32;border:1px solid #333;border-radius:16px;padding:14px;margin-bottom:10px;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#a855f7,#7c3aed)}
+input,textarea,select{width:100%;background:#0f0f1a;border:1px solid #333;border-radius:10px;color:#fff;padding:10px;margin-top:6px;font-size:12px;outline:none}
+textarea{height:80px}
+label{font-size:8px;color:#888;font-weight:800;margin-top:10px;display:block;letter-spacing:1px}
+.btn{padding:10px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:10px;flex:1;display:flex;justify-content:center}
+.btn-e{background:rgba(96,165,250,0.15);color:#93c5fd;border:1px solid rgba(96,165,250,0.3)}
+.btn-d{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
+.btn-add{width:100%;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;padding:14px;border-radius:12px;font-weight:900;border:none;margin-top:10px;cursor:pointer}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style>
+</head>
+<body>
+<div class="top"><div style="display:flex;gap:6px"><a class="back" href="adminmasterpanel.html">← MASTER PANEL</a><a class="back" href="adminwriting.html" style="background:#a855f7">🛡️ REVIEW</a></div><a class="back" href="writing.html">👁️ USER VIEW</a></div>
+<div style="max-width:700px;margin:0 auto">
+<h3 style="color:#a855f7;text-align:center">✍️ ADMIN - POST WRITING JOBS</h3>
+<p style="text-align:center;color:#666;font-size:10px;margin-top:4px">Jobs show to ALL devices via Firebase</p>
+<div id="fbStatus" style="text-align:center;margin-top:8px;font-size:10px;padding:8px;border-radius:10px;background:#111;border:1px solid #333">⏳ Connecting...</div>
+<div id="list" style="margin-top:12px"></div>
+</div>
+<div class="card" style="max-width:700px;margin:12px auto">
+<h4 style="color:#a855f7">➕ Add New Writing Job</h4>
+<label>Title</label><input id="aTitle" placeholder="Blog: Benefits of Remote Work">
+<label>Short Instructions</label><textarea id="aDesc" placeholder="SEO optimized, engaging tone..."></textarea>
+<label>Full Topic / Brief</label><textarea id="aTopic" placeholder="Write 800-word article..." style="min-height:120px"></textarea>
+<div class="grid2"><div><label>Price KES</label><input id="aPrice" type="number" value="600"></div><div><label>Word Count</label><input id="aWords" value="800 words"></div></div>
+<div class="grid2"><div><label>Deadline Hours</label><input id="aDead" type="number" value="24"></div><div><label>Difficulty</label><select id="aLevel"><option>Easy</option><option selected>Medium</option><option>Hard</option></select></div></div>
+<button class="btn-add" id="pubBtn" onclick="addJob()">🚀 PUBLISH TO ALL DEVICES</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = {apiKey:"AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",authDomain:"diamines-agencies.firebaseapp.com",projectId:"diamines-agencies",storageBucket:"diamines-agencies.firebasestorage.app",messagingSenderId:"438413306857",appId:"1:438413306857:web:3c7f736794be6a49b0f978"};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let allJobs = [];
+function render(){
+  let h=''; if(!allJobs.length) h=`<div style="text-align:center;padding:30px;color:#666">No jobs - Publish above - Will show on ALL phones</div>`;
+  else h=allJobs.map(j=>`<div class="card"><div style="display:flex;justify-content:space-between"><b>✍️ ${j.title}</b><span style="color:#4ade80">KES ${j.price}</span></div><small style="color:#888">${j.words} • ${j.h}h • ${j.level}</small><p style="font-size:11px;color:#aaa;margin-top:6px">${j.desc}</p><div style="font-size:10px;color:#666;margin-top:6px;background:#000;padding:6px;border-radius:8px">${(j.topic||'').substring(0,120)}...</div><div style="display:flex;gap:6px;margin-top:10px"><button class="btn btn-e" onclick="editJob('${j.id}')">✏️ EDIT</button><button class="btn btn-d" onclick="delJob('${j.id}')">🗑️ DELETE FOR ALL</button></div></div>`).join('');
+  document.getElementById('list').innerHTML=h;
+}
+
+// LIVE LISTENER - Shows instantly on ALL devices
+try{
+  onSnapshot(collection(db, "writingJobs"), (snap)=>{
+    allJobs=[]; snap.forEach(d=>allJobs.push(d.data()));
+    allJobs.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+    document.getElementById('fbStatus').innerHTML = "✅ LIVE: "+allJobs.length+" jobs - All devices see this ✅";
+    document.getElementById('fbStatus').style.background="rgba(34,197,94,0.15)"; 
+    document.getElementById('fbStatus').style.color="#4ade80";
+    render();
+  }, (err)=>{
+    document.getElementById('fbStatus').innerHTML = "❌ Error: "+err.message+"<br>Go to Firebase Console > Firestore > Rules > Allow read,write true and Publish!";
+    document.getElementById('fbStatus').style.background="rgba(239,68,68,0.15)";
+    document.getElementById('fbStatus').style.color="#f87171";
+  });
+}catch(e){
+  document.getElementById('fbStatus').innerHTML = "❌ Firestore not enabled! Go to Firebase Console > Build > Firestore Database > Create Database";
+}
+
+window.addJob = async function(){
+  let t=document.getElementById('aTitle').value.trim(),d=document.getElementById('aDesc').value.trim(),tp=document.getElementById('aTopic').value.trim();
+  if(!t||!d||!tp){alert('Fill all');return;}
+  let btn=document.getElementById('pubBtn'); btn.innerText="⏳ Publishing..."; btn.disabled=true;
+  let job={id:'WR'+Date.now(),title:t,desc:d,topic:tp,brief:tp,words:document.getElementById('aWords').value||'800 words',price:parseInt(document.getElementById('aPrice').value)||600,h:parseInt(document.getElementById('aDead').value)||24,level:document.getElementById('aLevel').value,createdAt:new Date().toISOString(),status:'available'};
+  try{ await setDoc(doc(db, "writingJobs", job.id), job); alert('✅ Published! ALL devices will see it now!'); document.getElementById('aTitle').value='';document.getElementById('aDesc').value='';document.getElementById('aTopic').value=''; }
+  catch(e){ alert('❌ '+e.message); }
+  btn.innerText="🚀 PUBLISH TO ALL DEVICES"; btn.disabled=false;
+}
+window.delJob = async function(id){ if(!confirm('Delete for ALL?'))return; try{ await deleteDoc(doc(db, "writingJobs", id)); }catch(e){alert(e.message);} }
+window.editJob = async function(id){
+  let j=allJobs.find(x=>x.id===id); if(!j)return;
+  let nt=prompt('Title',j.title); if(nt===null)return; let np=prompt('Price',j.price); if(np===null)return;
+  j.title=nt; j.price=parseInt(np)||j.price;
+  try{ await setDoc(doc(db, "writingJobs", id), j); }catch(e){alert(e.message);}
+}
+</script>
+</body>
+</html>
