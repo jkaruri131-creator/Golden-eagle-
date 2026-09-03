@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diamonds Writing Jobs</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui;margin:0;padding:0}
+body{background:#07070a;color:#fff;min-height:100vh}
+.top{max-width:800px;margin:0 auto;padding:12px;display:flex;justify-content:space-between}
+.back{padding:8px 14px;border-radius:99px;font-size:10px;font-weight:800;text-decoration:none;border:1px solid #333;background:rgba(255,255,255,0.06);color:#fff}
+.header{max-width:800px;margin:12px auto;background:linear-gradient(135deg,#1a102a,#1e1e32);border:2px solid #a855f7;border-radius:18px;padding:16px;text-align:center}
+.header h1{color:#a855f7;font-size:18px}
+.header p{color:#666;font-size:10px;margin-top:4px}
+.tabs{max-width:800px;margin:12px auto;display:flex;gap:6px;overflow:auto;padding:0 12px}
+.tab{padding:10px 14px;border-radius:99px;font-size:10px;font-weight:900;cursor:pointer;border:1px solid #333;background:#1a1a2e;color:#888;white-space:nowrap}
+.tab.active{background:#a855f7;color:#fff;border-color:#a855f7}
+.card{background:#1e1e32;border:1px solid #333;border-radius:16px;padding:14px;margin-bottom:10px;max-width:800px;margin:12px auto;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#a855f7,#7c3aed);border-radius:16px 16px 0 0}
+.badge{padding:4px 8px;border-radius:99px;font-size:8px;font-weight:800;border:1px solid rgba(168,85,247,0.3);background:rgba(168,85,247,0.15);color:#c084fc}
+.btn{width:100%;padding:12px;border-radius:12px;border:none;font-weight:900;font-size:11px;cursor:pointer;margin-top:10px}
+.btn-purple{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;box-shadow:0 6px 18px rgba(168,85,247,0.3)}
+.btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-dark{background:#222;color:#888;border:1px solid #333}
+.page{display:none}.page.active{display:block}
+textarea{width:100%;background:#0f0f1a;border:1px solid #333;border-radius:10px;color:#fff;padding:10px;font-size:12px;outline:none}
+</style>
+</head>
+<body>
+<div class="top"><a class="back" href="dashboard.html">← DASHBOARD</a><a class="back" href="my-earnings.html">💰 WALLET</a></div>
+<div class="header"><h1>✍️ WRITING JOBS</h1><p>Earn per task - Real academic work</p></div>
+<div class="tabs">
+<button class="tab active" id="t-avail" onclick="switchTab('available')">📋 AVAILABLE (<span id="cA">0</span>)</button>
+<button class="tab" id="t-my" onclick="switchTab('mytask')">📁 MY TASKS (<span id="cM">0</span>)</button>
+<button class="tab" id="t-ap" onclick="switchTab('approved')">✅ APPROVED (<span id="cAp">0</span>)</button>
+<button class="tab" id="t-rj" onclick="switchTab('rejected')">❌ REJECTED (<span id="cR">0</span>)</button>
+</div>
+<div style="max-width:800px;margin:0 auto;padding:0 12px">
+<div id="page-available" class="page active"></div>
+<div id="page-mytask" class="page"></div>
+<div id="page-approved" class="page"></div>
+<div id="page-rejected" class="page"></div>
+</div>
+<div id="submitModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99;padding:20px;overflow:auto">
+<div style="max-width:600px;margin:30px auto;background:#1e1e32;border:2px solid #a855f7;border-radius:18px;padding:16px">
+<h3 style="color:#a855f7">📤 Submit Your Article</h3><p id="sTitle" style="font-size:11px;color:#888;margin-top:6px"></p>
+<textarea id="artBox" style="min-height:220px;margin-top:10px" placeholder="Paste your full article here... Minimum 100 characters"></textarea>
+<button class="btn btn-green" onclick="doSubmit()">✅ SUBMIT FOR REVIEW</button>
+<button class="btn btn-dark" onclick="document.getElementById('submitModal').style.display='none'">CANCEL</button>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = {apiKey:"AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",authDomain:"diamines-agencies.firebaseapp.com",projectId:"diamines-agencies",storageBucket:"diamines-agencies.firebasestorage.app",messagingSenderId:"438413306857",appId:"1:438413306857:web:3c7f736794be6a49b0f978"};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.db=db; window.FB={collection,getDocs,doc,deleteDoc,setDoc};
+</script>
+<script>
+let cur=null, email='';
+function getEmail(){ try{ let u=JSON.parse(localStorage.getItem('DIAMINES_CURRENT')||'{}'); return (u.email||localStorage.getItem('DIAMINES_USER_EMAIL')||localStorage.getItem('USER_EMAIL')||'').toLowerCase(); }catch{return ''} }
+email=getEmail();
+const K_AVAIL='DIAMONDS_AVAIL_V4', K_MY='DIAMONDS_MY_'+email;
+const getC=k=>{try{return JSON.parse(localStorage.getItem(k)||'[]')}catch{return[]}}, saveC=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+function switchTab(n){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('t-'+(n==='available'?'avail':n==='mytask'?'my':n==='approved'?'ap':'rj')).classList.add('active');
+  document.getElementById('page-'+n).classList.add('active');
+  if(n==='available') rAvail(); if(n==='mytask') rMy(); if(n==='approved') rAp(); if(n==='rejected') rRj();
+}
+function rAvail(){
+  let jobs=getC(K_AVAIL); jobs.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')); document.getElementById('cA').innerText=jobs.length;
+  let el=document.getElementById('page-available');
+  if(!jobs.length){ el.innerHTML=`<div style="text-align:center;padding:60px;color:#555">📭 No available jobs now<br><small>Check again later</small></div>`; return;}
+  el.innerHTML=jobs.map(j=>`<div class="card"><div style="display:flex;justify-content:space-between"><b>✍️ ${j.title}</b><span style="color:#4ade80;font-weight:900;background:rgba(34,197,94,0.15);padding:5px 12px;border-radius:99px">KES ${j.price}</span></div><div style="margin-top:8px;display:flex;gap:5px"><span class="badge">📝 ${j.words||'800'}</span><span class="badge">⏱️ ${j.h||24}h</span><span class="badge">${j.level||'Medium'}</span></div><p style="font-size:11px;color:#aaa;margin-top:8px">${j.desc||''}</p><div style="background:#000;border:1px solid #222;border-radius:10px;padding:8px;margin-top:8px"><small style="color:#666;font-size:9px">BRIEF:</small><p style="font-size:10px;color:#888">${(j.topic||j.brief||'').substring(0,220)}...</p></div><button class="btn btn-purple" onclick="accept('${j.id}')">🚀 ACCEPT JOB - KES ${j.price}</button></div>`).join('');
+}
+function rMy(){
+  let jobs=getC(K_MY).filter(j=>j.status==='in_progress'||j.status==='submitted'); document.getElementById('cM').innerText=jobs.length;
+  let el=document.getElementById('page-mytask'); if(!jobs.length){ el.innerHTML=`<div style="text-align:center;padding:60px;color:#555">📁 No tasks yet - Accept from AVAILABLE tab</div>`; return;}
+  el.innerHTML=jobs.map(j=>`<div class="card" style="border-left:5px solid #22c55e"><div style="display:flex;justify-content:space-between"><b>📝 ${j.title}</b><b style="color:#4ade80">KES ${j.price}</b></div><small style="color:#888">${new Date(j.takenAt).toLocaleString()} • ${j.status}</small><div style="background:#000;border:1px solid #222;border-radius:10px;padding:8px;margin-top:8px"><p style="font-size:10px;color:#888">${(j.topic||'').substring(0,300)}</p></div><button class="btn btn-green" onclick="openSub('${j.jobId||j.id}')">${j.status==='submitted'?'⏳ SUBMITTED - WAITING':'📤 SUBMIT ARTICLE'}</button></div>`).join('');
+}
+function rAp(){ let jobs=getC(K_MY).filter(j=>j.status==='approved'); document.getElementById('cAp').innerText=jobs.length; document.getElementById('page-approved').innerHTML=jobs.length?jobs.map(j=>`<div class="card" style="border-left:5px solid #22c55e"><b>✅ ${j.title}</b> <b style="color:#4ade80;float:right">+KES ${j.price}</b><br><small style="color:#888">${j.reviewedAt||''}</small><div style="background:rgba(34,197,94,0.08);border:1px dashed #22c55e;border-radius:10px;padding:8px;margin-top:8px"><small style="color:#4ade80">Feedback: ${j.feedback||'Great work!'}</small></div></div>`).join(''):`<div style="text-align:center;padding:60px;color:#555">✅ No approved yet</div>`; }
+function rRj(){ let jobs=getC(K_MY).filter(j=>j.status==='rejected'); document.getElementById('cR').innerText=jobs.length; document.getElementById('page-rejected').innerHTML=jobs.length?jobs.map(j=>`<div class="card" style="border-left:5px solid #ef4444"><b>❌ ${j.title}</b><div style="background:rgba(239,68,68,0.08);border:1px dashed #ef4444;border-radius:10px;padding:8px;margin-top:8px"><small style="color:#f87171">Reason: ${j.feedback||'Rejected'}</small></div></div>`).join(''):`<div style="text-align:center;padding:60px;color:#555">❌ No rejected</div>`; }
+let cAv=getC(K_AVAIL); if(cAv.length) rAvail();
+async function sync(){
+  try{
+    let s=await window.FB.getDocs(window.FB.collection(window.db,"writingJobs"));
+    let avail=[]; s.forEach(d=>{ let v=d.data(); if(!v.status||v.status==='available') avail.push(v); });
+    avail.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')); saveC(K_AVAIL, avail); rAvail();
+    let s2=await window.FB.getDocs(window.FB.collection(window.db,"writingTaken"));
+    let my=[]; s2.forEach(d=>{ let v=d.data(); if((v.takenBy||'').toLowerCase()===email) my.push(v); });
+    let local=getC(K_MY), merged=[...my]; local.forEach(l=>{ if((l.status==='approved'||l.status==='rejected')&&!merged.find(m=>(m.jobId||m.id)===(l.jobId||l.id)&&m.status===l.status)) merged.push(l); });
+    saveC(K_MY, merged); document.getElementById('cM').innerText=merged.filter(j=>j.status==='in_progress'||j.status==='submitted').length; document.getElementById('cAp').innerText=merged.filter(j=>j.status==='approved').length; document.getElementById('cR').innerText=merged.filter(j=>j.status==='rejected').length;
+  }catch(e){}
+}
+sync();
+window.accept=async function(id){
+  let avail=getC(K_AVAIL), job=avail.find(j=>j.id===id); if(!job) return;
+  if(!confirm(`Accept "${job.title}" for KES ${job.price}?`)) return;
+  saveC(K_AVAIL, avail.filter(j=>j.id!==id)); rAvail();
+  let my=getC(K_MY), taken={...job, jobId:id, takenBy:email, takenAt:new Date().toISOString(), status:'in_progress', userEmail:email};
+  my.unshift(taken); saveC(K_MY, my);
+  try{ await window.FB.deleteDoc(window.FB.doc(window.db,"writingJobs", id)); await window.FB.setDoc(window.FB.doc(window.db,"writingTaken", id), taken); await window.FB.setDoc(window.FB.doc(window.db,"writingPending", String(Date.now())), {...taken, original:taken.topic, brief:taken.topic}); }catch{}
+  alert('✅ Accepted! Moved to MY TASKS - It disappeared from main website for all users.');
+  switchTab('mytask');
+}
+window.openSub=function(jobId){ let my=getC(K_MY).find(j=>(j.jobId||j.id)===jobId); if(!my) return; cur=my; document.getElementById('sTitle').innerText=my.title+' - KES '+my.price; document.getElementById('artBox').value=''; document.getElementById('submitModal').style.display='block'; }
+window.doSubmit=async function(){
+  let txt=document.getElementById('artBox').value.trim(); if(txt.length<100) return alert('Too short - Minimum 100 chars');
+  let my=getC(K_MY), idx=my.findIndex(j=>(j.jobId||j.id)===(cur.jobId||cur.id)); if(idx==-1) return;
+  my[idx].status='submitted'; my[idx].written=txt; my[idx].proof=txt; my[idx].submittedAt=new Date().toISOString(); saveC(K_MY, my);
+  try{ await window.FB.setDoc(window.FB.doc(window.db,"writingTaken", cur.jobId||cur.id), my[idx]); await window.FB.setDoc(window.FB.doc(window.db,"writingPending", String(my[idx].submittedAt)), {...my[idx], original:my[idx].topic, written:txt, proof:txt, userEmail:email, earn:my[idx].price, price:my[idx].price}); }catch{}
+  document.getElementById('submitModal').style.display='none'; alert('✅ Submitted! Admin will review in adminmasterpanel.html'); rMy();
+}
+</script>
+</body>
+</html>
