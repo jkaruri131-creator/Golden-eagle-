@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Writing Studio - Diamines</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui;margin:0;padding:0}
+body{background:#07070a;color:#fff;min-height:100vh}
+.top{max-width:800px;margin:0 auto;padding:14px;display:flex;justify-content:space-between}
+.back{padding:9px 16px;border-radius:99px;font-size:10px;font-weight:800;text-decoration:none;border:1px solid #2a2a3a;background:rgba(255,255,255,0.05);color:#fff;backdrop-filter:blur(10px)}
+.header{max-width:800px;margin:10px auto;background:radial-gradient(circle at top, #2a1845, #1e1e32);border:1px solid rgba(168,85,247,0.3);border-radius:20px;padding:20px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+.header h1{background:linear-gradient(90deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:20px;font-weight:900}
+.tabs{max-width:800px;margin:14px auto;display:flex;gap:8px;overflow:auto;padding:0 12px;scrollbar-width:none}
+.tab{padding:11px 18px;border-radius:99px;font-size:10px;font-weight:900;cursor:pointer;border:1px solid #2a2a3a;background:#14141f;color:#777;white-space:nowrap;transition:0.3s}
+.tab.active{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;border-color:#a855f7;box-shadow:0 4px 15px rgba(168,85,247,0.4)}
+.card{background:linear-gradient(180deg,#1e1e32,#181828);border:1px solid #2a2a3a;border-radius:18px;padding:16px;margin:12px auto;max-width:800px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#a855f7,#ec4899)}
+.badge{padding:5px 10px;border-radius:99px;font-size:9px;font-weight:800;border:1px solid rgba(168,85,247,0.25);background:rgba(168,85,247,0.12);color:#c084fc}
+.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:900;font-size:11px;cursor:pointer;margin-top:12px;letter-spacing:0.5px;transition:0.2s}
+.btn-purple{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;box-shadow:0 6px 18px rgba(168,85,247,0.3)}
+.btn-purple:active{transform:scale(0.98)}
+.btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-dark{background:#1a1a25;color:#666;border:1px solid #2a2a3a}
+.page{display:none}.page.active{display:block}
+textarea{width:100%;background:#0f0f1a;border:1px solid #2a2a3a;border-radius:12px;color:#fff;padding:12px;font-size:12px;outline:none}
+textarea:focus{border-color:#a855f7}
+
+/* PREMIUM POPUPS */
+.popup-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(12px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.3s}
+.popup-bg.show{display:flex}
+.popup{width:100%;max-width:380px;background:linear-gradient(180deg,#1e1e32,#141420);border:1px solid rgba(168,85,247,0.4);border-radius:24px;padding:28px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(168,85,247,0.2) inset;animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)}
+.popup-icon{width:80px;height:80px;margin:0 auto 16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px}
+.icon-success{background:radial-gradient(circle, rgba(34,197,94,0.25), rgba(34,197,94,0.05));border:2px solid rgba(34,197,94,0.3)}
+.icon-error{background:radial-gradient(circle, rgba(239,68,68,0.25), rgba(239,68,68,0.05));border:2px solid rgba(239,68,68,0.3)}
+.icon-wait{background:radial-gradient(circle, rgba(168,85,247,0.25), rgba(168,85,247,0.05));border:2px solid rgba(168,85,247,0.3)}
+.popup h2{font-size:18px;margin-bottom:8px}
+.popup p{font-size:12px;color:#999;line-height:1.5;margin-bottom:20px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{transform:scale(0.8) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.confetti{position:absolute;width:6px;height:6px;background:#a855f7;animation:fall 3s linear infinite}
+@keyframes fall{0%{transform:translateY(-100px) rotate(0deg)}100%{transform:translateY(100vh) rotate(720deg)}}
+</style>
+</head>
+<body>
+<div class="top"><a class="back" href="dashboard.html">← Dashboard</a><a class="back" href="wallet.html">💰 Wallet</a></div>
+<div class="header"><h1>✍️ DIAMINES WRITING STUDIO</h1><p style="color:#888;font-size:11px;margin-top:6px">Professional content creation platform • Earn per article</p><div style="margin-top:12px;display:flex;justify-content:center;gap:8px"><span style="background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.2);padding:6px 12px;border-radius:99px;font-size:9px">● LIVE JOBS</span><span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.2);padding:6px 12px;border-radius:99px;font-size:9px">⚡ Instant Payout</span></div></div>
+<div class="tabs">
+<button class="tab active" id="t-avail" onclick="switchTab('available')">📋 Available (<span id="cA">0</span>)</button>
+<button class="tab" id="t-my" onclick="switchTab('mytask')">📁 In Progress (<span id="cM">0</span>)</button>
+<button class="tab" id="t-ap" onclick="switchTab('approved')">✅ Approved (<span id="cAp">0</span>)</button>
+<button class="tab" id="t-rj" onclick="switchTab('rejected')">❌ Revisions (<span id="cR">0</span>)</button>
+</div>
+<div style="max-width:800px;margin:0 auto;padding:0 12px">
+<div id="page-available" class="page active"></div>
+<div id="page-mytask" class="page"></div>
+<div id="page-approved" class="page"></div>
+<div id="page-rejected" class="page"></div>
+</div>
+
+<!-- SUBMIT MODAL -->
+<div id="submitModal" class="popup-bg"><div class="popup" style="max-width:500px"><h3 style="color:#a855f7;text-align:left">📤 Submit Your Article</h3><p id="sTitle" style="text-align:left;color:#666;font-size:11px;margin:8px 0"></p><textarea id="artBox" style="min-height:240px;margin-top:10px" placeholder="Paste your 800+ word article here... Our editors will review within 24h"></textarea><div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-dark" style="flex:1" onclick="closeAll()">Cancel</button><button class="btn btn-green" style="flex:1.5" onclick="doSubmit()">Submit for Review</button></div></div></div>
+
+<!-- DECORATIVE POPUPS -->
+<div id="pop-success" class="popup-bg"><div class="popup"><div class="popup-icon icon-success">🎉</div><h2 style="color:#22c55e">Congratulations!</h2><p id="pop-success-text">Your work was approved!</p><button class="btn btn-green" onclick="closeAll()">Continue Writing 🚀</button></div></div>
+<div id="pop-reject" class="popup-bg"><div class="popup"><div class="popup-icon icon-error">📝</div><h2 style="color:#f87171">Revision Needed</h2><p id="pop-reject-text">Editor requested changes.</p><button class="btn btn-dark" style="background:#f87171;color:#fff" onclick="closeAll()">View Feedback</button></div></div>
+<div id="pop-accept" class="popup-bg"><div class="popup"><div class="popup-icon icon-wait">✨</div><h2 style="color:#a855f7">Task Accepted!</h2><p id="pop-accept-text">You have 24 hours to complete this article. Good luck!</p><button class="btn btn-purple" onclick="closeAll();switchTab('mytask')">Go to My Tasks →</button></div></div>
+<div id="pop-submit" class="popup-bg"><div class="popup"><div class="popup-icon icon-wait">🚀</div><h2 style="color:#a855f7">Submitted for Review!</h2><p>Our editorial team will review your article within 24 hours. You will be notified once approved and KES credited instantly to your wallet!</p><button class="btn btn-purple" onclick="closeAll()">Awesome!</button></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, deleteDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = {apiKey:"AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",authDomain:"diamines-agencies.firebaseapp.com",projectId:"diamines-agencies",storageBucket:"diamines-agencies.firebasestorage.app",messagingSenderId:"438413306857",appId:"1:438413306857:web:3c7f736794be6a49b0f978"};
+const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+let email=''; try{ let u=JSON.parse(localStorage.getItem('DIAMINES_CURRENT')||'{}'); email=(u.email||localStorage.getItem('DIAMINES_USER_EMAIL')||'').toLowerCase(); }catch{}
+let availJobs=[], myJobs=[]; const K_MY='DIAMONDS_MY_'+email;
+function switchTab(n){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById('t-'+(n==='available'?'avail':n==='mytask'?'my':n==='approved'?'ap':'rj')).classList.add('active'); document.getElementById('page-'+n).classList.add('active'); if(n==='available') rAvail(); if(n==='mytask') rMy(); if(n==='approved') rAp(); if(n==='rejected') rRj(); } window.switchTab=switchTab;
+function showPop(id){ document.getElementById(id).classList.add('show'); }
+window.closeAll=function(){ document.querySelectorAll('.popup-bg').forEach(p=>p.classList.remove('show')); }
+
+function rAvail(){
+  document.getElementById('cA').innerText=availJobs.length;
+  let el=document.getElementById('page-available');
+  if(!availJobs.length){ el.innerHTML=`<div style="text-align:center;padding:60px;color:#555"><div style="font-size:40px">📭</div><p style="margin-top:10px">No jobs available right now</p><small style="color:#444">New tasks are posted daily at 9 AM EAT</small></div>`; return;}
+  el.innerHTML=availJobs.map(j=>`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:13px">✍️ ${j.title}</b><span style="color:#4ade80;font-weight:900;background:rgba(34,197,94,0.15);padding:6px 14px;border-radius:99px;border:1px solid rgba(34,197,94,0.2)">KES ${j.price}</span></div><div style="margin-top:10px;display:flex;gap:6px"><span class="badge">📝 ${j.words||'800'}</span><span class="badge">⏱️ ${j.h||24}h</span><span class="badge">${j.level||'Medium'}</span></div><p style="font-size:11px;color:#aaa;margin-top:10px;line-height:1.5">${j.desc||''}</p><div style="background:rgba(0,0,0,0.4);border:1px solid #222;border-radius:12px;padding:10px;margin-top:10px"><small style="color:#a855f7;font-weight:800;font-size:8px;letter-spacing:1px">PROJECT BRIEF</small><p style="font-size:10px;color:#888;margin-top:4px">${(j.topic||'').substring(0,200)}...</p></div><button class="btn btn-purple" onclick="accept('${j.id}')">🚀 ACCEPT TASK • KES ${j.price}</button></div>`).join('');
+}
+function rMy(){
+  let f=myJobs.filter(j=>j.status==='in_progress'||j.status==='submitted'); document.getElementById('cM').innerText=f.length;
+  let el=document.getElementById('page-mytask'); if(!f.length){ el.innerHTML=`<div style="text-align:center;padding:60px;color:#555"><div style="font-size:40px">📁</div><p>Accept a task to start earning</p></div>`; return;}
+  el.innerHTML=f.map(j=>`<div class="card" style="border-left:4px solid #a855f7"><div style="display:flex;justify-content:space-between"><b>📝 ${j.title}</b><b style="color:#4ade80">KES ${j.price}</b></div><small style="color:#666">${j.status==='submitted'?'⏳ Under Review':'🟢 In Progress'} • ${j.takenAt?new Date(j.takenAt).toLocaleDateString():''}</small><div style="background:rgba(0,0,0,0.4);border-radius:10px;padding:10px;margin-top:10px"><p style="font-size:10px;color:#888">${(j.topic||'').substring(0,250)}...</p></div>${j.status==='in_progress'?`<button class="btn btn-green" onclick="openSub('${j.jobId||j.id}')">📤 SUBMIT ARTICLE</button>`:`<div style="text-align:center;padding:10px;background:rgba(168,85,247,0.1);border-radius:10px;margin-top:10px;color:#a855f7;font-size:10px">⏳ Editorial review in progress...</div>`}</div>`).join('');
+}
+function rAp(){
+  let f=myJobs.filter(j=>j.status==='approved'); document.getElementById('cAp').innerText=f.length;
+  if(f.length &&!sessionStorage.getItem('shownAp_'+f[0].jobId)){
+    setTimeout(()=>{ document.getElementById('pop-success-text').innerHTML=`Your article <b>${f[0].title}</b> was approved! <br><b style="color:#22c55e;font-size:20px">+ KES ${f[0].price}</b> credited to your wallet!`; showPop('pop-success'); createConfetti(); sessionStorage.setItem('shownAp_'+f[0].jobId,'1'); }, 800);
+  }
+  document.getElementById('page-approved').innerHTML=f.length?f.map(j=>`<div class="card" style="border-left:4px solid #22c55e"><div style="display:flex;justify-content:space-between"><b>✅ ${j.title}</b><b style="color:#22c55e">+KES ${j.price}</b></div><p style="font-size:11px;color:#4ade80;margin-top:8px">🎉 Approved • Paid to wallet</p><div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15);border-radius:10px;padding:10px;margin-top:8px"><small style="color:#22c55e">EDITOR FEEDBACK:</small><p style="font-size:10px;color:#aaa;margin-top:4px">${j.feedback||'Excellent work! Keep it up!'}</p></div></div>`).join(''):`<div style="text-align:center;padding:60px;color:#555"><div style="font-size:40px">✅</div><p>Approved articles appear here</p></div>`;
+}
+function rRj(){
+  let f=myJobs.filter(j=>j.status==='rejected'); document.getElementById('cR').innerText=f.length;
+  if(f.length &&!sessionStorage.getItem('shownRj_'+f[0].jobId)){
+    setTimeout(()=>{ document.getElementById('pop-reject-text').innerHTML=`Your article <b>${f[0].title}</b> needs revision:<br><br><i style="color:#f87171">"${f[0].feedback||'Please improve quality'}"</i>`; showPop('pop-reject'); sessionStorage.setItem('shownRj_'+f[0].jobId,'1'); }, 800);
+  }
+  document.getElementById('page-rejected').innerHTML=f.length?f.map(j=>`<div class="card" style="border-left:4px solid #ef4444"><b>❌ ${j.title}</b><div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);border-radius:10px;padding:10px;margin-top:10px"><small style="color:#f87171">REVISION NOTES:</small><p style="font-size:10px;color:#aaa;margin-top:4px">${j.feedback||''}</p></div><button class="btn btn-dark" style="color:#f87171;border-color:rgba(239,68,68,0.2)" onclick="openSub('${j.jobId||j.id}')">✏️ EDIT & RESUBMIT</button></div>`).join(''):`<div style="text-align:center;padding:60px;color:#555"><div style="font-size:40px">✨</div><p>No revisions</p></div>`;
+}
+function createConfetti(){ for(let i=0;i<20;i++){ let c=document.createElement('div'); c.className='confetti'; c.style.left=Math.random()*100+'%'; c.style.background=['#a855f7','#22c55e','#ec4899','#facc15'][Math.floor(Math.random()*4)]; c.style.animationDelay=Math.random()*2+'s'; document.body.appendChild(c); setTimeout(()=>c.remove(),3000); } }
+
+// LIVE SYNC - Hidden from user
+onSnapshot(collection(db, "writingJobs"), (snap)=>{ availJobs=[]; snap.forEach(d=>{ let v=d.data(); if(!v.status||v.status==='available') availJobs.push(v); }); availJobs.sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt)); rAvail(); });
+onSnapshot(collection(db, "writingTaken"), (snap)=>{ myJobs=[]; snap.forEach(d=>{ let v=d.data(); if((v.takenBy||'').toLowerCase()===email) myJobs.push(v); }); let local=JSON.parse(localStorage.getItem(K_MY)||'[]'); local.forEach(l=>{ if((l.status==='approved'||l.status==='rejected')&&!myJobs.find(m=>m.jobId===l.jobId && m.status===l.status)) myJobs.push(l); }); localStorage.setItem(K_MY, JSON.stringify(myJobs)); rMy(); rAp(); rRj(); });
+
+let cur=null;
+window.accept=async function(id){
+  let job=availJobs.find(j=>j.id===id); if(!job) return;
+  try{
+    let taken={...job, jobId:id, takenBy:email, takenAt:new Date().toISOString(), status:'in_progress', userEmail:email};
+    await deleteDoc(doc(db, "writingJobs", id)); await setDoc(doc(db, "writingTaken", id), taken);
+    await setDoc(doc(db, "writingPending", String(Date.now())), {...taken, original:taken.topic});
+    document.getElementById('pop-accept-text').innerText=`You accepted "${job.title}" - You have ${job.h||24} hours to complete it!`;
+    showPop('pop-accept');
+  }catch(e){ console.log(''); }
+}
+window.openSub=function(jobId){ let j=myJobs.find(x=>(x.jobId||x.id)===jobId); if(!j) return; cur=j; document.getElementById('sTitle').innerText=j.title; document.getElementById('artBox').value=j.written||''; document.getElementById('submitModal').classList.add('show'); }
+window.doSubmit=async function(){
+  let txt=document.getElementById('artBox').value.trim(); if(txt.length<100) return alert('Please write at least 100 characters');
+  let idx=myJobs.findIndex(x=>(x.jobId||x.id)===(cur.jobId||cur.id)); if(idx==-1) return;
+  myJobs[idx].status='submitted'; myJobs[idx].written=txt; myJobs[idx].submittedAt=new Date().toISOString();
+  localStorage.setItem(K_MY, JSON.stringify(myJobs));
+  try{ await setDoc(doc(db, "writingTaken", cur.jobId||cur.id), myJobs[idx]); await setDoc(doc(db, "writingPending", String(Date.now())), {...myJobs[idx], written:txt, userEmail:email, earn:myJobs[idx].price}); }catch(e){}
+  document.getElementById('submitModal').classList.remove('show'); showPop('pop-submit'); rMy();
+}
+</script>
+</body>
+</html>
