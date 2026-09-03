@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Writing Studio - Diamines Dark</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui,sans-serif;margin:0;padding:0}
+body{background:#07070a;color:#e5e7eb;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(600px at 15% 10%,rgba(168,85,247,0.15),transparent),radial-gradient(600px at 85% 0%,rgba(34,197,94,0.12),transparent),radial-gradient(500px at 50% 90%,rgba(236,72,153,0.10),transparent);pointer-events:none;z-index:-1}
+.top{max-width:850px;margin:0 auto;padding:16px;display:flex;justify-content:space-between;align-items:center}
+.back{padding:10px 18px;border-radius:99px;font-size:11px;font-weight:800;text-decoration:none;border:1px solid rgba(168,85,247,0.3);background:rgba(20,12,35,0.8);color:#c084fc;backdrop-filter:blur(10px);box-shadow:0 4px 16px rgba(0,0,0,0.4)}
+.pill{padding:10px 16px;border-radius:99px;background:#1a102a;border:1px solid rgba(168,85,247,0.3);font-size:10px;font-weight:800;color:#c084fc}
+.header{max-width:850px;margin:12px auto;background:linear-gradient(135deg,#1a102a 0%, #151528 100%);border:1px solid rgba(168,85,247,0.25);border-radius:26px;padding:26px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(168,85,247,0.1) inset;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#a855f7,#ec4899,#22c55e,#a855f7);background-size:200% 100%;animation:move 3s linear infinite}
+@keyframes move{0%{background-position:0%}100%{background-position:200%}}
+.header h1{position:relative;font-size:26px;font-weight:1000;letter-spacing:-0.5px;color:#fff}
+.header h1 span{display:block;font-size:11px;font-weight:700;color:#a855f7;margin-top:6px;letter-spacing:2.5px}
+.tabs{max-width:850px;margin:16px auto;display:flex;gap:8px;overflow:auto;padding:0 14px;scrollbar-width:none}
+.tab{padding:12px 18px;border-radius:99px;font-size:11px;font-weight:900;cursor:pointer;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.05);color:#9ca3af;white-space:nowrap;transition:0.15s}
+.tab.active{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;border-color:#a855f7;box-shadow:0 8px 20px rgba(168,85,247,0.4);transform:translateY(-1px)}
+.card{background:linear-gradient(135deg,#1a1a2e,#151528);border:1px solid rgba(168,85,247,0.15);border-left:4px solid #a855f7;border-radius:20px;padding:18px;margin:12px auto;max-width:850px;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.4)}
+.badge{padding:6px 12px;border-radius:99px;font-size:9px;font-weight:800;border:1px solid rgba(168,85,247,0.2);background:rgba(168,85,247,0.12);color:#c084fc}
+.btn{width:100%;padding:14px;border-radius:14px;border:none;font-weight:900;font-size:12px;cursor:pointer;margin-top:12px;letter-spacing:0.3px;transition:0.15s;will-change:transform}
+.btn:active{transform:scale(0.96)}
+.btn-purple{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;box-shadow:0 8px 20px rgba(168,85,247,0.35)}
+.btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 8px 20px rgba(34,197,94,0.3)}
+.btn-dark{background:rgba(255,255,255,0.06);color:#9ca3af;border:1px solid rgba(255,255,255,0.1)}
+.page{display:none}.page.active{display:block}
+textarea{width:100%;background:#0a0a14;color:#e5e7eb;border:2px solid rgba(168,85,247,0.25);border-radius:14px;padding:14px;font-size:12px;outline:none}
+textarea:focus{border-color:#a855f7;box-shadow:0 0 0 4px rgba(168,85,247,0.15)}
+textarea::placeholder{color:#6b7280}
+.popup-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(16px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.popup-bg.show{display:flex;animation:fadeIn 0.15s}
+.popup{width:100%;max-width:400px;background:linear-gradient(180deg,#1e1e32,#151528);border:1px solid rgba(168,85,247,0.3);border-radius:28px;padding:30px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,0.6);animation:popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);position:relative;overflow:hidden}
+.popup::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#a855f7,#ec4899,#22c55e)}
+.popup-icon{width:90px;height:90px;margin:0 auto 18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;position:relative}
+.icon-success{background:radial-gradient(circle, rgba(34,197,94,0.2), rgba(34,197,94,0.05));border:2px solid rgba(34,197,94,0.3);box-shadow:0 0 30px rgba(34,197,94,0.2)}
+.icon-error{background:radial-gradient(circle, rgba(239,68,68,0.18), rgba(239,68,68,0.03));border:2px solid rgba(239,68,68,0.3)}
+.icon-wait{background:radial-gradient(circle, rgba(168,85,247,0.2), rgba(168,85,247,0.05));border:2px solid rgba(168,85,247,0.3)}
+.icon-gold{background:radial-gradient(circle, rgba(245,158,11,0.2), rgba(245,158,11,0.05));border:2px solid rgba(245,158,11,0.3)}
+.popup h2{font-size:20px;margin-bottom:8px;color:#fff}
+.popup p{font-size:12px;color:#9ca3af;line-height:1.6;margin-bottom:22px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{transform:scale(0.85) translateY(10px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.confetti{position:fixed;top:-10px;width:8px;height:8px;border-radius:2px;animation:fall 2.2s linear forwards;z-index:200;pointer-events:none}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg)}100%{transform:translateY(110vh) rotate(720deg)}}
+.shine{position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);animation:shineMove 2.5s infinite}
+@keyframes shineMove{0%{left:-100%}100%{left:100%}}
+</style>
+</head>
+<body>
+<div class="top"><a class="back" href="dashboard.html">← Dashboard</a><span class="pill">🌙 DARK PREMIUM</span></div>
+<div class="header"><h1>✍️ WRITING STUDIO <span>PROFESSIONAL • DARK EDITION • INSTANT KES</span></h1><p style="position:relative;color:#9ca3af;font-size:11px;margin-top:10px">Create premium articles in dark mode - Easy on eyes, fast earnings</p><div style="position:relative;margin-top:14px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap"><span style="background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;padding:7px 14px;border-radius:99px;font-size:10px;font-weight:800">● LIVE DARK JOBS</span><span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:7px 14px;border-radius:99px;font-size:10px;font-weight:800;color:#c084fc">⚡ Instant Payout</span><span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);padding:7px 14px;border-radius:99px;font-size:10px;font-weight:800;color:#4ade80">🏆 2.4k Writers</span></div></div>
+
+<div class="tabs">
+<button class="tab active" id="t-avail" onclick="switchTab('available')">📋 Available (<span id="cA">0</span>)</button>
+<button class="tab" id="t-my" onclick="switchTab('mytask')">📁 My Tasks (<span id="cM">0</span>)</button>
+<button class="tab" id="t-pen" onclick="switchTab('pending')">⏳ Pending (<span id="cP">0</span>)</button>
+<button class="tab" id="t-ap" onclick="switchTab('approved')">✅ Approved (<span id="cAp">0</span>)</button>
+<button class="tab" id="t-rj" onclick="switchTab('rejected')">❌ Revision (<span id="cR">0</span>)</button>
+</div>
+
+<div style="max-width:850px;margin:0 auto;padding:0 14px">
+<div id="page-available" class="page active"></div>
+<div id="page-mytask" class="page"></div>
+<div id="page-pending" class="page"></div>
+<div id="page-approved" class="page"></div>
+<div id="page-rejected" class="page"></div>
+</div>
+
+<div id="submitModal" class="popup-bg"><div class="popup" style="max-width:520px"><div class="shine"></div><h3 style="color:#c084fc;text-align:left;font-size:16px">📤 Submit Masterpiece</h3><p id="sTitle" style="text-align:left;color:#9ca3af;font-size:11px;margin:8px 0"></p><textarea id="artBox" style="min-height:260px;margin-top:12px" placeholder="Paste your 800+ word premium article here..."></textarea><div style="display:flex;gap:10px;margin-top:14px"><button class="btn btn-dark" style="flex:1" onclick="closeAll()">Cancel</button><button id="submitBtn" class="btn btn-green" style="flex:1.5" onclick="doSubmit()">✨ Submit for Review</button></div></div></div>
+
+<div id="pop-confirm" class="popup-bg"><div class="popup"><div class="shine"></div><div class="popup-icon icon-wait">💼</div><h2>Accept Task?</h2><p id="pop-confirm-text" style="color:#9ca3af">Accept this writing task?</p><div style="display:flex;gap:10px"><button class="btn btn-dark" style="flex:1" onclick="closeAll()">Not Now</button><button id="confirmBtn" class="btn btn-purple" style="flex:1.5" onclick="confirmAccept()">Yes, Accept 🚀</button></div></div></div>
+
+<div id="pop-awarded" class="popup-bg"><div class="popup"><div class="shine"></div><div class="popup-icon icon-gold">🏆</div><h2 style="color:#fbbf24">TASK AWARDED!</h2><p id="pop-awarded-text" style="color:#9ca3af">Task is yours!</p><button class="btn btn-purple" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="closeAll();switchTab('mytask')">Go to My Tasks →</button></div></div>
+
+<div id="pop-success" class="popup-bg"><div class="popup"><div class="shine"></div><div class="popup-icon icon-success">🎉</div><h2 style="color:#4ade80">Approved!</h2><p id="pop-success-text" style="color:#9ca3af">Your work was approved!</p><button class="btn btn-green" onclick="closeAll()">Continue 🚀</button></div></div>
+
+<div id="pop-reject" class="popup-bg"><div class="popup"><div class="shine"></div><div class="popup-icon icon-error">📝</div><h2 style="color:#f87171">Revision Needed</h2><p id="pop-reject-text" style="color:#9ca3af">Editor requested changes.</p><button class="btn btn-dark" style="background:#ef4444;color:#fff" onclick="closeAll()">View Feedback</button></div></div>
+
+<div id="pop-submit" class="popup-bg"><div class="popup"><div class="shine"></div><div class="popup-icon icon-wait">🚀</div><h2 style="color:#c084fc">Submitted!</h2><p style="color:#9ca3af">Editorial team will review within 24h. KES credited instantly after approval!</p><button class="btn btn-purple" onclick="closeAll();switchTab('pending')">Track in Pending →</button></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, deleteDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = {apiKey:"AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",authDomain:"diamines-agencies.firebaseapp.com",projectId:"diamines-agencies",storageBucket:"diamines-agencies.firebasestorage.app",messagingSenderId:"438413306857",appId:"1:438413306857:web:3c7f736794be6a49b0f978"};
+const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+let email=''; try{ let u=JSON.parse(localStorage.getItem('DIAMINES_CURRENT')||'{}'); email=(u.email||localStorage.getItem('DIAMINES_USER_EMAIL')||'').toLowerCase(); }catch{}
+let availJobs=[], myJobs=[]; const K_MY='DIAMONDS_MY_'+email;
+let pendingAcceptId=null;
+
+function switchTab(n){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  let tabId = n==='available'?'avail':n==='mytask'?'my':n==='pending'?'pen':n==='approved'?'ap':'rj';
+  let el1=document.getElementById('t-'+tabId); if(el1) el1.classList.add('active');
+  let el2=document.getElementById('page-'+n); if(el2) el2.classList.add('active');
+  if(n==='available') rAvail(); if(n==='mytask') rMy(); if(n==='pending') rPen(); if(n==='approved') rAp(); if(n==='rejected') rRj();
+  window.scrollTo({top:0, behavior:'instant'});
+}
+window.switchTab=switchTab;
+function showPop(id){ document.getElementById(id).classList.add('show'); document.body.style.overflow='hidden'; }
+window.closeAll=function(){ document.querySelectorAll('.popup-bg').forEach(p=>p.classList.remove('show')); document.body.style.overflow=''; }
+
+function rAvail(){
+  let cA=document.getElementById('cA'); if(cA) cA.innerText=availJobs.length;
+  let el=document.getElementById('page-available'); if(!el) return;
+  if(!availJobs.length){ el.innerHTML=`<div style="text-align:center;padding:70px;background:#1a1a2e;border-radius:20px;margin-top:10px;border:1px solid rgba(168,85,247,0.15)"><div style="font-size:48px">📭</div><p style="margin-top:12px;font-weight:700;color:#9ca3af">No jobs available</p><small style="color:#6b7280">New tasks daily at 9 AM EAT 🌙</small></div>`; return;}
+  el.innerHTML=availJobs.map(j=>`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:14px;color:#fff">✍️ ${j.title}</b><span style="color:#fff;font-weight:900;background:linear-gradient(135deg,#22c55e,#16a34a);padding:7px 16px;border-radius:99px">KES ${j.price}</span></div><div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap"><span class="badge">📝 ${j.words||'800'} words</span><span class="badge">⏱️ ${j.h||24}h</span><span class="badge">⭐ ${j.level||'Medium'}</span></div><p style="font-size:11px;color:#9ca3af;margin-top:12px;line-height:1.6">${j.desc||''}</p><div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.15);border-radius:14px;padding:12px;margin-top:12px"><small style="color:#a855f7;font-weight:900;font-size:9px;letter-spacing:1px">📌 PROJECT BRIEF</small><p style="font-size:11px;color:#9ca3af;margin-top:6px">${(j.topic||'').substring(0,220)}...</p></div><button class="btn btn-purple" onclick="bidTask('${j.id}')">💼 BID • KES ${j.price}</button></div>`).join('');
+}
+function rMy(){
+  let f=myJobs.filter(j=>j.status==='in_progress'); let cM=document.getElementById('cM'); if(cM) cM.innerText=f.length;
+  let el=document.getElementById('page-mytask'); if(!el) return;
+  if(!f.length){ el.innerHTML=`<div style="text-align:center;padding:70px;background:#1a1a2e;border-radius:20px;border:1px solid rgba(168,85,247,0.15)"><div style="font-size:48px">📁</div><p style="margin-top:10px;color:#9ca3af;font-weight:700">No active tasks</p></div>`; return;}
+  el.innerHTML=f.map(j=>`<div class="card" style="border-left-color:#a855f7"><div style="display:flex;justify-content:space-between"><b style="color:#fff">📝 ${j.title}</b><b style="color:#4ade80">KES ${j.price}</b></div><small style="color:#a855f7;font-weight:700">🟢 In Progress • ${j.takenAt?new Date(j.takenAt).toLocaleDateString():''}</small><div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:10px;margin-top:10px"><p style="font-size:11px;color:#9ca3af">${(j.topic||'').substring(0,280)}...</p></div><button class="btn btn-green" onclick="openSub('${j.jobId||j.id}')">📤 SUBMIT NOW</button></div>`).join('');
+}
+function rPen(){
+  let f=myJobs.filter(j=>j.status==='submitted'); let cP=document.getElementById('cP'); if(cP) cP.innerText=f.length;
+  let el=document.getElementById('page-pending'); if(!el) return;
+  if(!f.length){ el.innerHTML=`<div style="text-align:center;padding:70px;background:#1a1a2e;border-radius:20px;border:1px solid rgba(168,85,247,0.15)"><div style="font-size:48px">⏳</div><p style="margin-top:10px;color:#9ca3af;font-weight:700">No pending reviews</p></div>`; return;}
+  el.innerHTML=f.map(j=>`<div class="card" style="border-left-color:#f59e0b"><div style="display:flex;justify-content:space-between"><b style="color:#fff">⏳ ${j.title}</b><b style="color:#fbbf24">KES ${j.price}</b></div><small style="color:#fbbf24;font-weight:700">🔍 Under Review • ${j.submittedAt?new Date(j.submittedAt).toLocaleDateString():''}</small><div style="background:rgba(245,158,11,0.08);border:1px dashed rgba(245,158,11,0.3);border-radius:12px;padding:12px;margin-top:10px;text-align:center"><div style="font-size:24px">👀</div><p style="font-size:11px;color:#fbbf24;margin-top:6px;font-weight:700">Editors reviewing</p></div></div>`).join('');
+}
+function rAp(){
+  let f=myJobs.filter(j=>j.status==='approved'); let cAp=document.getElementById('cAp'); if(cAp) cAp.innerText=f.length;
+  let page=document.getElementById('page-approved'); if(!page) return;
+  if(f.length &&!sessionStorage.getItem('shownAp_'+f[0].jobId)){
+    requestAnimationFrame(()=>{ document.getElementById('pop-success-text').innerHTML=`Your article <b style="color:#fff">${f[0].title}</b> approved! <br><b style="color:#4ade80;font-size:22px">+ KES ${f[0].price}</b> credited!`; showPop('pop-success'); createConfetti(); sessionStorage.setItem('shownAp_'+f[0].jobId,'1'); });
+  }
+  page.innerHTML=f.length?f.map(j=>`<div class="card" style="border-left-color:#22c55e"><div style="display:flex;justify-content:space-between"><b style="color:#fff">✅ ${j.title}</b><b style="color:#4ade80">+KES ${j.price}</b></div><p style="font-size:11px;color:#4ade80;margin-top:8px;font-weight:700">🎉 Paid to wallet</p><div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:10px;margin-top:8px"><small style="color:#4ade80;font-weight:800">FEEDBACK:</small><p style="font-size:11px;color:#9ca3af;margin-top:4px">${j.feedback||'Excellent!'}</p></div></div>`).join(''):`<div style="text-align:center;padding:70px;background:#1a1a2e;border-radius:20px;border:1px solid rgba(34,197,94,0.15)"><div style="font-size:48px">✅</div><p style="color:#9ca3af;font-weight:700">Approved articles here</p></div>`;
+}
+function rRj(){
+  let f=myJobs.filter(j=>j.status==='rejected'); let cR=document.getElementById('cR'); if(cR) cR.innerText=f.length;
+  let page=document.getElementById('page-rejected'); if(!page) return;
+  if(f.length &&!sessionStorage.getItem('shownRj_'+f[0].jobId)){
+    requestAnimationFrame(()=>{ document.getElementById('pop-reject-text').innerHTML=`<b style="color:#fff">${f[0].title}</b> needs revision:<br><br><i style="color:#f87171;background:rgba(239,68,68,0.1);padding:6px 10px;border-radius:8px;display:inline-block">"${f[0].feedback||'Improve quality'}"</i>`; showPop('pop-reject'); sessionStorage.setItem('shownRj_'+f[0].jobId,'1'); });
+  }
+  page.innerHTML=f.length?f.map(j=>`<div class="card" style="border-left-color:#ef4444"><b style="color:#fff">❌ ${j.title}</b><div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:10px;margin-top:10px"><small style="color:#f87171;font-weight:800">REVISION:</small><p style="font-size:11px;color:#fca5a5;margin-top:4px">${j.feedback||''}</p></div><button class="btn btn-dark" style="color:#f87171;border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08)" onclick="openSub('${j.jobId||j.id}')">✏️ EDIT & RESUBMIT</button></div>`).join(''):`<div style="text-align:center;padding:70px;background:#1a1a2e;border-radius:20px;border:1px solid rgba(168,85,247,0.15)"><div style="font-size:48px">✨</div><p style="color:#9ca3af;font-weight:700">No revisions</p></div>`;
+}
+function createConfetti(){ for(let i=0;i<15;i++){ let c=document.createElement('div'); c.className='confetti'; c.style.left=Math.random()*100+'vw'; c.style.background=['#a855f7','#22c55e','#ec4899','#f59e0b'][Math.floor(Math.random()*4)]; document.body.appendChild(c); setTimeout(()=>c.remove(),2200); } }
+onSnapshot(collection(db, "writingJobs"), (snap)=>{ availJobs=[]; snap.forEach(d=>{ let v=d.data(); if(!v.status||v.status==='available') availJobs.push(v); }); availJobs.sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt)); rAvail(); });
+onSnapshot(collection(db, "writingTaken"), (snap)=>{ myJobs=[]; snap.forEach(d=>{ let v=d.data(); if((v.takenBy||'').toLowerCase()===email) myJobs.push(v); }); let local=JSON.parse(localStorage.getItem(K_MY)||'[]'); local.forEach(l=>{ if((l.status==='approved'||l.status==='rejected')&&!myJobs.find(m=>m.jobId===l.jobId && m.status===l.status)) myJobs.push(l); }); localStorage.setItem(K_MY, JSON.stringify(myJobs)); rMy(); rPen(); rAp(); rRj(); });
+let cur=null;
+window.bidTask=function(id){ let job=availJobs.find(j=>j.id===id); if(!job) return; pendingAcceptId=id; document.getElementById('pop-confirm-text').innerHTML=`Accept <b style="color:#fff">"${job.title}"</b>?<br><br>💰 <b style="color:#4ade80">KES ${job.price}</b> • ⏱️ ${job.h||24}h`; showPop('pop-confirm'); }
+window.confirmAccept=async function(){
+  let btn=document.getElementById('confirmBtn'); let id=pendingAcceptId; if(!id) return; let job=availJobs.find(j=>j.id===id); if(!job) return;
+  if(btn){ btn.innerText='⏳ Accepting...'; btn.disabled=true; } closeAll();
+  availJobs=availJobs.filter(j=>j.id!==id); rAvail();
+  try{
+    let taken={...job, jobId:id, takenBy:email, takenAt:new Date().toISOString(), status:'in_progress', userEmail:email};
+    myJobs.push(taken); localStorage.setItem(K_MY, JSON.stringify(myJobs)); rMy();
+    setDoc(doc(db, "writingTaken", id), taken).catch(()=>{}); deleteDoc(doc(db, "writingJobs", id)).catch(()=>{}); setDoc(doc(db, "writingPending", String(Date.now())), {...taken, original:taken.topic}).catch(()=>{});
+    document.getElementById('pop-awarded-text').innerHTML=`<b style="color:#fff">"${job.title}"</b> is now yours!<br><br>💰 Earn <b style="color:#fbbf24">KES ${job.price}</b>`; showPop('pop-awarded'); createConfetti();
+  }catch(e){ if(btn){ btn.innerText='Yes, Accept 🚀'; btn.disabled=false; } }
+}
+window.openSub=function(jobId){ let j=myJobs.find(x=>(x.jobId||x.id)===jobId); if(!j) return; cur=j; document.getElementById('sTitle').innerText=j.title; document.getElementById('artBox').value=j.written||''; document.getElementById('submitModal').classList.add('show'); document.body.style.overflow='hidden'; setTimeout(()=>document.getElementById('artBox').focus(),50); }
+window.doSubmit=async function(){
+  let btn=document.getElementById('submitBtn'); let txt=document.getElementById('artBox').value.trim(); if(txt.length<100) return alert('Write at least 100 chars');
+  if(btn){ btn.innerText='⏳ Submitting...'; btn.disabled=true; }
+  let idx=myJobs.findIndex(x=>(x.jobId||x.id)===(cur.jobId||cur.id)); if(idx==-1){ if(btn){btn.innerText='✨ Submit'; btn.disabled=false;} return; }
+  myJobs[idx].status='submitted'; myJobs[idx].written=txt; myJobs[idx].submittedAt=new Date().toISOString(); localStorage.setItem(K_MY, JSON.stringify(myJobs));
+  document.getElementById('submitModal').classList.remove('show'); showPop('pop-submit'); rMy(); rPen();
+  try{ await setDoc(doc(db, "writingTaken", cur.jobId||cur.id), myJobs[idx]); await setDoc(doc(db, "writingPending", String(Date.now())), {...myJobs[idx], written:txt, userEmail:email, earn:myJobs[idx].price}); }catch{}
+  if(btn){ btn.innerText='✨ Submit for Review'; btn.disabled=false; }
+}
+</script>
+</body>
+</html>
