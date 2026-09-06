@@ -18,12 +18,14 @@ body{background:#070711;color:#fff;padding:14px;max-width:800px;margin:0 auto}
 .stk{position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);z-index:99;display:none;align-items:center;justify-content:center;padding:20px}
 .stk.show{display:flex}
 .stk-card{background:linear-gradient(180deg,#1e1e3f,#12122a);border-radius:20px;padding:22px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+.loader{width:32px;height:32px;border:3px solid rgba(255,255,255,0.1);border-top-color:#00e676;border-radius:50%;margin:10px auto;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 <h2>💎 DIAMINES - Withdraw Approvals</h2>
-<p style="font-size:11px;color:#8b8ba7;margin-bottom:6px">Balance deducted on request. Approve to pay, Reject to refund. 10% hidden fee profit.</p>
-<div style="background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);border-radius:10px;padding:8px;font-size:11px;color:#22c55e;margin-bottom:10px">💰 Total Profit (10% fee): <b id="totalProfit">KES 0</b> • Pending Payout: <b id="totalPending" style="color:#facc15">KES 0</b></div>
+<p style="font-size:11px;color:#8b8ba7;margin-bottom:6px">Balance deducted on request. Approve to pay LIVE M-Pesa via API, Reject to refund. 10% hidden fee profit.</p>
+<div style="background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);border-radius:10px;padding:8px;font-size:11px;color:#22c55e;margin-bottom:10px">💰 Total Profit (10% fee): <b id="totalProfit">KES 0</b> • Pending Payout: <b id="totalPending" style="color:#facc15">KES 0</b> • API: <b style="color:#00e676">LIVE</b></div>
 <input id="search" class="input" placeholder="Search email, phone, ID, amount..." oninput="render()">
 <div style="display:flex;gap:8px;margin-bottom:12px">
 <button onclick="filter='all';render()" style="padding:6px 12px;border-radius:20px;border:1px solid #333;background:#1a1a35;color:#fff;font-size:11px">All</button>
@@ -47,6 +49,15 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let filter='all';
 let firebaseList = [];
+const API_URL = "https://golden-eagle-api.onrender.com";
+
+function to254(phone){
+  let p = String(phone||"").replace(/\s/g,'').replace('+','');
+  if(p.startsWith('254')) return p;
+  if(p.startsWith('0')) return '254'+p.slice(1);
+  return p;
+}
+
 async function loadFirebase(){
   try{
     let snap = await getDocs(collection(db, "withdrawals"));
@@ -79,9 +90,10 @@ window.render = async ()=>{
   let req = w.requestedAmount||w.amount||0;
   let fee = w.fee!==undefined ? w.fee : Math.floor(req*0.10);
   let rec = w.receiveAmount!==undefined ? w.receiveAmount : req - fee;
+  let phone254 = w.phone254 || to254(w.phone);
   html+=`<div class="card">
    <div><b style="font-size:14px">KES ${req}</b> <span class="badge ${w.status}">${w.status.toUpperCase()}</span><br>
-   <small style="color:#8b8ba7">${w.email}<br>📱 ${w.phone} via ${(w.method||'mpesa').toUpperCase()} | <b style="color:#facc15">${w.id||w.firestoreId?.slice(0,6)}</b><br>${w.date||''}</small>
+   <small style="color:#8b8ba7">${w.email}<br>📱 ${w.phone} (${phone254}) via ${(w.method||'mpesa').toUpperCase()} | <b style="color:#facc15">${w.id||w.firestoreId?.slice(0,6)}</b><br>${w.date||''}</small>
    <div style="margin-top:6px;background:rgba(0,0,0,0.4);border-radius:8px;padding:6px;font-size:10px;line-height:1.4">
    <span style="color:#8b8ba7">User requested:</span> <b>KES ${req}</b><br>
    <span style="color:#ff4d8d">Fee 10% (YOUR PROFIT):</span> <b style="color:#ff4d8d">KES ${fee}</b><br>
@@ -93,7 +105,8 @@ window.render = async ()=>{
  });
  document.getElementById("list").innerHTML=html||"<p style='text-align:center;color:#555;margin-top:20px'>No withdrawals</p>";
 }
-// FIXED APPROVE - ADDS TO TOTAL WITHDRAW - NEVER 0 BUG
+
+// NEW REAL MONEY APPROVE - CALLS YOUR LIVE API
 window.approve = async (id)=>{
  let all=JSON.parse(localStorage.getItem("DIAMINES_WITHDRAW_ALL")||"[]");
  let wLocal = all.find(x=>x.id===id);
@@ -103,29 +116,51 @@ window.approve = async (id)=>{
  let req = Number(w.requestedAmount||w.amount||0);
  let fee = w.fee!==undefined ? w.fee : Math.floor(req*0.10);
  let rec = w.receiveAmount!==undefined ? w.receiveAmount : req - fee;
+ let phone254 = w.phone254 || to254(w.phone);
  let email = String(w.email||"").toLowerCase().trim();
- if(!confirm("Approve?\n"+w.email+"\nRequested KES "+req+"\nFee KES "+fee+" (YOU KEEP)\nSEND KES "+rec+" to "+w.phone)) return;
- // 1. Update withdrawal status to approved
- if(wFire && wFire.firestoreId){
-   try{ await updateDoc(doc(db, "withdrawals", wFire.firestoreId), {status:"approved"}); wFire.status="approved"; }catch(e){}
- }
- // 2. FIXED: Add to totalWithdraw in users - SAME AS DEPOSIT
+ if(!confirm(`SEND REAL MONEY?\n${w.email}\nRequested KES ${req}\nFee KES ${fee} (YOU KEEP)\nSEND KES ${rec} to ${phone254}?`)) return;
+ 
+ showModal(`<div class="loader"></div><h3 style="margin-top:8px">Sending KES ${rec} to ${w.phone}...</h3><p style="font-size:11px;color:#8b8ba7">Calling ${API_URL}/withdraw<br>Please wait...</p>`, "#facc15");
+
  try{
-   if(w.uid && !w.uid.includes('@')){
-     await updateDoc(doc(db, "users", w.uid), { totalWithdraw: increment(req), totalWithdrawn: increment(req) });
-   } else {
-     let qy = query(collection(db,"users"), where("email","==", w.email));
-     let qsnap = await getDocs(qy);
-     qsnap.forEach(async(u)=>{ await updateDoc(doc(db,"users", u.id), { totalWithdraw: increment(req), totalWithdrawn: increment(req) }); });
+   const res = await fetch(`${API_URL}/withdraw`, {
+     method: 'POST',
+     headers: {'Content-Type':'application/json'},
+     body: JSON.stringify({
+       amount: rec,
+       account_number: phone254,
+       account_name: w.username || w.email || "User",
+       bank_code: '999999'
+     })
+   });
+   const data = await res.json();
+   
+   if(data.success){
+     // Update withdrawal status to approved with transfer code
+     if(wFire && wFire.firestoreId){
+       try{ await updateDoc(doc(db, "withdrawals", wFire.firestoreId), {status:"approved", transfer_code: data.data?.transfer_code || "", transfer_id: data.data?.transfer_id || "", paidAt: new Date().toISOString()}); wFire.status="approved"; }catch(e){console.log(e)}
+     }
+     try{
+       if(w.uid && !w.uid.includes('@')){
+         await updateDoc(doc(db, "users", w.uid), { totalWithdraw: increment(req), totalWithdrawn: increment(req) });
+       } else {
+         let qy = query(collection(db,"users"), where("email","==", w.email));
+         let qsnap = await getDocs(qy);
+         qsnap.forEach(async(u)=>{ await updateDoc(doc(db,"users", u.id), { totalWithdraw: increment(req), totalWithdrawn: increment(req) }); });
+       }
+     }catch(e){ console.log(e); }
+     if(wLocal) wLocal.status="approved";
+     localStorage.setItem("DIAMINES_WITHDRAW_ALL", JSON.stringify(all));
+     let existingWit = Number(localStorage.getItem("DIAMINES_TOTAL_WITHDRAW_"+email)||0);
+     let newWit = existingWit + req;
+     localStorage.setItem("DIAMINES_TOTAL_WITHDRAW_"+email, String(newWit));
+     showModal(`<div style="width:60px;height:60px;margin:0 auto 10px;border-radius:16px;background:linear-gradient(135deg,#00e676,#00c853);display:flex;align-items:center;justify-content:center;font-size:28px">✅</div><h3 style="color:#00e676">REAL MONEY SENT!</h3><p style="font-size:12px;color:#fff;margin-top:6px">KES ${rec} → ${w.phone}<br><small style="color:#8b8ba7">Ref: ${data.data?.transfer_code||data.data?.reference||'OK'}</small><br>Profit KES ${fee}<br>Total Withdrawn: KES ${newWit}</p><p style="font-size:10px;color:#22c55e;margin-top:8px">User received M-Pesa SMS</p>`, "#00e676");
+   }else{
+     showModal(`<div style="width:60px;height:60px;margin:0 auto 10px;border-radius:16px;background:#4a0a0a;display:flex;align-items:center;justify-content:center;font-size:28px">❌</div><h3 style="color:#ff4d8d">Paystack Failed</h3><p style="font-size:11px;color:#fff">${data.error||'Unknown error'}</p><p style="font-size:10px;color:#8b8ba7;margin-top:6px">Check: 1. Paystack balance 2. Live key 3. Phone 254 format<br><br>Withdrawal still pending, not marked approved.</p>`, "#ff4d8d");
    }
- }catch(e){ console.log(e); }
- // 3. FIXED: localStorage - MAX logic, never overwrite with 0
- if(wLocal) wLocal.status="approved";
- localStorage.setItem("DIAMINES_WITHDRAW_ALL", JSON.stringify(all));
- let existingWit = Number(localStorage.getItem("DIAMINES_TOTAL_WITHDRAW_"+email)||0);
- let newWit = existingWit + req;
- localStorage.setItem("DIAMINES_TOTAL_WITHDRAW_"+email, String(newWit));
- showModal(`<div style="width:60px;height:60px;margin:0 auto 10px;border-radius:16px;background:linear-gradient(135deg,#00e676,#00c853);display:flex;align-items:center;justify-content:center;font-size:28px">✅</div><h3 style="color:#00e676">Approved!</h3><p style="font-size:12px;color:#8b8ba7;margin-top:6px">Paid KES ${rec}<br>Profit KES ${fee}<br>Total Withdrawn: KES ${newWit}</p>`, "#00e676");
+ }catch(err){
+   showModal(`<div style="width:60px;height:60px;margin:0 auto 10px;border-radius:16px;background:#4a0a0a;display:flex;align-items:center;justify-content:center;font-size:28px">❌</div><h3 style="color:#ff4d8d">API Error</h3><p style="font-size:11px;color:#fff">${err.message}</p><p style="font-size:10px;color:#8b8ba7">Is API live? ${API_URL}</p>`, "#ff4d8d");
+ }
  render();
 }
 window.reject = async (id)=>{
