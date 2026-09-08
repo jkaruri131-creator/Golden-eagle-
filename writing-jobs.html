@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ADMIN - Writing Jobs Manager</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui;margin:0;padding:0}
+body{background:#07070a;color:#fff;padding:12px;min-height:100vh}
+.top{max-width:700px;margin:0 auto 12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.back{padding:8px 12px;background:rgba(255,255,255,0.08);border:1px solid #333;border-radius:10px;color:#fff;text-decoration:none;font-size:10px;font-weight:800}
+.card{background:#1e1e32;border:1px solid #333;border-radius:16px;padding:14px;margin-bottom:10px;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#a855f7,#7c3aed)}
+input,textarea,select{width:100%;background:#0f0f1a;border:1px solid #333;border-radius:10px;color:#fff;padding:10px;margin-top:6px;font-size:12px;outline:none}
+textarea{height:80px}
+label{font-size:8px;color:#888;font-weight:800;margin-top:10px;display:block;letter-spacing:1px}
+.btn{padding:10px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:10px;flex:1;display:flex;justify-content:center}
+.btn-e{background:rgba(96,165,250,0.15);color:#93c5fd;border:1px solid rgba(96,165,250,0.3)}
+.btn-d{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
+.btn-add{width:100%;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;padding:14px;border-radius:12px;font-weight:900;border:none;margin-top:10px;cursor:pointer}
+.btn-bulk{width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;padding:14px;border-radius:12px;font-weight:900;border:none;margin-top:10px;cursor:pointer}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style>
+</head>
+<body>
+<div class="top"><div style="display:flex;gap:6px"><a class="back" href="adminmasterpanel.html">← MASTER PANEL</a><a class="back" href="adminwriting.html" style="background:#a855f7">🛡️ REVIEW</a></div><a class="back" href="writing.html">👁️ USER VIEW</a></div>
+<div style="max-width:700px;margin:0 auto">
+<h3 style="color:#a855f7;text-align:center">✍️ ADMIN - POST WRITING JOBS</h3>
+<p style="text-align:center;color:#666;font-size:10px;margin-top:4px">Publish Unlimited - Single or Bulk</p>
+<div id="fbStatus" style="text-align:center;margin-top:8px;font-size:10px;padding:8px;border-radius:10px;background:#111;border:1px solid #333">⏳ Connecting...</div>
+<div id="list" style="margin-top:12px"></div>
+</div>
+
+<div class="card" style="max-width:700px;margin:12px auto;border-color:rgba(245,158,11,0.3)">
+<h4 style="color:#f59e0b">📦 BULK PUBLISH - Paste Many Jobs At Once</h4>
+<p style="font-size:10px;color:#888;margin-top:6px">Format per line: <b style="color:#fbbf24">Title | Price | Words | Short Desc | Full Topic</b><br>Example: <br><small style="color:#666">Blog Remote Work | 600 | 800 words | SEO article | Write 800 words about remote work benefits...</small></p>
+<textarea id="bulkBox" placeholder="Paste many jobs here - One job per line:
+
+Blog: Remote Work | 600 | 800 words | SEO article about remote | Write 800 word detailed article about remote work benefits, tools, productivity...
+AI Writing Future | 800 | 1000 words | Future of AI | Write 1000 words about how AI changes content creation...
+Top 10 Marketing Tools | 700 | 900 words | Marketing tools list | List and explain top 10 marketing tools...
+
+You can paste 10, 50, 100 jobs at once!" style="min-height:180px;border-color:rgba(245,158,11,0.3)"></textarea>
+<div class="grid2" style="margin-top:8px"><div><label>Default Deadline Hours</label><input id="bulkDead" type="number" value="24"></div><div><label>Default Level</label><select id="bulkLevel"><option>Easy</option><option selected>Medium</option><option>Hard</option></select></div></div>
+<button class="btn-bulk" id="bulkBtn" onclick="publishBulk()">📦 PUBLISH ALL BULK JOBS AT ONCE</button>
+<div id="bulkStatus" style="margin-top:8px;font-size:11px;color:#fbbf24;text-align:center"></div>
+</div>
+
+<div class="card" style="max-width:700px;margin:12px auto">
+<h4 style="color:#a855f7">➕ Add Single Writing Job</h4>
+<label>Title</label><input id="aTitle" placeholder="Blog: Benefits of Remote Work">
+<label>Short Instructions</label><textarea id="aDesc" placeholder="SEO optimized, engaging tone..."></textarea>
+<label>Full Topic / Brief</label><textarea id="aTopic" placeholder="Write 800-word article..." style="min-height:120px"></textarea>
+<div class="grid2"><div><label>Price KES</label><input id="aPrice" type="number" value="600"></div><div><label>Word Count</label><input id="aWords" value="800 words"></div></div>
+<div class="grid2"><div><label>Deadline Hours</label><input id="aDead" type="number" value="24"></div><div><label>Difficulty</label><select id="aLevel"><option>Easy</option><option selected>Medium</option><option>Hard</option></select></div></div>
+<button class="btn-add" id="pubBtn" onclick="addJob()">🚀 PUBLISH SINGLE JOB</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = {apiKey:"AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",authDomain:"diamines-agencies.firebaseapp.com",projectId:"diamines-agencies",storageBucket:"diamines-agencies.firebasestorage.app",messagingSenderId:"438413306857",appId:"1:438413306857:web:3c7f736794be6a49b0f978"};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let allJobs = [];
+function render(){
+  let h=''; if(!allJobs.length) h=`<div style="text-align:center;padding:30px;color:#666">No jobs - Publish above</div>`;
+  else h=allJobs.map(j=>`<div class="card"><div style="display:flex;justify-content:space-between"><b>✍️ ${j.title}</b><span style="color:#4ade80">KES ${j.price}</span></div><small style="color:#888">${j.words} • ${j.h}h • ${j.level} • ${j.id}</small><p style="font-size:11px;color:#aaa;margin-top:6px">${j.desc}</p><div style="display:flex;gap:6px;margin-top:10px"><button class="btn btn-e" onclick="editJob('${j.id}')">✏️ EDIT</button><button class="btn btn-d" onclick="delJob('${j.id}')">🗑️ DELETE</button></div></div>`).join('');
+  document.getElementById('list').innerHTML=h;
+}
+
+try{
+  onSnapshot(collection(db, "writingJobs"), (snap)=>{
+    allJobs=[]; snap.forEach(d=>allJobs.push(d.data()));
+    allJobs.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+    document.getElementById('fbStatus').innerHTML = "✅ LIVE: "+allJobs.length+" jobs - Unlimited publish enabled ✅";
+    document.getElementById('fbStatus').style.background="rgba(34,197,94,0.15)";
+    document.getElementById('fbStatus').style.color="#4ade80";
+    render();
+  }, (err)=>{
+    document.getElementById('fbStatus').innerHTML = "❌ Error: "+err.message;
+    document.getElementById('fbStatus').style.background="rgba(239,68,68,0.15)";
+    document.getElementById('fbStatus').style.color="#f87171";
+  });
+}catch(e){}
+
+window.addJob = async function(){
+  let t=document.getElementById('aTitle').value.trim(),d=document.getElementById('aDesc').value.trim(),tp=document.getElementById('aTopic').value.trim();
+  if(!t||!d||!tp){alert('Fill all fields');return;}
+  let btn=document.getElementById('pubBtn'); btn.innerText="⏳ Publishing..."; btn.disabled=true;
+  let uniqueId='WR'+Date.now()+'_'+Math.random().toString(36).substring(2,7).toUpperCase();
+  let job={id:uniqueId,title:t,desc:d,topic:tp,brief:tp,words:document.getElementById('aWords').value||'800 words',price:parseInt(document.getElementById('aPrice').value)||600,h:parseInt(document.getElementById('aDead').value)||24,level:document.getElementById('aLevel').value,createdAt:new Date().toISOString(),status:'available'};
+  try{ await setDoc(doc(db, "writingJobs", job.id), job); document.getElementById('aTitle').value='';document.getElementById('aDesc').value='';document.getElementById('aTopic').value=''; document.getElementById('fbStatus').innerHTML = "✅ Published "+job.id+"!"; }
+  catch(e){ alert('❌ '+e.message); }
+  btn.innerText="🚀 PUBLISH SINGLE JOB"; btn.disabled=false;
+}
+
+window.publishBulk = async function(){
+  let text=document.getElementById('bulkBox').value.trim();
+  if(!text){ alert('Paste jobs first'); return; }
+  let lines=text.split('\n').filter(l=>l.trim().length>5);
+  if(!lines.length){ alert('No valid lines'); return; }
+  let btn=document.getElementById('bulkBtn');
+  let status=document.getElementById('bulkStatus');
+  btn.innerText='⏳ Publishing '+lines.length+' jobs...'; btn.disabled=true;
+  status.innerText='Starting bulk publish of '+lines.length+' jobs...';
+
+  let batch=writeBatch(db);
+  let count=0;
+  let defaultH=parseInt(document.getElementById('bulkDead').value)||24;
+  let defaultLevel=document.getElementById('bulkLevel').value||'Medium';
+  let batchCount=0;
+  let totalPublished=0;
+
+  for(let i=0;i<lines.length;i++){
+    let line=lines[i].trim();
+    if(!line) continue;
+    // Parse: Title | Price | Words | Short Desc | Full Topic
+    let parts=line.split('|').map(p=>p.trim());
+    let title=parts[0]||'Untitled Job '+(i+1);
+    let price=parseInt(parts[1])||600;
+    let words=parts[2]||'800 words';
+    let desc=parts[3]||parts[0]||'Write article';
+    let topic=parts[4]||parts[3]||parts[0]||'Write detailed article about '+title;
+
+    // If line doesn't have |, treat whole line as title
+    if(parts.length===1){
+      title=parts[0];
+      desc=parts[0];
+      topic='Write detailed 800 word article about: '+parts[0];
+      price=600;
+      words='800 words';
+    }
+
+    let uniqueId='WR'+Date.now()+'_'+(i+1)+'_'+Math.random().toString(36).substring(2,6).toUpperCase();
+    let job={
+      id:uniqueId,
+      title:title,
+      desc:desc.substring(0,300),
+      topic:topic,
+      brief:topic,
+      words:words,
+      price:price,
+      h:defaultH,
+      level:defaultLevel,
+      createdAt:new Date().toISOString(),
+      status:'available'
+    };
+
+    // Firestore batch max 500, so commit every 400
+    batch.set(doc(db, "writingJobs", job.id), job);
+    batchCount++; count++; totalPublished++;
+
+    if(batchCount>=400){
+      await batch.commit();
+      batch=writeBatch(db);
+      batchCount=0;
+      status.innerText='Published '+totalPublished+' / '+lines.length+'...';
+    }
+
+    // Add tiny delay to keep unique timestamp
+    if(i%20===0) await new Promise(r=>setTimeout(r,10));
+  }
+
+  if(batchCount>0){
+    await batch.commit();
+  }
+
+  status.innerHTML='<span style="color:#4ade80">✅ SUCCESS! Published '+totalPublished+' jobs! All devices will see them now!</span>';
+  document.getElementById('bulkBox').value='';
+  btn.innerText='📦 PUBLISH ALL BULK JOBS AT ONCE'; btn.disabled=false;
+  setTimeout(()=>{ status.innerText=''; },5000);
+}
+
+window.delJob = async function(id){ if(!confirm('Delete '+id+'?'))return; try{ await deleteDoc(doc(db, "writingJobs", id)); }catch(e){alert(e.message);} }
+window.editJob = async function(id){
+  let j=allJobs.find(x=>x.id===id); if(!j)return;
+  let nt=prompt('Title',j.title); if(nt===null)return;
+  let nd=prompt('Description',j.desc); if(nd===null) nd=j.desc;
+  let np=prompt('Price KES',j.price); if(np===null)return;
+  j.title=nt; j.desc=nd; j.price=parseInt(np)||j.price; j.updatedAt=new Date().toISOString();
+  try{ await setDoc(doc(db, "writingJobs", id), j, {merge:true}); }catch(e){alert(e.message);}
+}
+</script>
+</body>
+  </html>
