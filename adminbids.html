@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Bids - Diamines</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui,sans-serif;margin:0;padding:0}
+body{background:#07070a;color:#e5e7eb;padding:16px}
+.header{max-width:1100px;margin:0 auto;background:linear-gradient(135deg,#1a102a,#151528);border:1px solid rgba(168,85,247,0.25);border-radius:18px;padding:18px;display:flex;justify-content:space-between;align-items:center}
+.card{background:#1a1a2e;border:1px solid rgba(168,85,247,0.15);border-radius:16px;padding:16px;margin:14px auto;max-width:1100px}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.08);font-size:12px;text-align:left}
+th{color:#a855f7;font-size:10px;letter-spacing:1px}
+.btn{padding:8px 14px;border-radius:8px;border:none;font-weight:800;font-size:11px;cursor:pointer}
+.btn-green{background:#22c55e;color:#fff} .btn-red{background:#ef4444;color:#fff} .btn-purple{background:#a855f7;color:#fff} .btn-dark{background:rgba(255,255,255,0.08);color:#9ca3af}
+input{background:#0a0a14;border:1px solid rgba(168,85,247,0.3);border-radius:10px;padding:10px;color:#fff;width:100%;margin-top:6px}
+.tabs{display:flex;gap:8px;margin-top:14px;overflow:auto}
+.tab{padding:10px 16px;border-radius:99px;background:rgba(255,255,255,0.05);color:#9ca3af;border:1px solid rgba(255,255,255,0.08);cursor:pointer;font-weight:800;font-size:11px;white-space:nowrap}
+.tab.active{background:#a855f7;color:#fff}
+</style>
+</head>
+<body>
+<div class="header">
+<div><b style="font-size:18px">💰 ADMIN BIDS CONTROL</b><br><small style="color:#9ca3af">Manage deposits • Approve bids • Edit any user • Official No: 0141416120</small></div>
+<div><a href="admin-writing.html" style="color:#c084fc;text-decoration:none;font-size:12px;font-weight:800;border:1px solid rgba(168,85,247,0.3);padding:8px 14px;border-radius:99px">← Admin Writing</a></div>
+</div>
+
+<div class="card">
+<div class="tabs">
+<button class="tab active" id="tab-pending" onclick="switchTab('pending')">⏳ Pending Deposits (<span id="cPend">0</span>)</button>
+<button class="tab" id="tab-approved" onclick="switchTab('approved')">✅ Approved</button>
+<button class="tab" id="tab-edit" onclick="switchTab('edit')">✏️ Edit User Bids</button>
+</div>
+
+<div id="page-pending">
+<h3 style="margin-top:14px;color:#fbbf24">⏳ Pending Deposits - DIAMINES OFFICIAL: 0141416120</h3>
+<p style="font-size:11px;color:#9ca3af">User sends KES to 0141416120, fills Mpesa code here. Approve to add bids. 100=10 Bids, 200=20 Bids, 300=30 Bids, 400=40 Bids, 500=50 Bids. No refund if rejected.</p>
+<table><thead><tr><th>User Email</th><th>Phone</th><th>Mpesa Code</th><th>Amount</th><th>Bids</th><th>Status</th><th>Action</th></tr></thead><tbody id="pendingTable"><tr><td colspan="7" style="text-align:center;color:#6b7280;padding:20px">No pending</td></tr></tbody></table>
+</div>
+
+<div id="page-approved" style="display:none">
+<h3 style="margin-top:14px;color:#4ade80">✅ Approved Deposits</h3>
+<table><thead><tr><th>User</th><th>Amount</th><th>Bids</th><th>Code</th><th>Date</th></tr></thead><tbody id="approvedTable"></tbody></table>
+</div>
+
+<div id="page-edit" style="display:none">
+<h3 style="margin-top:14px;color:#a855f7">✏️ Edit Any User Bids - Full Power</h3>
+<div style="display:flex;gap:10px;margin-top:10px">
+<input id="searchEmail" placeholder="Enter user email (e.g user@gmail.com)" style="flex:2">
+<button class="btn btn-purple" onclick="searchUser()">Search</button>
+</div>
+<div id="editResult" style="margin-top:14px;display:none;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:14px;padding:16px">
+<p style="font-size:12px;color:#9ca3af">Editing: <b id="editEmail" style="color:#fff"></b></p>
+<div style="display:flex;gap:10px;margin-top:10px">
+<div style="flex:1"><small style="color:#9ca3af">TOTAL BIDS</small><input id="editTotal" type="number"></div>
+<div style="flex:1"><small style="color:#9ca3af">AVAILABLE BIDS</small><input id="editAvail" type="number"></div>
+<div style="flex:1"><small style="color:#9ca3af">USED BIDS</small><input id="editUsed" type="number"></div>
+</div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<button class="btn btn-green" onclick="saveEdit()">💾 Save Bids</button>
+<button class="btn btn-dark" onclick="addFreeBids()">+10 Bids</button>
+<button class="btn btn-red" onclick="resetBids()">Reset to 0</button>
+</div>
+</div>
+<h4 style="margin-top:20px;color:#9ca3af">All Users (LocalStorage)</h4>
+<table><thead><tr><th>Email</th><th>Total</th><th>Avail</th><th>Used</th><th>Free Used?</th><th>Action</th></tr></thead><tbody id="usersTable"></tbody></table>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = {apiKey:"AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",authDomain:"diamines-agencies.firebaseapp.com",projectId:"diamines-agencies",storageBucket:"diamines-agencies.firebasestorage.app",messagingSenderId:"438413306857",appId:"1:438413306857:web:3c7f736794be6a49b0f978"};
+const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+let deposits=[];
+function switchTab(t){
+ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+ document.getElementById('tab-'+t).classList.add('active');
+ document.getElementById('page-pending').style.display=t==='pending'?'block':'none';
+ document.getElementById('page-approved').style.display=t==='approved'?'block':'none';
+ document.getElementById('page-edit').style.display=t==='edit'?'block':'none';
+ if(t==='edit') renderUsers();
+}
+window.switchTab=switchTab;
+function renderPending(){
+ let pend=deposits.filter(d=>d.status==='pending');
+ document.getElementById('cPend').innerText=pend.length;
+ let tb=document.getElementById('pendingTable');
+ if(!pend.length){ tb.innerHTML='<tr><td colspan=7 style="text-align:center;color:#6b7280;padding:20px">No pending deposits</td></tr>'; return; }
+ tb.innerHTML=pend.map(d=>`<tr><td>${d.email}</td><td>${d.phone}</td><td><b style="color:#fbbf24">${d.mpesaCode}</b></td><td>KES ${d.amount}</td><td>${d.bids} BIDS</td><td><span style="background:rgba(245,158,11,0.15);color:#fbbf24;padding:4px 8px;border-radius:99px;font-size:10px">PENDING</span></td><td><button class="btn btn-green" onclick="approve('${d.id}')">Approve</button> <button class="btn btn-red" onclick="reject('${d.id}')">Reject</button></td></tr>`).join('');
+ let ap=deposits.filter(d=>d.status==='approved');
+ document.getElementById('approvedTable').innerHTML=ap.map(d=>`<tr><td>${d.email}</td><td>${d.amount}</td><td>${d.bids}</td><td>${d.mpesaCode}</td><td>${new Date(d.createdAt).toLocaleString()}</td></tr>`).join('') || '<tr><td colspan=5 style="text-align:center;color:#6b7280">No approved yet</td></tr>';
+}
+window.approve=async function(id){
+ let d=deposits.find(x=>x.id===id); if(!d) return;
+ try{ await updateDoc(doc(db,'bidDeposits',id),{status:'approved'}); }catch{}
+ let key='DIAMINES_BIDS_'+d.email.toLowerCase();
+ let cur=JSON.parse(localStorage.getItem(key)||'null') || {total:0,available:0,used:0,freeUsed:true,freeGiven:true};
+ cur.total+=d.bids; cur.available+=d.bids;
+ localStorage.setItem(key, JSON.stringify(cur));
+ try{ await setDoc(doc(db,'userBids', d.email.toLowerCase()), cur); }catch{}
+ alert('Approved! Added '+d.bids+' bids to '+d.email);
+}
+window.reject=async function(id){
+ try{ await updateDoc(doc(db,'bidDeposits',id),{status:'rejected'}); }catch{}
+ alert('Rejected');
+}
+onSnapshot(collection(db,'bidDeposits'), snap=>{
+ deposits=[]; snap.forEach(docSnap=>{ deposits.push({id:docSnap.id, ...docSnap.data()}); });
+ renderPending();
+});
+let currentEditEmail='';
+window.searchUser=function(){
+ let email=document.getElementById('searchEmail').value.trim().toLowerCase();
+ if(!email) return alert('Enter email');
+ currentEditEmail=email;
+ let key='DIAMINES_BIDS_'+email;
+ let cur=JSON.parse(localStorage.getItem(key)||'null');
+ if(!cur){ cur={total:10,available:10,used:0,freeUsed:false,freeGiven:true}; }
+ document.getElementById('editResult').style.display='block';
+ document.getElementById('editEmail').innerText=email;
+ document.getElementById('editTotal').value=cur.total;
+ document.getElementById('editAvail').value=cur.available;
+ document.getElementById('editUsed').value=cur.used;
+}
+window.saveEdit=function(){
+ if(!currentEditEmail) return;
+ let cur={total:parseInt(document.getElementById('editTotal').value)||0, available:parseInt(document.getElementById('editAvail').value)||0, used:parseInt(document.getElementById('editUsed').value)||0, freeUsed:true, freeGiven:true};
+ localStorage.setItem('DIAMINES_BIDS_'+currentEditEmail, JSON.stringify(cur));
+ alert('Saved bids for '+currentEditEmail);
+ renderUsers();
+}
+window.addFreeBids=function(){
+ let t=parseInt(document.getElementById('editTotal').value)||0;
+ let a=parseInt(document.getElementById('editAvail').value)||0;
+ document.getElementById('editTotal').value=t+10;
+ document.getElementById('editAvail').value=a+10;
+}
+window.resetBids=function(){
+ document.getElementById('editTotal').value=0;
+ document.getElementById('editAvail').value=0;
+ document.getElementById('editUsed').value=0;
+}
+function renderUsers(){
+ let tb=document.getElementById('usersTable');
+ let rows=[];
+ for(let i=0;i<localStorage.length;i++){
+  let k=localStorage.key(i);
+  if(k.startsWith('DIAMINES_BIDS_')){
+   let email=k.replace('DIAMINES_BIDS_','');
+   try{ let v=JSON.parse(localStorage.getItem(k)); rows.push({email, ...v}); }catch{}
+  }
+ }
+ tb.innerHTML=rows.map(r=>`<tr><td>${r.email}</td><td>${r.total}</td><td style="color:#4ade80">${r.available}</td><td style="color:#f87171">${r.used}</td><td>${r.freeUsed?'YES':'NO'}</td><td><button class="btn btn-purple" onclick="document.getElementById('searchEmail').value='${r.email}';searchUser();switchTab('edit')">Edit</button></td></tr>`).join('') || '<tr><td colspan=6 style="text-align:center;color:#6b7280">No users found (localStorage only - will show Firebase later)</td></tr>';
+}
+renderUsers();
+</script>
+</body>
+  </html>
