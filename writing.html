@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Writing Studio - Diamines Dark</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui,sans-serif;margin:0;padding:0}
+body{background:#07070a;color:#e5e7eb;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(600px at 15% 10%,rgba(168,85,247,0.15),transparent),radial-gradient(600px at 85% 0%,rgba(34,197,94,0.12),transparent),radial-gradient(500px at 50% 90%,rgba(236,72,153,0.10),transparent);pointer-events:none;z-index:-1}
+.top{max-width:850px;margin:0 auto;padding:16px;display:flex;justify-content:space-between;align-items:center}
+.back{padding:10px 18px;border-radius:99px;font-size:11px;font-weight:800;text-decoration:none;border:1px solid rgba(168,85,247,0.3);background:rgba(20,12,35,0.8);color:#c084fc}
+.pill{padding:10px 16px;border-radius:99px;background:#1a102a;border:1px solid rgba(168,85,247,0.3);font-size:10px;font-weight:800;color:#c084fc}
+.header{max-width:850px;margin:12px auto;background:linear-gradient(135deg,#1a102a 0%, #151528 100%);border:1px solid rgba(168,85,247,0.25);border-radius:26px;padding:26px;text-align:center;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#a855f7,#ec4899,#22c55e,#a855f7);background-size:200% 100%;animation:move 3s linear infinite}
+@keyframes move{0%{background-position:0%}100%{background-position:200%}}
+.header h1{position:relative;font-size:26px;font-weight:1000;color:#fff}
+.header h1 span{display:block;font-size:11px;font-weight:700;color:#a855f7;margin-top:6px;letter-spacing:2.5px}
+.tabs{max-width:850px;margin:16px auto;display:flex;gap:8px;overflow:auto;padding:0 14px;scrollbar-width:none}
+.tab{padding:12px 18px;border-radius:99px;font-size:11px;font-weight:900;cursor:pointer;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.05);color:#9ca3af;white-space:nowrap}
+.tab.active{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;border-color:#a855f7;box-shadow:0 8px 20px rgba(168,85,247,0.4)}
+.card{background:linear-gradient(135deg,#1a1a2e,#151528);border:1px solid rgba(168,85,247,0.15);border-left:4px solid #a855f7;border-radius:20px;padding:18px;margin:12px auto;max-width:850px;box-shadow:0 10px 30px rgba(0,0,0,0.4)}
+.badge{padding:6px 12px;border-radius:99px;font-size:9px;font-weight:800;border:1px solid rgba(168,85,247,0.2);background:rgba(168,85,247,0.12);color:#c084fc}
+.btn{width:100%;padding:14px;border-radius:14px;border:none;font-weight:900;font-size:12px;cursor:pointer;margin-top:12px}
+.btn-purple{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff}
+.btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-dark{background:rgba(255,255,255,0.06);color:#9ca3af;border:1px solid rgba(255,255,255,0.1)}
+.page{display:none}.page.active{display:block}
+textarea{width:100%;background:#0a0a14;color:#e5e7eb;border:2px solid rgba(168,85,247,0.25);border-radius:14px;padding:14px;font-size:12px;outline:none}
+.popup-bg{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.popup-bg.show{display:flex}
+.popup{width:100%;max-width:420px;background:linear-gradient(180deg,#1e1e32,#151528);border:1px solid rgba(168,85,247,0.3);border-radius:28px;padding:32px;text-align:center;position:relative;overflow:hidden;animation:popIn 0.25s cubic-bezier(0.34,1.56,0.64,1)}
+.popup::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#a855f7,#ec4899,#22c55e)}
+.popup-icon{width:100px;height:100px;margin:0 auto 18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:48px}
+.icon-success{background:radial-gradient(circle, rgba(34,197,94,0.25), rgba(34,197,94,0.05));border:2px solid rgba(34,197,94,0.4)}
+.icon-error{background:radial-gradient(circle, rgba(245,158,11,0.2), rgba(245,158,11,0.05));border:2px solid rgba(245,158,11,0.3)}
+.icon-wait{background:radial-gradient(circle, rgba(168,85,247,0.25), rgba(168,85,247,0.05));border:2px solid rgba(168,85,247,0.4)}
+.icon-gold{background:radial-gradient(circle, rgba(245,158,11,0.25), rgba(245,158,11,0.05));border:2px solid rgba(245,158,11,0.4)}
+@keyframes popIn{from{transform:scale(0.85) translateY(15px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.confetti{position:fixed;top:-10px;width:8px;height:12px;border-radius:3px;animation:fall 2.5s linear forwards;z-index:200;pointer-events:none}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg)}100%{transform:translateY(110vh) rotate(720deg)}}
+.shine{position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);animation:shineMove 2.5s infinite}
+@keyframes shineMove{0%{left:-100%}100%{left:100%}}
+.bids-bar{max-width:850px;margin:12px auto;background:linear-gradient(135deg,#1a1a2e,#1e1e3a);border:1px solid rgba(245,158,11,0.3);border-radius:18px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.bids-info{display:flex;gap:14px;flex-wrap:wrap}
+.bids-item b{color:#fbbf24;font-size:18px}.bids-item span{color:#9ca3af;font-size:9px;display:block;font-weight:800}
+.purchase-btn{padding:11px 20px;border-radius:99px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-weight:900;font-size:11px;border:none;cursor:pointer}
+.pkg{border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);border-radius:14px;padding:14px;text-align:center;flex:1}
+.pkg.best{border-color:#f59e0b;background:rgba(245,158,11,0.12)}
+.admin-link{padding:8px 14px;border-radius:99px;font-size:10px;font-weight:900;text-decoration:none;border:1px solid rgba(168,85,247,0.3);background:rgba(168,85,247,0.12);color:#c084fc}
+</style>
+</head>
+<body>
+<div class="top"><a class="back" href="dashboard.html">← Dashboard</a><div style="display:flex;gap:8px"><a class="admin-link" href="adminbids.html">✏️ BIDS EDIT</a><span class="pill">🌙 DARK</span></div></div>
+<div class="header"><h1>✍️ WRITING STUDIO <span>PROFESSIONAL • DARK EDITION</span></h1><p style="color:#9ca3af;font-size:11px;margin-top:10px">1 BID = 1 JOB • Free 1 Bid For New Writers</p></div>
+
+<div class="bids-bar">
+  <div class="bids-info">
+    <div class="bids-item"><span>TOTAL BIDS</span><b id="totalBids">0</b></div>
+    <div class="bids-item"><span>AVAILABLE</span><b id="availBids" style="color:#4ade80">0</b></div>
+    <div class="bids-item"><span>USED</span><b id="usedBids" style="color:#f87171">0</b></div>
+    <div class="bids-item" id="freeBadge" style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);padding:6px 12px;border-radius:99px"><span style="color:#4ade80">🎁 FREE: 1 BID</span></div>
+  </div>
+  <button class="purchase-btn" onclick="openPurchase()">PURCHASE BIDS</button>
+</div>
+
+<div class="tabs">
+<button class="tab active" id="t-avail" onclick="switchTab('available')">📋 Available (<span id="cA">0</span>)</button>
+<button class="tab" id="t-my" onclick="switchTab('mytask')">📁 My Tasks (<span id="cM">0</span>)</button>
+<button class="tab" id="t-pen" onclick="switchTab('pending')">⏳ Pending (<span id="cP">0</span>)</button>
+<button class="tab" id="t-ap" onclick="switchTab('approved')">✅ Approved (<span id="cAp">0</span>)</button>
+<button class="tab" id="t-rj" onclick="switchTab('rejected')">❌ Review (<span id="cR">0</span>)</button>
+</div>
+
+<div style="max-width:850px;margin:0 auto;padding:0 14px">
+<div id="page-available" class="page active"></div>
+<div id="page-mytask" class="page"></div>
+<div id="page-pending" class="page"></div>
+<div id="page-approved" class="page"></div>
+<div id="page-rejected" class="page"></div>
+</div>
+
+<div id="submitModal" class="popup-bg"><div class="popup" style="max-width:520px"><h3 style="color:#c084fc;text-align:left">📤 Submit Article</h3><p id="sTitle" style="text-align:left;color:#9ca3af;font-size:11px;margin:8px 0"></p><textarea id="artBox" style="min-height:260px;margin-top:12px" placeholder="Paste your 800+ word article..."></textarea><div style="display:flex;gap:10px;margin-top:14px"><button class="btn btn-dark" style="flex:1" onclick="closeAll()">Cancel</button><button id="submitBtn" class="btn btn-green" style="flex:1.5" onclick="doSubmit()">✨ Submit for Review</button></div></div></div>
+
+<div id="pop-confirm" class="popup-bg"><div class="popup"><div class="shine"></div><div class="popup-icon icon-wait">💼</div><h2>Use 1 Bid?</h2><p id="pop-confirm-text"></p><div style="display:flex;gap:10px"><button class="btn btn-dark" style="flex:1" onclick="closeAll()">Not Now</button><button id="confirmBtn" class="btn btn-purple" style="flex:1.5" onclick="confirmAccept()">Yes, Use 1 Bid 🚀</button></div></div></div>
+<div id="pop-awarded" class="popup-bg"><div class="popup"><div class="shine"></div><div class="popup-icon icon-gold">🏆</div><h2 style="color:#fbbf24">JOB UNLOCKED!</h2><p id="pop-awarded-text"></p><button class="btn btn-purple" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="closeAll();switchTab('mytask')">Go to My Tasks →</button></div></div>
+
+<div id="pop-approved" class="popup-bg"><div class="popup" style="border-color:rgba(34,197,94,0.5)"><div class="shine"></div><div class="popup-icon icon-success">✨</div><h2 style="color:#4ade80">Approved!</h2><p id="pop-approved-text" style="color:#e5e7eb;font-size:13px;line-height:1.8"></p><div style="background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));border:1px solid rgba(34,197,94,0.3);border-radius:16px;padding:14px;margin-bottom:16px"><small style="color:#4ade80;font-weight:800">💰 EARNINGS ADDED</small><br><b id="pop-approved-amount" style="color:#fff;font-size:24px"></b></div><button class="btn btn-green" onclick="closeAll();switchTab('approved')">View →</button></div></div>
+
+<!-- RATING PLATFORM STYLE REJECTION NOTIFICATION -->
+<div id="pop-rejected" class="popup-bg"><div class="popup" style="border-color:rgba(245,158,11,0.4);max-width:440px"><div class="shine"></div><div class="popup-icon icon-error">📋</div><h2 style="color:#fbbf24">Submission Reviewed</h2><p id="pop-rejected-text" style="color:#e5e7eb;font-size:13px"></p>
+<div style="background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.04));border:1px solid rgba(245,158,11,0.25);border-radius:16px;padding:14px;margin:12px 0;text-align:left">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><small style="color:#fbbf24;font-weight:900">CLIENT RATING</small><span style="color:#fbbf24;font-weight:900">★★☆☆☆ 2.0/5</span></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:6px"><small style="color:#9ca3af">Status:</small><small style="color:#f87171;font-weight:800">❌ Not Approved</small></div>
+<div style="display:flex;justify-content:space-between"><small style="color:#9ca3af">Quality:</small><small style="color:#fbbf24;font-weight:700">Needs Improvement</small></div>
+</div>
+<div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:14px;padding:12px;margin-bottom:14px;text-align:left"><small style="color:#c084fc;font-weight:800">💬 REASON:</small><p id="pop-rejected-feedback" style="color:#e5e7eb;font-size:12px;margin-top:6px;line-height:1.6"></p></div>
+<div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:10px"><small style="color:#9ca3af">🔔 Notification: This submission was reviewed by the client and did not meet the required standards. A new task will be assigned to improve your rating.</small></div>
+<button class="btn btn-purple" onclick="closeAll();switchTab('rejected')">View Details →</button></div></div>
+
+<div id="pop-no-bids" class="popup-bg"><div class="popup"><div class="shine"></div><div class="popup-icon icon-error">💎</div><h2 style="color:#fbbf24">Out Of Bids!</h2><p id="noBidsText"></p><button class="btn btn-purple" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="closeAll();openPurchase()">🛒 Purchase Now</button><button class="btn btn-dark" onclick="closeAll()">Cancel</button></div></div>
+<div id="pop-locked" class="popup-bg"><div class="popup"><div class="shine"></div><div class="popup-icon icon-wait">📝</div><h2 style="color:#c084fc">Task Under Review</h2><p style="color:#e5e7eb;font-size:13px">This submission is under client review. Please check your revision queue for feedback.</p><button class="btn btn-purple" onclick="closeAll()">Okay →</button></div></div>
+<div id="pop-depositing" class="popup-bg"><div class="popup"><div class="popup-icon icon-wait">⏳</div><h2 style="color:#a855f7">Depositing...</h2><p>Verifying...</p></div></div>
+<div id="pop-deposited" class="popup-bg"><div class="popup"><div class="shine"></div><div class="popup-icon icon-success">✅</div><h2 style="color:#4ade80">Deposited!</h2><p id="depositedText"></p><button class="btn btn-green" onclick="closeAll()">Great</button></div></div>
+<div id="pop-submit" class="popup-bg"><div class="popup"><div class="shine"></div><div class="popup-icon icon-wait">🚀</div><h2 style="color:#c084fc">Submitted!</h2><p>Editorial team will review within 24h.</p><button class="btn btn-purple" onclick="closeAll();switchTab('pending')">Track →</button></div></div>
+
+<div id="purchaseModal" class="popup-bg"><div class="popup" style="max-width:520px;text-align:left"><div class="shine"></div><h3 style="color:#fbbf24;text-align:center">🛒 Purchase Bids</h3><p style="text-align:center;margin-top:6px;color:#9ca3af">1 BID = 1 JOB • 10x Value!</p>
+<div style="background:#0a0a14;border:1px solid rgba(245,158,11,0.3);border-radius:14px;padding:14px;margin:14px 0;text-align:center"><b style="color:#fbbf24;font-size:11px">SEND TO OFFICIAL</b><br><b style="font-size:24px;color:#fff;letter-spacing:2px">0141416120</b></div>
+<div style="display:flex;gap:8px"><div class="pkg best"><b>10 BIDS</b><br><b style="color:#fbbf24">KES 100</b><br><button class="btn btn-purple" style="padding:9px;margin-top:8px;background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="selectPkg(100,10)">Select</button></div><div class="pkg"><b>20 BIDS</b><br><b style="color:#4ade80">KES 200</b><br><button class="btn btn-purple" style="padding:9px;margin-top:8px" onclick="selectPkg(200,20)">Select</button></div><div class="pkg"><b>30 BIDS</b><br><b style="color:#a855f7">KES 300</b><br><button class="btn btn-purple" style="padding:9px;margin-top:8px" onclick="selectPkg(300,30)">Select</button></div></div>
+<div style="display:flex;gap:8px;margin-top:8px"><div class="pkg"><b>40 BIDS</b><br><b>KES 400</b><br><button class="btn btn-purple" style="padding:9px;margin-top:8px" onclick="selectPkg(400,40)">Select</button></div><div class="pkg"><b>50 BIDS</b><br><b>KES 500</b><br><button class="btn btn-purple" style="padding:9px;margin-top:8px" onclick="selectPkg(500,50)">Select</button></div></div>
+<div style="background:rgba(255,255,255,0.05);border-radius:14px;padding:14px;margin-top:14px"><b style="font-size:12px;color:#c084fc">CONFIRM PAYMENT</b><input id="depPhone" placeholder="M-Pesa Number" style="width:100%;background:#0a0a14;border:1px solid rgba(168,85,247,0.3);border-radius:10px;padding:12px;color:#fff;margin-top:10px"><input id="depCode" placeholder="M-Pesa Code" style="width:100%;background:#0a0a14;border:1px solid rgba(168,85,247,0.3);border-radius:10px;padding:12px;color:#fff;margin-top:8px"><input id="depAmount" placeholder="Amount" type="number" style="width:100%;background:#0a0a14;border:1px solid rgba(168,85,247,0.3);border-radius:10px;padding:12px;color:#fff;margin-top:8px"><button class="btn btn-green" onclick="submitDeposit()">✅ Submit</button></div>
+<button class="btn btn-dark" onclick="closeAll()">Close</button></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, deleteDoc, setDoc, onSnapshot, addDoc, getDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = {apiKey:"AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",authDomain:"diamines-agencies.firebaseapp.com",projectId:"diamines-agencies",storageBucket:"diamines-agencies.firebasestorage.app",messagingSenderId:"438413306857",appId:"1:438413306857:web:3c7f736794be6a49b0f978"};
+const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+let email=''; try{ let u=JSON.parse(localStorage.getItem('DIAMINES_CURRENT')||'{}'); email=(u.email||localStorage.getItem('DIAMINES_USER_EMAIL')||'').toLowerCase(); }catch{}
+if(!email) email='test@diamines.com';
+let availJobs=[], myJobs=[]; const K_MY='DIAMONDS_MY_'+email;
+let pendingAcceptId=null;
+const K_BIDS='DIAMINES_BIDS_SIMPLE_'+email;
+const K_FREE='DIAMINES_FREE_USED_SIMPLE_'+email;
+const K_LOCKED='DIAMINES_LOCKED_JOBS_'+email;
+function getLocked(){ try{return JSON.parse(localStorage.getItem(K_LOCKED)||'[]')}catch{return[]}}
+function addLocked(jobId){ let arr=getLocked(); if(!arr.includes(String(jobId))){arr.push(String(jobId)); localStorage.setItem(K_LOCKED, JSON.stringify(arr));}}
+function isLocked(jobId){ return getLocked().includes(String(jobId)) || myJobs.some(j=> (j.jobId||j.id)===jobId && ['submitted','approved','rejected'].includes(j.status)); }
+function getLocalBids(){ let d=JSON.parse(localStorage.getItem(K_BIDS)||'null'); let freeUsed=localStorage.getItem(K_FREE)==='1'; if(!d){ d= freeUsed? {total:0,available:0,used:1,freeUsed:true} : {total:1,available:1,used:0,freeUsed:false}; localStorage.setItem(K_BIDS, JSON.stringify(d)); } if(freeUsed) d.freeUsed=true; return d; }
+function updateUI(d){ document.getElementById('totalBids').innerText=d.total; document.getElementById('availBids').innerText=d.available; document.getElementById('usedBids').innerText=d.used; let fb=document.getElementById('freeBadge'); if(d.freeUsed){ fb.innerHTML='<span style="color:#f87171">🎁 FREE USED</span>'; fb.style.background='rgba(239,68,68,0.12)'; } else { fb.innerHTML='<span style="color:#4ade80">🎁 FREE: 1 BID</span>'; } }
+function saveLocal(d){ localStorage.setItem(K_BIDS, JSON.stringify(d)); if(d.freeUsed) localStorage.setItem(K_FREE,'1'); updateUI(d); setDoc(doc(db,'userBids', email), d, {merge:true}).catch(()=>{}); }
+onSnapshot(doc(db,'userBids', email), (snap)=>{ if(snap.exists()){ let fbData=snap.data(); localStorage.setItem(K_BIDS, JSON.stringify(fbData)); if(fbData.freeUsed) localStorage.setItem(K_FREE,'1'); updateUI(fbData); } else { let local=getLocalBids(); if(localStorage.getItem(K_FREE)!=='1'){ setDoc(doc(db,'userBids', email), {total:1,available:1,used:0,freeUsed:false}, {merge:true}).catch(()=>{}); } updateUI(local); } });
+window.openPurchase=()=>{ document.getElementById('purchaseModal').classList.add('show'); }
+window.selectPkg=(a,b)=>{ document.getElementById('depAmount').value=a; }
+window.submitDeposit=async ()=>{ let phone=document.getElementById('depPhone').value.trim(); let code=document.getElementById('depCode').value.trim(); let amount=parseInt(document.getElementById('depAmount').value); if(!phone||!code||!amount){ document.getElementById('noBidsText').innerText='Please fill all fields'; showPop('pop-no-bids'); return; } closeAll(); showPop('pop-depositing'); let map={100:10,200:20,300:30,400:40,500:50}; let bids=map[amount]||Math.floor(amount/10); let payload={email:email, phone:phone, mpesaCode:code, amount:amount, bids:bids, status:'pending', createdAt:new Date().toISOString()}; try{ await addDoc(collection(db,'bidDeposits'), payload); }catch{} closeAll(); document.getElementById('depositedText').innerHTML=`KES ${amount} (${bids} BIDS) received!`; showPop('pop-deposited'); document.getElementById('depPhone').value=''; document.getElementById('depCode').value=''; document.getElementById('depAmount').value=''; }
+function switchTab(n){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  let tid=n==='available'?'avail':n==='mytask'?'my':n==='pending'?'pen':n==='approved'?'ap':'rj';
+  let tb=document.getElementById('t-'+tid); if(tb) tb.classList.add('active');
+  let pg=document.getElementById('page-'+n); if(pg) pg.classList.add('active');
+  if(n==='available') rAvail(); if(n==='mytask') rMy(); if(n==='pending') rPen(); if(n==='approved') rAp(); if(n==='rejected') rRj();
+}
+window.switchTab=switchTab;
+function showPop(id){ document.getElementById(id).classList.add('show'); document.body.style.overflow='hidden'; }
+window.closeAll=()=>{ document.querySelectorAll('.popup-bg').forEach(p=>p.classList.remove('show')); document.body.style.overflow=''; }
+function createConfetti(){ for(let i=0;i<20;i++){ let c=document.createElement('div'); c.className='confetti'; c.style.left=Math.random()*100+'vw'; c.style.background=['#22c55e','#a855f7','#f59e0b','#ec4899','#fff'][Math.floor(Math.random()*5)]; document.body.appendChild(c); setTimeout(()=>c.remove(),3000); } }
+function rAvail(){
+  document.getElementById('cA').innerText=availJobs.length;
+  let el=document.getElementById('page-available');
+  if(!availJobs.length){ el.innerHTML=`<div style="text-align:center;padding:70px;background:#1a1a2e;border-radius:20px"><div style="font-size:48px">📭</div><p style="color:#9ca3af;font-weight:700">No jobs</p></div>`; return;}
+  el.innerHTML=availJobs.map(j=>{ let locked=isLocked(j.id); return `<div class="card"><div style="display:flex;justify-content:space-between"><b style="color:#fff">✍️ ${j.title}</b><span style="color:#fff;font-weight:900;background:linear-gradient(135deg,#22c55e,#16a34a);padding:7px 16px;border-radius:99px">KES ${j.price}</span></div><span class="badge" style="background:rgba(245,158,11,0.15);color:#fbbf24">🔑 1 BID</span><button class="btn btn-purple" style="${locked?'opacity:0.5;pointer-events:none':''}" onclick="bidTask('${j.id}')">${locked?'✓ Submitted':'💼 BID NOW'}</button></div>`; }).join('');
+}
+function rMy(){
+  let f=myJobs.filter(j=>j.status==='in_progress');
+  document.getElementById('cM').innerText=f.length;
+  let el=document.getElementById('page-mytask');
+  if(!f.length){ el.innerHTML=`<div style="text-align:center;padding:70px;background:#1a1a2e;border-radius:20px"><div style="font-size:48px">📁</div><p style="color:#9ca3af;font-weight:700">No active tasks</p></div>`; return;}
+  el.innerHTML=f.map(j=>`<div class="card" style="border-left-color:#a855f7"><div style="display:flex;justify-content:space-between"><b style="color:#fff">📝 ${j.title}</b><b style="color:#4ade80">KES ${j.price}</b></div><small style="color:#a855f7;font-weight:700">🟢 In Progress</small><button class="btn btn-green" onclick="openSub('${j.jobId||j.id}')">📤 SUBMIT NOW</button></div>`).join('');
+}
+function rPen(){
+  let f=myJobs.filter(j=>j.status==='submitted');
+  document.getElementById('cP').innerText=f.length;
+  let el=document.getElementById('page-pending');
+  if(!f.length){ el.innerHTML=`<div style="text-align:center;padding:70px;background:#1a1a2e;border-radius:20px"><div style="font-size:48px">⏳</div><p style="color:#9ca3af;font-weight:700">No pending</p></div>`; return;}
+  el.innerHTML=f.map(j=>`<div class="card" style="border-left-color:#f59e0b"><div style="display:flex;justify-content:space-between"><b style="color:#fff">⏳ ${j.title}</b><b style="color:#fbbf24">KES ${j.price}</b></div><small style="color:#fbbf24;font-weight:700">🔍 Under Review</small></div>`).join('');
+}
+function rAp(){
+  let f=myJobs.filter(j=>j.status==='approved');
+  document.getElementById('cAp').innerText=f.length;
+  let el=document.getElementById('page-approved');
+  if(!f.length){ el.innerHTML=`<div style="text-align:center;padding:70px;background:#1a1a2e;border-radius:20px"><div style="font-size:48px">✅</div><p style="color:#9ca3af;font-weight:700">No approved yet</p></div>`; return;}
+  el.innerHTML=f.map(j=>`<div class="card" style="border-left-color:#22c55e"><div style="display:flex;justify-content:space-between"><b style="color:#fff">✅ ${j.title}</b><b style="color:#4ade80">+KES ${j.price}</b></div><p style="font-size:11px;color:#4ade80;margin-top:8px;font-weight:700">🎉 Paid</p></div>`).join('');
+}
+// LOGICAL RATING PLATFORM STYLE REJECTION
+function rRj(){
+  let f=myJobs.filter(j=>j.status==='rejected');
+  document.getElementById('cR').innerText=f.length;
+  let el=document.getElementById('page-rejected');
+  if(!f.length){ el.innerHTML=`<div style="text-align:center;padding:70px;background:#1a1a2e;border-radius:20px"><div style="font-size:48px">✨</div><p style="color:#9ca3af;font-weight:700">No reviews yet</p></div>`; return;}
+  el.innerHTML=f.map(j=>`<div class="card" style="border-left-color:#f59e0b;border:1px solid rgba(245,158,11,0.25)">
+  <div style="display:flex;justify-content:space-between;align-items:center"><b style="color:#fff">📋 ${j.title}</b><span style="background:rgba(239,68,68,0.15);color:#f87171;padding:6px 12px;border-radius:99px;font-size:10px;font-weight:900">❌ NOT APPROVED</span></div>
+
+  <div style="margin-top:12px;background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.04));border:1px solid rgba(245,158,11,0.2);border-radius:14px;padding:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center"><small style="color:#fbbf24;font-weight:900;letter-spacing:1px">CLIENT RATING</small><b style="color:#fbbf24">★★☆☆☆ 2.0/5</b></div>
+    <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+      <span style="background:#1a1a2e;padding:4px 8px;border-radius:99px;font-size:9px;color:#9ca3af">Quality: Needs Work</span>
+      <span style="background:#1a1a2e;padding:4px 8px;border-radius:99px;font-size:9px;color:#9ca3af">Originality: Low</span>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.15);border-radius:12px;padding:12px">
+    <small style="color:#c084fc;font-weight:800">🔔 NOTIFICATION OF REJECTION</small>
+    <p style="font-size:12px;color:#e5e7eb;margin-top:6px;line-height:1.6">Your submission for <b>"${j.title}"</b> was reviewed by the client and did not meet the required quality standards.</p>
+    <div style="margin-top:10px;padding:10px;background:#0a0a14;border-radius:10px;border:1px dashed rgba(245,158,11,0.2)">
+      <small style="color:#fbbf24;font-weight:800">💬 REASON:</small>
+      <p style="font-size:11px;color:#c4b5fd;margin-top:4px;line-height:1.6">${j.feedback||'The article did not meet the brief requirements. Please improve quality, originality and formatting for next tasks.'}</p>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:6px;align-items:center"><span style="font-size:12px">💡</span><small style="color:#9ca3af;font-size:10px">This rating will affect your future task assignments. Improve to get higher rated jobs.</small></div>
+  </div>
+  </div>`).join('');
+}
+onSnapshot(collection(db, "writingJobs"), (snap)=>{
+  availJobs=[]; snap.forEach(d=>{ let v=d.data(); if(!v.status||v.status==='available'){ if(!isLocked(v.id)) availJobs.push(v); } });
+  availJobs = availJobs.filter(j=>!isLocked(j.id)); rAvail();
+});
+function mergeJobs(incoming){
+  let map={}; myJobs.forEach(j=>{ map[j.jobId||j.id]=j; });
+  incoming.forEach(j=>{ let key=j.jobId||j.id; let existing=map[key]; if(!existing) map[key]=j; else { if(j.status==='approved' || j.status==='rejected') map[key]= {...existing,...j, status:j.status, feedback:j.feedback||existing.feedback, price:j.price||existing.price, updatedAt:j.updatedAt||new Date().toISOString()}; else if(j.status==='submitted' && existing.status==='in_progress') map[key]= {...existing,...j}; } });
+  return Object.values(map);
+}
+function handleJobsUpdate(newJobs){
+  let old=myJobs.map(j=>({id:j.jobId||j.id, status:j.status}));
+  myJobs=mergeJobs(newJobs);
+  myJobs.forEach(j=>{ if(['submitted','approved','rejected'].includes(j.status)) addLocked(j.jobId||j.id); });
+  localStorage.setItem(K_MY, JSON.stringify(myJobs));
+  rMy(); rPen(); rAp(); rRj(); rAvail();
+  myJobs.forEach(nj=>{
+    let o=old.find(x=>x.id===(nj.jobId||nj.id));
+    let oldStatus=o?o.status:null;
+    if(oldStatus && oldStatus!==nj.status){
+      if(nj.status==='approved' &&!sessionStorage.getItem('shownAp_'+(nj.jobId||nj.id))){
+        document.getElementById('pop-approved-text').innerHTML=`Your article <b>"${nj.title}"</b> approved!`;
+        document.getElementById('pop-approved-amount').innerText=`KES ${nj.price}`;
+        showPop('pop-approved'); createConfetti(); sessionStorage.setItem('shownAp_'+(nj.jobId||nj.id),'1');
+      }
+      if(nj.status==='rejected' &&!sessionStorage.getItem('shownRj_'+(nj.jobId||nj.id))){
+        document.getElementById('pop-rejected-text').innerHTML=`Your submission <b>"${nj.title}"</b> was reviewed.`;
+        document.getElementById('pop-rejected-feedback').innerText=nj.feedback||'Did not meet client requirements.';
+        showPop('pop-rejected'); sessionStorage.setItem('shownRj_'+(nj.jobId||nj.id),'1');
+      }
+    }
+  });
+}
+try{ let cached=JSON.parse(localStorage.getItem(K_MY)||'[]'); if(cached.length){ myJobs=cached; cached.forEach(j=>{ if(['submitted','approved','rejected'].includes(j.status)) addLocked(j.jobId||j.id); }); rMy(); rPen(); rAp(); rRj(); } }catch{}
+onSnapshot(collection(db, "writingTaken"), (snap)=>{ let jobs=[]; snap.forEach(d=>{ let v=d.data(); let em=(v.takenBy||v.userEmail||v.email||'').toLowerCase(); if(em===email) jobs.push(v); }); if(jobs.length || myJobs.length) handleJobsUpdate(jobs); });
+onSnapshot(collection(db, "writingPending"), (snap)=>{ let jobs=[]; snap.forEach(d=>{ let v=d.data(); let em=(v.userEmail||v.takenBy||v.email||'').toLowerCase(); if(em===email) jobs.push({jobId:v.jobId||d.id,...v}); }); if(jobs.length) handleJobsUpdate(jobs); });
+onSnapshot(query(collection(db, "writingApproved"), where("userEmail","==",email)), (snap)=>{ let jobs=[]; snap.forEach(d=>jobs.push({jobId:d.data().jobId||d.id,...d.data(), status:'approved'})); if(jobs.length) handleJobsUpdate(jobs); });
+onSnapshot(query(collection(db, "writingRejected"), where("userEmail","==",email)), (snap)=>{ let jobs=[]; snap.forEach(d=>jobs.push({jobId:d.data().jobId||d.id,...d.data(), status:'rejected'})); if(jobs.length) handleJobsUpdate(jobs); });
+let cur=null;
+window.bidTask=(id)=>{
+  if(isLocked(id)){ showPop('pop-locked'); return; }
+  let bids=getLocalBids(); if(bids.available < 1){ document.getElementById('noBidsText').innerText='Need 1 BID'; showPop('pop-no-bids'); return; }
+  let job=availJobs.find(j=>j.id===id); if(!job) return; pendingAcceptId=id;
+  document.getElementById('pop-confirm-text').innerHTML=`Unlock <b>"${job.title}"</b>? Earn KES ${job.price}`;
+  showPop('pop-confirm');
+}
+window.confirmAccept=async ()=>{
+  let id=pendingAcceptId; let job=availJobs.find(j=>j.id===id); if(!job) return;
+  let bids=getLocalBids(); if(bids.available < 1){ closeAll(); showPop('pop-no-bids'); return; }
+  bids.available-=1; bids.used+=1; bids.total=Math.max(bids.total, bids.available+bids.used); bids.freeUsed=true; saveLocal(bids);
+  closeAll(); availJobs=availJobs.filter(j=>j.id!==id); rAvail();
+  let taken={...job, jobId:id, takenBy:email, takenAt:new Date().toISOString(), status:'in_progress', userEmail:email, updatedAt:new Date().toISOString()};
+  handleJobsUpdate([taken]); setDoc(doc(db, "writingTaken", id+"_"+email), taken); deleteDoc(doc(db, "writingJobs", id));
+  document.getElementById('pop-awarded-text').innerHTML=`"${job.title}" unlocked!`; showPop('pop-awarded');
+}
+window.openSub=(jobId)=>{
+  let job=myJobs.find(x=>(x.jobId||x.id)===jobId); if(!job) return;
+  if(['submitted','approved','rejected'].includes(job.status)){ showPop('pop-locked'); return; }
+  cur=job; document.getElementById('sTitle').innerText=job.title; document.getElementById('artBox').value=job.written||''; document.getElementById('submitModal').classList.add('show');
+}
+window.doSubmit=async ()=>{
+  let txt=document.getElementById('artBox').value.trim(); if(txt.length<100){ document.getElementById('noBidsText').innerText='At least 100 chars'; showPop('pop-no-bids'); return; }
+  let idx=myJobs.findIndex(x=>(x.jobId||x.id)===(cur.jobId||cur.id)); if(idx===-1) return;
+  if(['submitted','approved','rejected'].includes(myJobs[idx].status)){ closeAll(); showPop('pop-locked'); return; }
+  myJobs[idx].status='submitted'; myJobs[idx].written=txt; myJobs[idx].submittedAt=new Date().toISOString(); myJobs[idx].updatedAt=new Date().toISOString();
+  addLocked(myJobs[idx].jobId||myJobs[idx].id); localStorage.setItem(K_MY, JSON.stringify(myJobs));
+  document.getElementById('submitModal').classList.remove('show'); showPop('pop-submit'); rMy(); rPen(); rAvail();
+  setDoc(doc(db, "writingTaken", cur.jobId||cur.id), myJobs[idx], {merge:true});
+  setDoc(doc(db, "writingTaken", (cur.jobId||cur.id)+"_"+email), myJobs[idx], {merge:true});
+  setDoc(doc(db, "writingPending", cur.jobId||cur.id), {...myJobs[idx], userEmail:email, written:txt}, {merge:true});
+}
+</script>
+</body>
+  </html>
