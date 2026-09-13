@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Withdraw - DIAMINES - FIXED PENDING TO APPROVED</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',system-ui}
+body{background:#070711;color:#fff;min-height:100vh;padding:14px;max-width:640px;margin:0 auto}
+.card{background:linear-gradient(135deg,#1a1a35,#12122a);border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:16px;margin-bottom:12px}
+.input{width:100%;padding:12px;background:#070711;border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;outline:none;margin-bottom:10px}
+.btn{width:100%;padding:14px;border-radius:12px;border:none;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#00c853,#00e676);color:#042e16}
+.bal{font-size:12px;color:#8b8ba7;margin-bottom:8px}
+.bal b{color:#00e676;font-size:14px}
+.item{background:#000;border:1px solid #222;border-radius:12px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.badge{font-size:9px;padding:4px 8px;border-radius:6px;font-weight:800}
+.pending{background:#7a4a00;color:#facc15}
+.approved{background:#064e3b;color:#22c55e}
+.rejected{background:#4a0a0a;color:#ff4d8d}
+</style>
+<script>
+// INSTANT PRELOAD - NO FLICKER
+(function(){
+  try{
+    var raw=localStorage.getItem('DIAMINES_CURRENT');
+    if(raw) window.__PRE=JSON.parse(raw);
+  }catch{}
+})();
+</script>
+</head>
+<body>
+<h2 style="text-align:center;margin:10px 0">💸 Withdraw Funds</h2>
+<div class="card">
+<div class="bal">Balance: <b id="bal">KES 0</b> • Total Withdrawn: <b id="wit" style="color:#22c55e">KES 0</b></div>
+<input id="amount" class="input" type="number" placeholder="Amount KES (Min 100)">
+<input id="phone" class="input" placeholder="M-Pesa Phone e.g. 0712345678">
+<button class="btn" onclick="requestWithdraw()">REQUEST WITHDRAW →</button>
+<p style="font-size:10px;color:#5a5a78;margin-top:8px">10% fee. You receive 90%. Balance deducted instantly. Admin approves → status becomes APPROVED.</p>
+</div>
+
+<div class="card">
+<h3 style="font-size:12px;margin-bottom:8px">My Withdrawals (Live: Pending → Approved)</h3>
+<div id="list"><p style="color:#555;text-align:center;padding:20px">Loading...</p></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, query, where, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB6QxDFhIIHwt6TTZla6g4m-FaJdMol6M",
+  authDomain: "diamines-agencies.firebaseapp.com",
+  projectId: "diamines-agencies",
+  storageBucket: "diamines-agencies.firebasestorage.app",
+  messagingSenderId: "438413306857",
+  appId: "1:438413306857:web:3c7f736794be6a49b0f978"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentEmail = "";
+let currentBalance = 0;
+let unsub = null;
+
+// INSTANT BALANCE
+try{
+  let d = window.__PRE;
+  if(d){
+    currentEmail = (d.email||"").toLowerCase();
+    currentBalance = Number(d.balance||0);
+    document.getElementById('bal').innerText = "KES "+currentBalance.toLocaleString();
+    document.getElementById('wit').innerText = "KES "+Number(d.totalWithdraw||d.totalWithdrawn||0).toLocaleString();
+    if(d.phone) document.getElementById('phone').value = d.phone;
+  }
+}catch{}
+
+onAuthStateChanged(auth, async (user)=>{
+  if(!user &&!currentEmail){ location.href="login.html"; return; }
+  let email = (user?.email||currentEmail||"").toLowerCase();
+  currentEmail = email;
+  if(!email) return;
+  try{
+    // LIVE BALANCE - NO FLICKER - Single doc listener
+    onSnapshot(doc(db, "users", email), (snap)=>{
+      if(snap.exists()){
+        let data=snap.data();
+        currentBalance = Number(data.balance??0);
+        document.getElementById('bal').innerText = "KES "+currentBalance.toLocaleString();
+        document.getElementById('wit').innerText = "KES "+Number(data.totalWithdraw??data.totalWithdrawn??0).toLocaleString();
+        try{ localStorage.setItem('DIAMINES_CURRENT', JSON.stringify(data)); }catch{}
+      }
+    });
+    // LIVE WITHDRAWALS - PENDING → APPROVED INSTANTLY
+    listenWithdrawals(email);
+  }catch(e){ console.log(e); }
+});
+
+function listenWithdrawals(email){
+  if(unsub) unsub();
+  const q = query(collection(db, "withdrawals"), where("email","==", email));
+  unsub = onSnapshot(q, (snap)=>{
+    let arr=[];
+    snap.forEach(d=> arr.push({id:d.id, ...d.data()}));
+    arr.sort((a,b)=> new Date(b.date||b.createdAt||0) - new Date(a.date||a.createdAt||0));
+    renderList(arr);
+  });
+}
+
+function renderList(list){
+  if(!list.length){
+    document.getElementById('list').innerHTML = "<p style='color:#555;text-align:center;padding:20px'>No withdrawals yet</p>";
+    return;
+  }
+  let html="";
+  list.forEach(w=>{
+    let req = Number(w.requestedAmount||w.amount||0);
+    let fee = w.fee!=null? Number(w.fee) : Math.floor(req*0.10);
+    let rec = w.receiveAmount!=null? Number(w.receiveAmount) : req-fee;
+    let status = (w.status||'pending').toLowerCase();
+    html+=`<div class="item">
+      <div><b>KES ${req}</b> → You get KES ${rec}<br>
+      <small style="color:#8b8ba7">${w.date||w.createdAt||''} • ${w.phone||''}</small><br>
+      <small style="color:#666">Fee: KES ${fee}</small></div>
+      <div><span class="badge ${status}">${status.toUpperCase()}</span></div>
+    </div>`;
+  });
+  document.getElementById('list').innerHTML = html;
+}
+
+window.requestWithdraw = async ()=>{
+  let amt = Number(document.getElementById('amount').value||0);
+  let phone = document.getElementById('phone').value.trim();
+  if(!amt || amt < 100){ alert("Min KES 100"); return; }
+  if(!phone){ alert("Enter M-Pesa phone"); return; }
+  if(amt > currentBalance){ alert("Insufficient balance. Your balance: KES "+currentBalance); return; }
+  
+  if(!confirm(`Request withdraw?\nAmount: KES ${amt}\nFee 10%: KES ${Math.floor(amt*0.10)}\nYou receive: KES ${amt - Math.floor(amt*0.10)}\nPhone: ${phone}\n\nBalance will be deducted instantly.`)) return;
+
+  try{
+    let fee = Math.floor(amt*0.10);
+    let rec = amt - fee;
+    
+    // 1. DEDUCT INSTANTLY FROM BALANCE (FIXED - NO DOUBLE)
+    await updateDoc(doc(db, "users", currentEmail), {
+      balance: increment(-amt),
+      accountBalance: increment(-amt),
+      wallet: increment(-amt)
+    });
+
+    // 2. CREATE WITHDRAWAL AS PENDING
+    let id = "W"+Date.now();
+    await addDoc(collection(db, "withdrawals"), {
+      id: id,
+      email: currentEmail,
+      phone: phone,
+      amount: amt,
+      requestedAmount: amt,
+      fee: fee,
+      receiveAmount: rec,
+      status: "pending",
+      date: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      uid: currentEmail
+    });
+
+    alert("✅ Withdraw request sent!\nKES "+amt+" deducted from balance.\nStatus: PENDING\nWhen admin approves, it will turn to APPROVED and move to Total Withdrawals.");
+    document.getElementById('amount').value="";
+    
+  }catch(e){
+    alert("Error: "+e.message);
+  }
+}
+</script>
+</body>
+  </html>
