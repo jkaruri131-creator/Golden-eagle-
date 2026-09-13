@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DIAMINES - FULL DASHBOARD ACCESS</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui;margin:0;padding:0}body{background:#070711;color:#fff;padding:12px}
+.top{background:#0f0f23;padding:12px;border-radius:12px;border-bottom:2px solid #00e676;display:flex;justify-content:space-between;margin-bottom:12px}
+.card{background:#15152d;border:1px solid #222;border-radius:12px;padding:14px;margin-bottom:12px}
+.input{width:100%;padding:12px;background:#1e1e3a;border:1px solid #333;border-radius:8px;color:#fff;margin:10px 0}
+.btn{padding:10px 14px;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-size:12px;margin:3px}
+.btn-p{background:linear-gradient(135deg,#ff0055,#ff4d8d);color:#fff}.btn-g{background:#00e676;color:#000}.btn-b{background:#2962ff;color:#fff}.btn-y{background:#ffb700;color:#000}.btn-r{background:#ff1744;color:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+.job{background:#000;border:1px solid #222;border-radius:10px;padding:10px;margin-bottom:8px}
+</style></head><body>
+
+<div class="top"><b style="color:#00e676">👑 ADMIN GOD MODE - Full Dashboard by Email Only</b><button class="btn btn-r" onclick="logoutUser()">Exit Account</button></div>
+
+<div id="loginBox" class="card" style="border-color:#00e676">
+<h3 style="color:#00e676">Enter User Email to Login FULLY as Him</h3>
+<input id="emailInput" class="input" placeholder="e.g. otienovillicent234@gmail.com" value="otienovillicent234@gmail.com">
+<button class="btn btn-p" style="width:100%;padding:14px" onclick="fullLogin()">LOGIN AS USER - SEE EVERYTHING →</button>
+<small style="color:#666">No password needed. You will have Buy Jobs, Withdraw, Tasks access like it's your own account.</small>
+<div id="msg" style="margin-top:10px;font-size:11px"></div>
+</div>
+
+<div id="dash" style="display:none">
+<div class="grid">
+<div class="card"><small style="color:#888">USERNAME</small><h2 id="dName"></h2><small id="dEmail" style="color:#666"></small><br><br><p>Upline: <b id="dUpline" style="color:#00b8d4"></b></p><p>Status: <b id="dStatus" style="color:#00e676">ACTIVE</b></p></div>
+<div class="card" style="border-color:#00e676"><small style="color:#888">ACCOUNT BALANCE</small><h1 id="dBal" style="color:#00e676">KES 0</h1><button class="btn btn-g" onclick="addBal()">+ Add Balance (Admin)</button><button class="btn btn-y" onclick="editBal()">Edit Balance</button></div>
+<div class="card"><small style="color:#888">ACTIONS (Like Real User)</small><br><button class="btn btn-b" style="width:100%;margin-top:6px" onclick="buyJob()">🛒 BUY JOB - as Him</button><button class="btn btn-p" style="width:100%;margin-top:6px" onclick="withdrawAs()">💸 WITHDRAW - as Him</button><button class="btn btn-y" style="width:100%;margin-top:6px" onclick="loadTasks()">📝 MY TASKS / WRITING</button></div>
+</div>
+
+<div class="card" style="border-color:#ff0055"><h3>📝 writingApproved - His Field Tasks (Buy, Approve, Reject)</h3><div id="tasks"></div></div>
+<div class="card"><h3>👥 His Team Downline</h3><div id="team" style="font-size:12px"></div></div>
+<div class="card"><h3>💰 Transaction History / Wallets</h3><div id="wallet"></div></div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, getDoc, query, where, updateDoc, setDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyB6QxDFhIIHwt6TTZla6g4m-FaJdMol6M",
+  authDomain: "diamines-agencies.firebaseapp.com",
+  projectId: "diamines-agencies",
+  storageBucket: "diamines-agencies.firebasestorage.app",
+  messagingSenderId: "438413306857",
+  appId: "1:438413306857:web:3c7f736794be6a49b0f978"
+};
+let app = getApps().length? getApps()[0] : initializeApp(firebaseConfig);
+const db = getFirestore(app);
+let curEmail=''; let curId=''; let curData=null;
+
+window.fullLogin = async()=>{
+ let e=document.getElementById('emailInput').value.trim().toLowerCase();
+ if(!e) return alert('Enter email');
+ document.getElementById('msg').innerHTML='Logging in as '+e+'...';
+ try{
+   let snap=await getDoc(doc(db,"users",e));
+   let data=null; let id=e;
+   if(snap.exists()) data=snap.data();
+   else{
+     const q=query(collection(db,"users"), where("email","==",e));
+     const qs=await getDocs(q);
+     if(!qs.empty){ data=qs.docs[0].data(); id=qs.docs[0].id; }
+   }
+   if(!data){ msg.innerHTML='<span style="color:#ff1744">Not found</span>'; return; }
+   curEmail=e; curId=id; curData=data;
+   // GOD MODE: Set localStorage like real login
+   localStorage.setItem('DIAMINES_CURRENT_USER', e);
+   localStorage.setItem('DIAMINES_USER_EMAIL', e);
+   localStorage.setItem('currentUser', JSON.stringify(data));
+   document.getElementById('loginBox').style.display='none';
+   document.getElementById('dash').style.display='block';
+   document.getElementById('dName').innerText=data.username||e.split('@')[0];
+   document.getElementById('dEmail').innerText=e+' | Doc: '+id;
+   document.getElementById('dBal').innerText='KES '+(data.balance||0);
+   document.getElementById('dUpline').innerText=data.upline||'Official';
+   loadTeam(); loadTasks(); loadWallet();
+ }catch(err){ msg.innerHTML='❌ '+err.message; }
+}
+
+window.loadTeam = async()=>{
+ const all=await getDocs(collection(db,"users"));
+ let t=[]; all.forEach(d=>{ let u=d.data(); if((u.upline||'').toLowerCase()===curEmail) t.push(u.email); });
+ document.getElementById('team').innerHTML=t.length? t.join('<br>') : 'No team';
+}
+
+window.loadTasks = async()=>{
+ document.getElementById('tasks').innerHTML='Loading...';
+ const cols=['writingApproved','writings','tasks','jobs','submissions'];
+ let html='';
+ for(let c of cols){
+  try{
+   const q=query(collection(db,c), where("email","==",curEmail));
+   const s=await getDocs(q);
+   if(!s.empty){
+     html+=`<b style="color:#00b8d4">${c}: ${s.size}</b><br>`;
+     s.forEach(d=>{
+       let v=d.data();
+       html+=`<div class="job"><b>${v.title||v.jobTitle||d.id}</b> - ${v.status||'pending'} - KES ${v.price||v.amount||0}
+       <br><small style="color:#666">${v.createdAt||''}</small><br>
+       <button class="btn btn-g" style="font-size:9px" onclick="approveTask('${c}','${d.id}')">Approve</button>
+       <button class="btn btn-r" style="font-size:9px" onclick="rejectTask('${c}','${d.id}')">Reject</button>
+       <button class="btn btn-b" style="font-size:9px" onclick="viewTask('${c}','${d.id}')">View</button>
+       </div>`;
+     });
+   }
+  }catch{}
+ }
+ document.getElementById('tasks').innerHTML=html||'No tasks found, but you can still Buy Jobs as him.';
+}
+
+window.loadWallet = async()=>{
+ try{
+  const w=await getDoc(doc(db,"wallets",curEmail));
+  document.getElementById('wallet').innerHTML=w.exists()? JSON.stringify(w.data(),null,2) : 'No wallet doc - balance in users doc: '+(curData.balance||0);
+ }catch{ document.getElementById('wallet').innerHTML='Balance: '+(curData.balance||0); }
+}
+
+window.buyJob = async()=>{
+ let job=prompt('Job name to buy as '+curEmail+'? e.g. Field Review - KES 200');
+ if(!job) return;
+ let price=parseInt(prompt('Price KES?', '200')||'200');
+ try{
+   let bal=(curData.balance||0);
+   if(bal<price) { if(!confirm('Balance low ('+bal+'). Buy anyway (negative allowed)?')) return; }
+   await setDoc(doc(db,"users",curId), {balance: bal-price}, {merge:true});
+   await addDoc(collection(db,"purchases"), {email:curEmail, job:job, price:price, boughtByAdmin:true, date:new Date().toISOString()});
+   curData.balance=bal-price;
+   document.getElementById('dBal').innerText='KES '+curData.balance;
+   alert('✅ Bought '+job+' for '+curEmail+' as admin');
+   loadTasks();
+ }catch(e){ alert(e.message); }
+}
+
+window.withdrawAs = async()=>{
+ let amt=prompt('Withdraw amount for '+curEmail+'? Current: '+(curData.balance||0));
+ if(!amt) return;
+ amt=parseInt(amt);
+ try{
+   let bal=(curData.balance||0)-amt;
+   await setDoc(doc(db,"users",curId), {balance:bal}, {merge:true});
+   await addDoc(collection(db,"withdrawals"), {email:curEmail, amount:amt, status:'approved', byAdmin:true, date:new Date().toISOString()});
+   curData.balance=bal;
+   document.getElementById('dBal').innerText='KES '+bal;
+   alert('✅ Withdraw KES '+amt+' done as '+curEmail);
+ }catch(e){ alert(e.message); }
+}
+
+window.addBal = async()=>{
+ let a=parseInt(prompt('Add how much?', '500')||'0');
+ if(!a) return;
+ let nb=(curData.balance||0)+a;
+ await updateDoc(doc(db,"users",curId), {balance:nb});
+ curData.balance=nb;
+ document.getElementById('dBal').innerText='KES '+nb;
+}
+
+window.editBal = async()=>{
+ let a=parseInt(prompt('Set balance to?', curData.balance||0)||'0');
+ await updateDoc(doc(db,"users",curId), {balance:a});
+ curData.balance=a;
+ document.getElementById('dBal').innerText='KES '+a;
+}
+
+window.approveTask = async(col,id)=>{
+ await updateDoc(doc(db,col,id), {status:'approved', approvedByAdmin:true, approvedAt:new Date().toISOString()});
+ alert('Approved '+id); loadTasks();
+}
+window.rejectTask = async(col,id)=>{
+ let reason=prompt('Reject reason?')||'Did not meet client qualifications';
+ await updateDoc(doc(db,col,id), {status:'rejected', rejectReason:reason, rejectedAt:new Date().toISOString()});
+ alert('Rejected'); loadTasks();
+}
+window.viewTask = async(col,id)=>{
+ let s=await getDoc(doc(db,col,id));
+ alert(JSON.stringify(s.data(),null,2));
+}
+window.logoutUser = ()=>{
+ localStorage.removeItem('DIAMINES_CURRENT_USER');
+ location.reload();
+}
+
+// Auto login if?email= in URL
+let params=new URLSearchParams(window.location.search);
+if(params.get('email')){ document.getElementById('emailInput').value=params.get('email').toLowerCase(); setTimeout(fullLogin,800); }
+</script>
+</body></html>
