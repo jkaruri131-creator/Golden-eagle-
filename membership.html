@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES AGENCIES - FIXED PACKAGE SAVE</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',system-ui}
+body{background:#070711;color:#fff;padding:14px;max-width:600px;margin:0 auto;min-height:100vh}
+a{color:#888;text-decoration:none;font-size:13px}
+h2{margin:14px 0 4px;font-size:24px;font-weight:800;letter-spacing:1px}
+.sub{font-size:11px;color:#8b8ba7;margin-bottom:14px}
+.top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.box{border-radius:14px;padding:10px;border:1px solid;display:flex;flex-direction:column;justify-content:center}
+.bal{background:linear-gradient(135deg,#7a4a00,#c67c00);border-color:#facc15}
+.dep{background:linear-gradient(135deg,#0e2a6a,#1a4db5);border-color:#3b82f6}
+.pkgbox{background:linear-gradient(135deg,#064e3b,#0a7a5c);border-color:#22c55e}
+.box small{font-size:7px;font-weight:800;letter-spacing:1px;opacity:0.8}
+.box b{font-size:12px;margin-top:2px}
+.card{background:#1a1a35;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:16px;margin-top:12px}
+.input{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#000;color:#fff;margin-bottom:10px;font-size:14px;outline:none}
+.input:focus{border-color:#00C3A0}
+.btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#00C3A0,#00a37a);color:#fff;font-weight:800;font-size:14px;cursor:pointer}
+.pkg{border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px;background:#12122a;margin-bottom:12px;cursor:pointer;position:relative;overflow:hidden}
+.pkg.active{border-color:#facc15;background:radial-gradient(600px at 0% 0%, rgba(250,204,21,0.18), transparent), #1e1e3a;box-shadow:0 0 24px rgba(250,204,21,0.15)}
+.animal{font-size:42px;position:absolute;right:8px;top:8px;opacity:0.14}
+.price{font-size:22px;font-weight:900;color:#facc15}
+.jobs-col{display:flex;flex-direction:column;gap:6px;margin-top:12px;background:rgba(0,0,0,0.3);border-radius:12px;padding:10px}
+.job-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:600}
+.job-row.yes{background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);color:#fff}
+.job-row.no{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);color:#555}
+.dot{width:6px;height:6px;border-radius:50%}
+.dot.yes{background:#22c55e;box-shadow:0 0 6px #22c55e}
+.dot.no{background:#555}
+.pay{font-size:10px;color:#8b8ba7}
+.pay.yes{color:#4ade80;font-weight:800}
+.stk{position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);z-index:99;display:none;align-items:center;justify-content:center;padding:20px}
+.stk.show{display:flex}
+.stk-card{background:linear-gradient(180deg,#1e1e3f,#12122a);border:1px solid #00C3A0;border-radius:24px;padding:24px;max-width:380px;width:100%;text-align:center}
+.pkg-btn{width:100%;padding:12px;border-radius:10px;border:none;font-weight:800;font-size:12px;cursor:pointer;margin-top:10px}
+.pkg-btn-active{background:linear-gradient(135deg,#facc15,#ffb700);color:#000}
+.pkg-btn-current{background:#064e3b;color:#22c55e;border:1px solid #22c55e}
+.pkg-btn-upgrade{background:linear-gradient(135deg,#00e676,#00c853);color:#fff}
+.mpesa-box{background:linear-gradient(135deg,#022c22,#052e1a);border:1px solid rgba(34,197,94,0.3);border-radius:14px;padding:12px;margin-top:10px;text-align:center}
+</style>
+<script>
+(function(){
+  try{
+    var raw=localStorage.getItem('DIAMINES_CURRENT');
+    if(raw) window.__PRE=JSON.parse(raw);
+  }catch{}
+})();
+</script>
+</head>
+<body>
+<a href="dashboard.html" id="dashLink">← Dashboard</a>
+<h2>DIAMINES AGENCIES</h2>
+<p class="sub">Manual M-Pesa Deposit - Activate Package</p>
+<div class="top">
+<div class="box bal"><small>💰 BALANCE</small><b id="mainBal">KES 0</b></div>
+<div class="box dep"><small>📊 TOTAL DEPOSIT</small><b id="totalDep">KES 0</b></div>
+<div class="box pkgbox"><small>📦 PACKAGE</small><b id="curPkg">NONE</b></div>
+</div>
+<div id="statusBox"></div>
+
+<div class="card">
+<h4 style="font-size:12px;margin-bottom:12px">💳 Deposit via M-Pesa</h4>
+
+<div class="mpesa-box">
+<b style="color:#4ade80;font-size:12px">SEND MONEY TO:</b><br>
+<b style="color:#fbbf24;font-size:20px;letter-spacing:1px">0748374704</b>
+<p style="color:#e5e7eb;font-size:11px;margin-top:6px;line-height:1.6">1. M-Pesa → Send Money<br>2. Number: <b>0748374704</b><br>3. Enter Amount (Min 100)<br>4. Copy Code e.g SH...</p>
+</div>
+
+<input id="depPhone" class="input" type="tel" placeholder="Your M-Pesa Number e.g 07..." style="margin-top:12px">
+<input id="depCode" class="input" type="text" placeholder="M-Pesa Code e.g SH12AB3CD4" style="text-transform:uppercase">
+<input id="depAmount" class="input" type="number" placeholder="Amount You Sent e.g 500">
+<button class="btn" id="depositBtn" onclick="submitManualDeposit()">✅ SUBMIT FOR APPROVAL</button>
+<small style="color:#8b8ba7;font-size:10px;display:block;margin-top:8px;text-align:center">Admin will verify within 5-10 mins. Check admin-deposit.html</small>
+</div>
+
+<div class="card">
+<h4 style="font-size:12px;margin-bottom:10px">🦁 Animal Packages</h4>
+<div id="pkgList"></div>
+</div>
+
+<div class="stk" id="succModal"><div class="stk-card" style="border-color:#00e676"><h3 id="succTitle" style="color:#00e676">Success!</h3><p id="succMsg" style="font-size:11px;color:#8b8ba7"></p><b id="succCode" style="font-size:12px;color:#facc15"></b><div style="margin-top:12px"><button id="succOkBtn" style="width:100%;padding:10px;border-radius:10px;border:none;background:#00e676;color:#000;font-weight:800">OKAY</button></div></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = { apiKey: "AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M", authDomain: "diamines-agencies.firebaseapp.com", projectId: "diamines-agencies", storageBucket: "diamines-agencies.firebasestorage.app", messagingSenderId: "438413306857", appId: "1:438413306857:web:3c7f736794be6a49b0f978" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUser=null;
+let currentData=window.__PRE||null;
+let isActivating=false;
+let unsubEmail = null;
+
+function getUser(){try{return JSON.parse(localStorage.getItem("DIAMINES_CURRENT")||"null")}catch(e){return null}}
+function getEmail(){ if(currentData?.email) return String(currentData.email).toLowerCase().trim(); return String(getUser()?.email||"").toLowerCase().trim(); }
+function getBal(){
+  let e=getEmail();
+  let fb = currentData?.balance!==undefined? Number(currentData.balance)||0 : 0;
+  let local = Number(localStorage.getItem("DIAMINES_BAL_"+e)||0)||0;
+  return Math.max(fb, local);
+}
+function getDep(){
+  let e=getEmail();
+  let fb = currentData?.totalDeposit!==undefined? Number(currentData.totalDeposit)||0 : 0;
+  let local = Number(localStorage.getItem("DIAMINES_TOTAL_DEPOSIT_"+e)||0)||0;
+  return Math.max(fb, local);
+}
+
+(function instant(){
+  try{
+    let d = window.__PRE;
+    if(d){
+      document.getElementById('mainBal').innerText = "KES "+Number(d.balance||0).toLocaleString();
+      document.getElementById('totalDep').innerText = "KES "+Number(d.totalDeposit||0).toLocaleString();
+      document.getElementById('curPkg').innerText = d.package? (d.package.toUpperCase()) : "NONE";
+    }
+  }catch{}
+})();
+
+onAuthStateChanged(auth, async(user)=>{
+  let pre = window.__PRE;
+  if(!user &&!pre){
+    if(!getUser()?.email) location.href="login.html";
+    return;
+  }
+  let email = (user?.email||pre?.email||"").toLowerCase();
+  currentUser = user;
+  if(!email) return;
+  try{
+    if(unsubEmail) unsubEmail();
+    unsubEmail = onSnapshot(doc(db, "users", email), (snap)=>{
+      if(snap.exists()){
+        let data = snap.data();
+        data.email = data.email || email;
+        currentData = {...(currentData||{}),...data};
+        try{ localStorage.setItem('DIAMINES_CURRENT', JSON.stringify(currentData)); }catch{}
+        render();
+      }
+    });
+    if(user?.uid){
+      let snap = await getDoc(doc(db, "users", user.uid));
+      if(snap.exists()){
+        let data = snap.data();
+        currentData = {...(currentData||{}),...data};
+        render();
+      }
+    }
+  }catch{}
+  render();
+});
+
+let allJobsList = [ {id:"writings", name:"Writings", pay:25, icon:"✍️"}, {id:"editing", name:"Editing", pay:40, icon:"📝"}, {id:"transcription", name:"Transcription", pay:65, icon:"🎧"}, {id:"translation", name:"Translation", pay:85, icon:"🌍"}, {id:"digital", name:"Digital Marketing", pay:110, icon:"📢"}, {id:"affiliate", name:"Affiliate Marketing", pay:95, icon:"🛒"}, {id:"gaming", name:"Gaming", pay:150, icon:"🎮"} ];
+let packages=[ {id:"lion", name:"LION", animal:"🦁", price:500, color:"#facc15", desc:"Cub", daily:5, earning:"KES 150/day", allowed:["digital","affiliate","writings"]}, {id:"tiger", name:"TIGER", animal:"🐯", price:1500, color:"#ff8c00", desc:"Hunter", daily:10, earning:"KES 500/day", allowed:["digital","affiliate","writings","editing"]}, {id:"cheetah", name:"CHEETAH", animal:"🐆", price:3000, color:"#00e5ff", desc:"Elite", daily:20, earning:"KES 1500/day", allowed:["digital","affiliate","writings","editing","transcription","translation"]}, {id:"elephant", name:"ELEPHANT", animal:"🐘", price:5500, color:"#a78bfa", desc:"KING", daily:30, earning:"KES 4500/day", allowed:["digital","affiliate","writings","editing","transcription","translation","gaming"]} ];
+let selectedPkg=packages[0];
+
+function getCurrentPkgObj(){
+  let sources = [ currentData?.package, currentData?.packageName, window.__PRE?.package, localStorage.getItem("DIAMINES_PACKAGE_"+getEmail()), localStorage.getItem("DIAMINES_PACKAGE") ];
+  let raw = ""; for(let s of sources){ if(s && String(s).toLowerCase()!=='none'){ raw = String(s); break; } } raw = raw.toLowerCase();
+  let found = packages.find(x=> raw.includes(x.id)); if(found) return found;
+  let dep = getDep(); if(dep >= 5500) return packages.find(x=>x.id==="elephant"); if(dep >= 3000) return packages.find(x=>x.id==="cheetah"); if(dep >= 1500) return packages.find(x=>x.id==="tiger"); if(dep >= 500) return packages.find(x=>x.id==="lion"); return null;
+}
+function isDashboardLocked(){ return!getCurrentPkgObj(); }
+function updateDashboardLock(){ let e=getEmail(); if(!e) return; localStorage.setItem("DIAMINES_DASHBOARD_ALLOWED_"+e, isDashboardLocked()?"false":"true"); }
+document.getElementById("dashLink").addEventListener("click", (ev)=>{ if(isDashboardLocked()){ ev.preventDefault(); alert("🔒 Activate package first!"); return false; } });
+
+window.render = ()=>{
+  document.getElementById("mainBal").innerText="KES "+getBal().toLocaleString();
+  document.getElementById("totalDep").innerText="KES "+getDep().toLocaleString();
+  let cur=getCurrentPkgObj();
+  document.getElementById("curPkg").innerText=cur?cur.animal+" "+cur.name:"NONE";
+  if(cur){ document.getElementById("statusBox").innerHTML=`<div style='background:#064e3b;border:1px solid #22c55e;border-radius:12px;padding:12px;text-align:center'><b style='color:#22c55e'>✅ ACTIVE - ${cur.animal} ${cur.name}</b></div>`; }
+  else { document.getElementById("statusBox").innerHTML=`<div style='background:#7a4a00;border:1px solid #facc15;border-radius:12px;padding:10px;text-align:center;font-size:11px;color:#facc15'>🔒 Not active - Deposit & activate</div>`; }
+  updateDashboardLock();
+  let html=""; packages.forEach(p=>{
+    let currPkg=getCurrentPkgObj(); let isCurrent = currPkg && currPkg.id===p.id; let isLower = currPkg && p.price < currPkg.price; let diff = currPkg? p.price - currPkg.price : p.price;
+    let label=""; let btnClass="pkg-btn-active"; let btnText=`🔓 ACTIVATE ${p.name} - KES ${p.price}`; let btnDisabled=false;
+    if(isCurrent){ btnClass="pkg-btn-current"; btnText=`✅ ${p.name} ACTIVE`; btnDisabled=true; }
+    else if(isLower){ btnClass="pkg-btn-current"; btnText=`🔒 LOWER`; btnDisabled=true; }
+    else if(currPkg && diff>0){ label=`<span style="font-size:9px;background:#facc15;color:#000;padding:2px 6px;border-radius:6px;font-weight:800">UPGRADE KES ${diff}</span>`; btnClass="pkg-btn-upgrade"; btnText=`⬆️ UPGRADE TO ${p.name} - KES ${diff}`; }
+    let isSelected = selectedPkg.id===p.id? "active" : "";
+    let sorted=[...allJobsList].sort((a,b)=>{ let aAcc=p.allowed.includes(a.id)?0:1; let bAcc=p.allowed.includes(b.id)?0:1; return aAcc-bAcc; });
+    let jobsHtml=`<div class="jobs-col">`; sorted.forEach(j=>{ let allowed=p.allowed.includes(j.id); let rowClass=allowed?"yes":"no"; let payClass=allowed?"yes":""; let dotClass=allowed?"yes":"no"; let icon=allowed?"✅":"🔒"; jobsHtml+=`<div class="job-row ${rowClass}"><div style="display:flex;gap:8px;align-items:center"><div class="dot ${dotClass}"></div><span>${j.icon}</span><span style="color:${allowed?'#fff':'#555'}">${j.name}</span></div><div style="display:flex;gap:8px;align-items:center"><span class="pay ${payClass}">${allowed?`KES ${j.pay}`:''}</span><span>${icon}</span></div></div>`; }); jobsHtml+=`</div>`;
+    html+=`<div class="pkg ${isSelected}" onclick="if(!isActivating) selectPkg('${p.id}')" style="border-left:4px solid ${p.color}"><div class="animal">${p.animal}</div><div style="display:flex;justify-content:space-between"><div><b>${p.animal} ${p.name}</b> ${label}<br><small style="font-size:10px;color:#8b8ba7">${p.desc} • ${p.earning}</small></div><span class="price">KES ${p.price}</span></div>${jobsHtml}<button class="pkg-btn ${btnClass}" id="btn-${p.id}" onclick="event.stopPropagation(); activatePackage('${p.id}')" ${btnDisabled?'disabled':''}>${btnText}</button></div>`;
+  }); document.getElementById("pkgList").innerHTML=html;
+}
+window.selectPkg = (id)=>{ selectedPkg=packages.find(x=>x.id===id); if(!isActivating) render(); }
+document.getElementById("succOkBtn").addEventListener("click", ()=>{
+  document.getElementById("succModal").classList.remove("show");
+  if(!isDashboardLocked()){ location.href="dashboard.html"; }
+});
+
+// NEW MANUAL DEPOSIT - GOES TO admin-deposit.html
+window.submitManualDeposit = async ()=>{
+  let phone=document.getElementById('depPhone').value.trim();
+  let code=document.getElementById('depCode').value.trim().toUpperCase();
+  let amount=Number(document.getElementById('depAmount').value);
+  let email=getEmail();
+
+  if(!email){ alert("Login again"); return; }
+  if(phone.length<9){ alert("Enter your M-Pesa phone number"); return; }
+  if(code.length<8){ alert("Enter valid Mpesa code e.g SH12AB3CD4"); return; }
+  if(amount<100){ alert("Min deposit is KES 100"); return; }
+
+  let btn=document.getElementById('depositBtn');
+  btn.innerText="⏳ Submitting..."; btn.disabled=true;
+
+  try{
+    let payload={
+      email:email,
+      phone:phone,
+      mpesaCode:code,
+      amount:amount,
+      status:"pending",
+      targetPhone:"0748374704",
+      createdAt:new Date().toISOString(),
+      timestamp: serverTimestamp()
+    };
+
+    // This is what admin-deposit.html will read
+    await addDoc(collection(db, "depositRequests"), payload);
+    await addDoc(collection(db, "deposits"), payload);
+    await addDoc(collection(db, "mpesaDeposits"), payload);
+
+    document.getElementById('succTitle').innerText="Request Sent! ⏳";
+    document.getElementById('succMsg').innerHTML=`Your deposit of <b style='color:#facc15'>KES ${amount}</b> with code <b>${code}</b> is pending verification.<br><br>Admin will approve in 5-10 mins. Balance will update after approval.<br><br>Go check <b>admin-deposit.html</b> - you will see it there.`;
+    document.getElementById('succCode').innerText=code + " - PENDING";
+    document.getElementById('succModal').classList.add("show");
+
+    document.getElementById('depCode').value="";
+    document.getElementById('depAmount').value="";
+    btn.innerText="✅ SUBMIT FOR APPROVAL"; btn.disabled=false;
+  }catch(e){
+    alert("Error: "+e.message);
+    btn.innerText="✅ SUBMIT FOR APPROVAL"; btn.disabled=false;
+  }
+}
+
+window.activatePackage = async (pkgId)=>{
+  if(isActivating) return; if(pkgId) selectedPkg = packages.find(x=>x.id===pkgId) || selectedPkg;
+  let email=getEmail(); let curr=getCurrentPkgObj(); let currPrice=curr?curr.price:0; let toPay=selectedPkg.price - currPrice;
+  if(toPay<=0){ if(curr&&curr.id===selectedPkg.id){ alert("Already have "+selectedPkg.name); return; } toPay=selectedPkg.price; }
+  if(getBal()<toPay){ alert("Insufficient Balance! Need KES "+toPay+" - Deposit more first then submit for approval"); return; }
+  isActivating=true;
+  let finalBal = getBal() - toPay; if(finalBal<0) finalBal=0;
+  localStorage.setItem("DIAMINES_BAL_"+email, String(finalBal));
+  localStorage.setItem("DIAMINES_PACKAGE_"+email, selectedPkg.id);
+  localStorage.setItem("DIAMINES_PACKAGE", selectedPkg.id);
+  localStorage.setItem("DIAMINES_DASHBOARD_ALLOWED_"+email, "true");
+  let u=getUser(); if(u){ u.balance=finalBal; u.package=selectedPkg.id; u.packageName=selectedPkg.id; localStorage.setItem("DIAMINES_CURRENT", JSON.stringify(u)); }
+  if(currentData){ currentData.balance=finalBal; currentData.package=selectedPkg.id; currentData.packageName=selectedPkg.id; }
+  render();
+  try{
+    await setDoc(doc(db, "users", email), { email: email, package: selectedPkg.id, packageName: selectedPkg.id, balance: finalBal, accountBalance: finalBal, wallet: finalBal, isActive: true, activatedAt: new Date().toISOString() }, {merge:true});
+  }catch(e){}
+  try{ if(currentUser?.uid){ await setDoc(doc(db, "users", currentUser.uid), { email: email, package: selectedPkg.id, packageName: selectedPkg.id, balance: finalBal, isActive: true }, {merge:true}); } }catch(e){}
+  document.getElementById("succTitle").innerText=selectedPkg.animal+" "+selectedPkg.name+" Active!";
+  document.getElementById("succMsg").innerHTML="Paid KES "+toPay+"<br><br><span style='color:#22c55e'>Dashboard unlocked!</span>";
+  document.getElementById("succCode").innerText=selectedPkg.name;
+  document.getElementById("succModal").classList.add("show");
+  setTimeout(()=>{ isActivating=false; render(); setTimeout(()=>{ location.href="dashboard.html"; }, 1200); }, 400);
+}
+render();
+</script>
+</body>
+  </html>
