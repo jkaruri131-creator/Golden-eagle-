@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES - Transcription Jobs</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif}
+body{background:#08080f;color:#fff;padding:14px 12px 100px;min-height:100vh}
+.top{max-width:620px;margin:0 auto 16px;display:flex;justify-content:space-between;align-items:center}
+.back{width:40px;height:40px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:18px}
+.title{font-family:'Space Grotesk';font-size:20px;font-weight:800;letter-spacing:-0.5px}
+.title span{color:#facc15}
+.tabs{max-width:620px;margin:0 auto 14px;display:flex;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:4px;gap:3px;overflow-x:auto;backdrop-filter:blur(10px)}
+.tab{flex:1;min-width:74px;padding:10px 6px;border:none;border-radius:12px;background:transparent;color:#6b7280;font-weight:800;font-size:8.5px;letter-spacing:0.5px;cursor:pointer;white-space:nowrap;transition:0.2s}
+.tab.active{background:linear-gradient(135deg,#facc15,#f59e0b);color:#000;box-shadow:0 4px 16px rgba(250,204,21,0.3);transform:translateY(-1px)}
+.tab b{font-size:11px;margin-left:2px}
+.wrap{max-width:620px;margin:0 auto}
+.card{background:linear-gradient(180deg,#1e1e32 0%,#151528 100%);border:1px solid rgba(255,255,255,0.08);border-radius:22px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.3)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#facc15,#f59e0b,#22c55e,#facc15);background-size:200% 100%;animation:line 3s linear infinite}
+@keyframes line{0%{background-position:0%}100%{background-position:200%}}
+.card-head{display:flex;justify-content:space-between;align-items:start;gap:10px}
+.card-title{font-family:'Space Grotesk';font-size:15px;font-weight:800;line-height:1.3;flex:1}
+.card-desc{font-size:11px;color:#9ca3af;margin-top:8px;line-height:1.6;background:rgba(0,0,0,0.25);padding:9px 11px;border-radius:11px;border:1px solid rgba(255,255,255,0.06)}
+.badge{font-size:8px;padding:5px 10px;border-radius:99px;font-weight:900;border:1px solid;letter-spacing:0.5px;display:inline-flex;align-items:center;gap:3px}
+.b-yellow{background:rgba(250,204,21,0.12);color:#facc15;border-color:rgba(250,204,21,0.25)}
+.b-green{background:rgba(34,197,94,0.12);color:#4ade80;border-color:rgba(34,197,94,0.25)}
+.b-gray{background:rgba(255,255,255,0.06);color:#a1a1b5;border-color:rgba(255,255,255,0.08)}
+.b-red{background:rgba(239,68,68,0.12);color:#f87171;border-color:rgba(239,68,68,0.25)}
+.b-purple{background:rgba(168,85,247,0.12);color:#a78bfa;border-color:rgba(168,85,247,0.25)}
+.audio-box{background:linear-gradient(135deg,#000,#0a0a14);border:1px solid rgba(250,204,21,0.2);border-radius:14px;padding:12px;margin-top:14px;position:relative;overflow:hidden}
+.audio-box::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(to bottom,#facc15,#f59e0b)}
+.audio-label{font-size:8px;letter-spacing:1px;color:#facc15;font-weight:900;display:flex;justify-content:space-between}
+audio{width:100%;margin-top:10px;height:38px;border-radius:8px}
+.btn{width:100%;padding:13px;border:none;border-radius:13px;font-weight:900;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;letter-spacing:0.3px;transition:0.15s}
+.btn:active{transform:scale(0.97)}
+.btn-accept{background:linear-gradient(135deg,#facc15,#f59e0b);color:#000;box-shadow:0 8px 20px rgba(250,204,21,0.3)}
+.btn-submit{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 8px 20px rgba(34,197,94,0.25)}
+.btn-save{background:rgba(255,255,255,0.06);color:#d1d5db;border:1px solid rgba(255,255,255,0.1)}
+.btn-buy{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff}
+.btn-dl{background:linear-gradient(135deg,rgba(250,204,21,0.15),rgba(245,158,11,0.15));color:#facc15;border:1px solid rgba(250,204,21,0.35)}
+.btn-play{background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.12)}
+textarea{width:100%;background:#0a0a14;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;color:#fff;padding:12px;font-size:12px;min-height:120px;margin-top:10px;outline:none;transition:0.2s}
+textarea:focus{border-color:#facc15;box-shadow:0 0 0 3px rgba(250,204,21,0.1)}
+textarea:disabled{opacity:0.4}
+.empty{text-align:center;padding:50px 20px;color:#4b5563}
+.empty-icon{font-size:52px;margin-bottom:12px;filter:grayscale(0.3)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(12px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{width:100%;max-width:400px;border-radius:26px;padding:22px;position:relative;overflow:hidden;animation:pop 0.4s cubic-bezier(0.175,0.885,0.32,1.275);box-shadow:0 20px 60px rgba(0,0,0,0.6);max-height:90vh;overflow-y:auto}
+@keyframes pop{0%{transform:scale(0.7) translateY(30px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+.modal-accept{background:radial-gradient(120% 120% at 50% 0%,#2a2210,#1a1a2e 60%);border:2px solid #facc15;box-shadow:0 0 40px rgba(250,204,21,0.25),0 20px 60px rgba(0,0,0,0.6)}
+.modal-success{background:radial-gradient(120% 120% at 50% 0%,#0a2a14,#0f172a 60%);border:2px solid #22c55e;box-shadow:0 0 40px rgba(34,197,94,0.25)}
+.modal-error{background:radial-gradient(120% 120% at 50% 0%,#2a0a0a,#1a0a1a 60%);border:2px solid #ef4444}
+.modal-minutes{background:radial-gradient(120% 120% at 50% 0%,#1a102e,#1a1a2e 60%);border:2px solid #a855f7}
+.modal-icon{width:78px;height:78px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 14px;position:relative}
+.confetti-line{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#facc15,#22c55e,#60a5fa,#a855f7,#f59e0b,#facc15);background-size:300% 100%;animation:move 2s linear infinite}
+@keyframes move{0%{background-position:0%}100%{background-position:300%}}
+.modal-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.modal-details div{background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px;text-align:center}
+.modal-details small{color:#6b7280;font-size:8px;letter-spacing:0.8px;font-weight:800;display:block}
+.modal-details b{font-size:12px;display:block;margin-top:3px}
+.modal-actions{display:flex;gap:10px;margin-top:18px}
+.approved-card{background:linear-gradient(135deg,#052e16 0%,#064e3b 100%);border:2px solid #22c55e;border-radius:22px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(34,197,94,0.15)}
+.rejected-card{background:linear-gradient(135deg,#450a0a 0%,#7f1d1d 100%);border:2px solid #ef4444;border-radius:22px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:linear-gradient(135deg,#1e1e32,#151528);border:1px solid rgba(250,204,21,0.3);padding:12px 18px;border-radius:99px;display:flex;align-items:center;gap:10px;z-index:200;transition:0.5s cubic-bezier(0.175,0.885,0.32,1.275);box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.pkg-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+.pkg-card{background:linear-gradient(135deg,#1a1a2e,#121225);border:1.5px solid rgba(255,255,255,0.08);border-radius:18px;padding:14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:0.2s}
+.pkg-card:hover{border-color:#a855f7;transform:translateY(-2px)}
+.pkg-card.selected{border-color:#a855f7;background:linear-gradient(135deg,rgba(168,85,247,0.15),#1a1a2e);box-shadow:0 0 20px rgba(168,85,247,0.2)}
+.pkg-card.pop{border-color:#facc15;background:linear-gradient(135deg,rgba(250,204,21,0.1),#1a1a2e)}
+.pkg-card.pop.selected{border-color:#a855f7;background:linear-gradient(135deg,rgba(168,85,247,0.15),#1a1a2e)}
+.min-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.min-stat{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:10px;text-align:center}
+.deadline-bar{margin-top:10px;height:4px;background:#222;border-radius:99px;overflow:hidden}
+.deadline-fill{height:100%;background:linear-gradient(90deg,#facc15,#f59e0b)}
+</style>
+</head>
+<body>
+
+<div style="max-width:620px;margin:0 auto 12px;background:#111126;border:1px solid #222;border-radius:16px;padding:14px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5)">
+<h1 style="font-size:22px;font-weight:900;letter-spacing:2px;color:#facc15;text-shadow:0 0 20px rgba(250,204,21,0.4);font-family:'Space Grotesk'">DIAMINES TRANSCRIPTION JOBS</h1>
+<p style="font-size:8px;color:#8b8ba7;letter-spacing:3px;margin-top:4px;font-weight:800">PROFESSIONAL TRANSCRIPTION PLATFORM</p>
+</div>
+
+<div class="top">
+<a class="back" href="dashboard.html">←</a>
+<div class="title">🎙️ <span>Transcription</span> Jobs</div>
+<div style="width:40px"></div>
+</div>
+
+<!-- MINUTES BALANCE BAR WITH TOTAL / AVAILABLE / USED -->
+<div style="max-width:620px;margin:0 auto 14px;background:linear-gradient(135deg,#1a102e,#151528);border:1.5px solid rgba(168,85,247,0.3);border-radius:18px;padding:14px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div style="display:flex;align-items:center;gap:10px">
+<div style="width:42px;height:42px;background:linear-gradient(135deg,#a855f7,#7c3aed);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px">⏱️</div>
+<div>
+<div style="font-size:9px;color:#a78bfa;letter-spacing:1px;font-weight:800">MINUTES WALLET</div>
+<b style="font-size:12px;color:#fff">Your bidding balance</b>
+</div>
+</div>
+<button class="btn btn-buy" style="width:auto;padding:10px 16px;font-size:10px" onclick="openBuyMinutes()">💳 BUY</button>
+</div>
+<div class="min-stats">
+<div class="min-stat"><small style="color:#6b7280;font-size:8px;font-weight:800;letter-spacing:0.8px">TOTAL</small><b id="minTotal" style="color:#fff;font-size:16px;display:block;margin-top:2px">0 min</b></div>
+<div class="min-stat" style="border-color:rgba(34,197,94,0.25)"><small style="color:#4ade80;font-size:8px;font-weight:800;letter-spacing:0.8px">AVAILABLE</small><b id="minAvail" style="color:#4ade80;font-size:16px;display:block;margin-top:2px">0 min</b></div>
+<div class="min-stat" style="border-color:rgba(239,68,68,0.25)"><small style="color:#f87171;font-size:8px;font-weight:800;letter-spacing:0.8px">USED</small><b id="minUsed" style="color:#f87171;font-size:16px;display:block;margin-top:2px">0 min</b></div>
+</div>
+</div>
+
+<div class="tabs">
+<button class="tab active" id="tAv" onclick="switchTab('av')">AVAILABLE <b id="cAv">0</b></button>
+<button class="tab" id="tMy" onclick="switchTab('my')">MY TASKS <b id="cMy">0</b></button>
+<button class="tab" id="tPd" onclick="switchTab('pd')">PENDING <b id="cPd">0</b></button>
+<button class="tab" id="tAp" onclick="switchTab('ap')">✅ APPROVED <b id="cAp">0</b></button>
+<button class="tab" id="tRj" onclick="switchTab('rj')">❌ REJECTED <b id="cRj">0</b></button>
+</div>
+
+<div class="wrap" id="content"></div>
+
+<!-- BUY MINUTES MODAL - ARRANGED PACKAGES -->
+<div class="modal-overlay" id="mBuyMinutes" onclick="if(event.target===this)closeM('mBuyMinutes')">
+<div class="modal modal-minutes">
+<div class="confetti-line"></div>
+<div class="modal-icon" style="background:linear-gradient(135deg,#a855f7,#7c3aed);box-shadow:0 0 30px rgba(168,85,247,0.5)">⏱️</div>
+<h3 style="font-family:'Space Grotesk';font-size:17px;color:#a78bfa;text-align:center">Buy Minutes</h3>
+<p style="font-size:11px;color:#9ca3af;text-align:center;margin-top:6px">Select package and send payment</p>
+
+<div class="min-stats" style="margin-top:12px">
+<div class="min-stat"><small style="font-size:7px">TOTAL</small><b id="mTotal" style="font-size:12px">0</b></div>
+<div class="min-stat"><small style="font-size:7px">AVAILABLE</small><b id="mAvail" style="font-size:12px;color:#4ade80">0</b></div>
+<div class="min-stat"><small style="font-size:7px">USED</small><b id="mUsed" style="font-size:12px;color:#f87171">0</b></div>
+</div>
+
+<div class="pkg-grid">
+<div class="pkg-card" id="pkg16" onclick="selectMinutesPkg(16,200)">
+<div><b style="font-size:13px">16 Minutes</b><br><small style="color:#9ca3af">Starter Package</small></div>
+<div style="text-align:right"><b style="color:#facc15;font-size:14px">KES 200</b></div>
+</div>
+<div class="pkg-card" id="pkg60" onclick="selectMinutesPkg(60,680)">
+<div><b style="font-size:13px">60 Minutes 🔥</b><br><small style="color:#9ca3af">Popular Package</small></div>
+<div style="text-align:right"><b style="color:#facc15;font-size:14px">KES 680</b></div>
+</div>
+<div class="pkg-card" id="pkg120" onclick="selectMinutesPkg(120,1035)">
+<div><b style="font-size:13px">120 Minutes 💎</b><br><small style="color:#9ca3af">Pro Package</small></div>
+<div style="text-align:right"><b style="color:#facc15;font-size:14px">KES 1035</b></div>
+</div>
+</div>
+
+<div id="paySection" style="display:none;margin-top:14px;background:rgba(0,0,0,0.4);border:1.5px solid rgba(168,85,247,0.35);border-radius:14px;padding:14px">
+<div style="text-align:center">
+<div style="font-size:10px;color:#a78bfa;letter-spacing:1px;font-weight:800">SEND MONEY TO</div>
+<b style="font-size:24px;color:#facc15;letter-spacing:1px">0141416120</b>
+<div style="font-size:11px;color:#fff;margin-top:4px">Pay: <b id="payAmt" style="color:#4ade80">KES 0</b> → Get: <b id="payMin" style="color:#a78bfa">0 min</b></div>
+<div style="font-size:9px;color:#6b7280;margin-top:4px">M-Pesa → Send Money → Enter Number</div>
+</div>
+<div style="margin-top:12px">
+<label style="font-size:9px;color:#9ca3af;font-weight:800;letter-spacing:0.8px">M-PESA TRANSACTION CODE *</label>
+<input id="mpesaCode" placeholder="e.g. QGH7Y8T9" style="width:100%;background:#0a0a14;border:1.5px solid #333;border-radius:10px;padding:11px;color:#fff;font-size:12px;margin-top:4px;outline:none">
+<label style="font-size:9px;color:#9ca3af;font-weight:800;letter-spacing:0.8px;margin-top:10px;display:block">M-PESA NAME / PHONE *</label>
+<input id="mpesaName" placeholder="Name used to pay" style="width:100%;background:#0a0a14;border:1.5px solid #333;border-radius:10px;padding:11px;color:#fff;font-size:12px;margin-top:4px;outline:none">
+</div>
+<button class="btn btn-buy" style="margin-top:12px" onclick="submitMinutesPurchase()">📤 SUBMIT - WAIT APPROVAL</button>
+<div style="font-size:9px;color:#6b7280;text-align:center;margin-top:8px">Your request will be reviewed shortly</div>
+</div>
+
+<button class="btn btn-save" style="margin-top:12px" onclick="closeM('mBuyMinutes')">Close</button>
+</div>
+</div>
+
+<div class="modal-overlay" id="mAccept" onclick="if(event.target===this)closeM('mAccept')">
+<div class="modal modal-accept">
+<div class="confetti-line"></div>
+<div class="modal-icon" style="background:linear-gradient(135deg,#facc15,#f59e0b)">🎙️</div>
+<h3 id="maTitle" style="font-family:'Space Grotesk';font-size:17px;color:#facc15;text-align:center"></h3>
+<div class="modal-details">
+<div><small>💰 REWARD</small><b id="maPrice" style="color:#4ade80">KES 350</b></div>
+<div><small>⏰ DEADLINE</small><b id="maTime" style="color:#facc15">24 hours</b></div>
+<div><small>🎧 LENGTH</small><b id="maDur" style="color:#fff">18 min</b></div>
+<div><small>⏱️ COST</small><b id="maCost" style="color:#a78bfa">0 min</b></div>
+</div>
+<div class="modal-actions">
+<button class="btn btn-save" style="flex:1" onclick="closeM('mAccept')">❌ CANCEL</button>
+<button class="btn btn-accept" style="flex:1" onclick="doAccept()">✅ ACCEPT</button>
+</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="mSuccess" onclick="if(event.target===this)closeM('mSuccess')">
+<div class="modal modal-success">
+<div class="confetti-line"></div>
+<div class="modal-icon" style="background:linear-gradient(135deg,#22c55e,#16a34a)">🎉</div>
+<h3 style="font-family:'Space Grotesk';color:#4ade80;text-align:center;font-size:18px">Task Accepted!</h3>
+<p id="mSuccessTxt" style="font-size:11px;color:#bbf7d0;text-align:center;margin-top:8px;line-height:1.6"></p>
+<button class="btn btn-submit" style="margin-top:16px" onclick="closeM('mSuccess');switchTab('my')">GO TO MY TASKS</button>
+</div>
+</div>
+
+<div class="modal-overlay" id="mSub" onclick="if(event.target===this)closeM('mSub')">
+<div class="modal modal-success">
+<div class="confetti-line"></div>
+<div class="modal-icon" style="background:linear-gradient(135deg,#22c55e,#16a34a)">📤</div>
+<h3 style="font-family:'Space Grotesk';color:#4ade80;text-align:center">Submitted!</h3>
+<p style="font-size:11px;color:#bbf7d0;text-align:center;margin-top:6px">Sent for review</p>
+<div style="text-align:center;margin-top:12px"><b id="mSubPrice" style="font-size:22px;color:#facc15"></b></div>
+<button class="btn btn-submit" style="margin-top:14px" onclick="closeM('mSub');switchTab('pd')">VIEW PENDING</button>
+</div>
+</div>
+
+<div class="toast" id="toast"><div style="width:32px;height:32px;background:linear-gradient(135deg,#a855f7,#7c3aed);border-radius:99px;display:flex;align-items:center;justify-content:center">💾</div><div><b style="font-size:11px;color:#fff" id="toastT">Saved</b><br><small style="font-size:9px;color:#a1a1b5" id="toastS">Safe</small></div></div>
+
+<script>
+let EMAIL='guest@diamines.com';
+try{let c=JSON.parse(localStorage.getItem('DIAMINES_CURRENT')||'null'); if(c&&c.email) EMAIL=c.email.toLowerCase().trim();}catch{}
+const KEY_ALL='DIAMINES_TRANS_ALL_JOBS';
+const KEY_MY='DIAMINES_TRANS_MY_'+EMAIL;
+const KEY_PD_GLOBAL='DIAMINES_TRANS_PENDING_GLOBAL';
+const KEY_PD_USER='DIAMINES_TRANS_PD_'+EMAIL;
+const KEY_HIST='DIAMINES_TRANS_HISTORY_TRANS_'+EMAIL;
+const KEY_TOTAL='DIAMINES_TRANS_TOTAL_MINUTES_'+EMAIL;
+const KEY_USED='DIAMINES_TRANS_USED_MINUTES_'+EMAIL;
+const KEY_MINUTES_PENDING_GLOBAL='DIAMINES_MINUTES_PENDING_GLOBAL';
+const KEY_MINUTES_PENDING_USER='DIAMINES_MINUTES_PENDING_'+EMAIL;
+const KEY_LEGACY='DIAMINES_TRANS_MINUTES_'+EMAIL;
+
+function getAll(){ try{return JSON.parse(localStorage.getItem(KEY_ALL)||'[]')}catch{return []} }
+function getMy(){ try{return JSON.parse(localStorage.getItem(KEY_MY)||'[]')}catch{return []} }
+function getPdUser(){ try{return JSON.parse(localStorage.getItem(KEY_PD_USER)||'[]')}catch{return []} }
+function getHist(){ try{return JSON.parse(localStorage.getItem(KEY_HIST)||'[]')}catch{return []} }
+function getTotal(){ let v=parseInt(localStorage.getItem(KEY_TOTAL)||'0'); if(v===0){let l=parseInt(localStorage.getItem(KEY_LEGACY)||'0'); if(l>0) v=l;} return isNaN(v)?0:v; }
+function getUsed(){ let v=parseInt(localStorage.getItem(KEY_USED)||'0'); return isNaN(v)?0:v; }
+function getAvailable(){ return Math.max(0,getTotal()-getUsed()); }
+function setUsed(v){ localStorage.setItem(KEY_USED,String(v)); updateMinUI(); }
+function setAll(v){ localStorage.setItem(KEY_ALL,JSON.stringify(v)); }
+function setMy(v){ localStorage.setItem(KEY_MY,JSON.stringify(v)); }
+function setPendingGlobal(job){ let all=JSON.parse(localStorage.getItem(KEY_PD_GLOBAL)||'[]'); all.unshift(job); localStorage.setItem(KEY_PD_GLOBAL,JSON.stringify(all)); }
+function updateMinUI(){
+ let t=getTotal(), u=getUsed(), a=getAvailable();
+ document.getElementById('minTotal').innerText=t+' min';
+ document.getElementById('minAvail').innerText=a+' min';
+ document.getElementById('minUsed').innerText=u+' min';
+ let mt=document.getElementById('mTotal'); if(mt){ mt.innerText=t; document.getElementById('mAvail').innerText=a; document.getElementById('mUsed').innerText=u; }
+}
+let tab='av', curId=null, selectedPkg={minutes:0,amount:0};
+function switchTab(t){ tab=t; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); document.getElementById('t'+(t==='av'?'Av':t==='my'?'My':t==='pd'?'Pd':t==='ap'?'Ap':'Rj')).classList.add('active'); render(); }
+function closeM(id){ document.getElementById(id).classList.remove('show'); }
+function toast(t,s){ document.getElementById('toastT').innerText=t; document.getElementById('toastS').innerText=s; let el=document.getElementById('toast'); el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000); }
+function openBuyMinutes(){ updateMinUI(); document.getElementById('mBuyMinutes').classList.add('show'); document.getElementById('paySection').style.display='none'; document.querySelectorAll('.pkg-card').forEach(c=>c.classList.remove('selected')); }
+function selectMinutesPkg(min,amt){
+ selectedPkg={minutes:min,amount:amt};
+ document.querySelectorAll('.pkg-card').forEach(c=>c.classList.remove('selected'));
+ document.getElementById('pkg'+min).classList.add('selected');
+ document.getElementById('payAmt').innerText='KES '+amt;
+ document.getElementById('payMin').innerText=min+' min';
+ document.getElementById('paySection').style.display='block';
+}
+function submitMinutesPurchase(){
+ let code=document.getElementById('mpesaCode').value.trim();
+ let name=document.getElementById('mpesaName').value.trim();
+ if(!code||!name){ alert('Enter code and name'); return; }
+ if(selectedPkg.amount===0){ alert('Select package'); return; }
+ let req={ id:'MIN_'+Date.now(), email:EMAIL, minutes:selectedPkg.minutes, amount:selectedPkg.amount, mpesaCode:code, mpesaName:name, sendTo:'0141416120', status:'pending', createdAt:Date.now() };
+ let g=JSON.parse(localStorage.getItem(KEY_MINUTES_PENDING_GLOBAL)||'[]'); g.unshift(req); localStorage.setItem(KEY_MINUTES_PENDING_GLOBAL,JSON.stringify(g));
+ let u=JSON.parse(localStorage.getItem(KEY_MINUTES_PENDING_USER)||'[]'); u.unshift(req); localStorage.setItem(KEY_MINUTES_PENDING_USER,JSON.stringify(u));
+ toast('Submitted','Wait approval');
+ closeM('mBuyMinutes');
+ document.getElementById('mpesaCode').value=''; document.getElementById('mpesaName').value='';
+}
+function getMinutesFromJob(j){ if(j.minutesNeed) return parseInt(j.minutesNeed); let d=j.duration||''; let m=parseInt(String(d).replace(/[^0-9]/g,'')); return isNaN(m)||m<=0?10:m; }
+function formatDeadline(deadline){
+ let left=Math.max(0,deadline-Date.now());
+ if(left<=0) return 'Expired';
+ let h=Math.floor(left/3600000), m=Math.floor((left%3600000)/60000);
+ return h+'h '+m+'m left';
+}
+function downloadAudio(url, title){
+ // FIXED: Blob download works for catbox links on all phones
+ fetch(url).then(r=>r.blob()).then(blob=>{
+   let a=document.createElement('a');
+   a.href=URL.createObjectURL(blob);
+   a.download=(title||'audio').replace(/[^a-z0-9]/gi,'_')+'.mp3';
+   document.body.appendChild(a);
+   a.click();
+   setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(a.href); },1000);
+ }).catch(()=>{
+   window.open(url,'_blank');
+ });
+}
+function openAccept(id){
+ let j=getAll().find(x=>x.id===id); if(!j) return;
+ let need=getMinutesFromJob(j);
+ if(getAvailable()<need){ alert('Not enough minutes. Available: '+getAvailable()+' min, need: '+need+' min'); openBuyMinutes(); return; }
+ curId=id;
+ document.getElementById('maTitle').innerText=j.title;
+ document.getElementById('maPrice').innerText='KES '+j.price;
+ document.getElementById('maTime').innerText=(j.h||24)+'h';
+ document.getElementById('maDur').innerText=(j.duration||need+' min');
+ document.getElementById('maCost').innerText=need+' min';
+ document.getElementById('mAccept').classList.add('show');
+}
+function doAccept(){
+ let all=getAll(); let idx=all.findIndex(x=>x.id===curId); if(idx===-1) return;
+ let job=all[idx]; let need=getMinutesFromJob(job);
+ if(getAvailable()<need){ alert('Insufficient'); return; }
+ setUsed(getUsed()+need);
+ job.acceptedAt=Date.now(); job.deadline=Date.now()+(job.h||24)*3600000; job.minutesDeducted=need;
+ let my=getMy(); my.push(job); setMy(my);
+ all.splice(idx,1); setAll(all);
+ closeM('mAccept');
+ document.getElementById('mSuccessTxt').innerHTML=`<b>${job.title}</b><br>Length: ${job.duration}<br>Deadline: ${job.h}h<br>Reward: KES ${job.price}`;
+ document.getElementById('mSuccess').classList.add('show');
+ render();
+}
+function saveDraft(id){
+ let t=document.getElementById('txt_'+id)?.value||''; let my=getMy(); let f=my.find(x=>x.id===id); if(f){ f.draft=t; setMy(my); toast('Draft saved','Safe'); }
+}
+function submitJob(id){
+ let my=getMy(); let idx=my.findIndex(x=>x.id===id); if(idx===-1) return;
+ let job=my[idx];
+ if(Date.now() > job.deadline){ alert('Deadline expired - task locked'); render(); return; }
+ let txt=document.getElementById('txt_'+id).value.trim();
+ if(txt.length<30){ alert('Min 30 chars'); return; }
+ job.content=txt; job.submittedAt=Date.now(); job.userEmail=EMAIL;
+ let pdUser=getPdUser(); pdUser.unshift(job); localStorage.setItem(KEY_PD_USER,JSON.stringify(pdUser));
+ setPendingGlobal(job);
+ my.splice(idx,1); setMy(my);
+ document.getElementById('mSubPrice').innerText='KES '+job.price;
+ document.getElementById('mSub').classList.add('show');
+ render();
+}
+function render(){
+ updateMinUI();
+ let all=getAll(),my=getMy(),pd=getPdUser(),hist=getHist();
+ let ap=hist.filter(x=>x.status==='approved'), rj=hist.filter(x=>x.status==='rejected');
+ document.getElementById('cAv').innerText=all.length; document.getElementById('cMy').innerText=my.length; document.getElementById('cPd').innerText=pd.length; document.getElementById('cAp').innerText=ap.length; document.getElementById('cRj').innerText=rj.length;
+ let html='';
+ if(tab==='av'){
+  if(!all.length) html=`<div class="empty"><div class="empty-icon">📭</div><b>No jobs</b></div>`;
+  else all.forEach(j=>{
+   let need=getMinutesFromJob(j);
+   let can=getAvailable()>=need;
+   html+=`<div class="card">
+    <div class="card-head"><div class="card-title">🎙️ ${j.title}</div><span class="badge b-yellow" style="font-size:11px;padding:6px 12px">KES ${j.price}</span></div>
+    <div class="card-desc">${j.desc||'Transcribe verbatim, mark speakers, timestamps where needed.'}</div>
+    <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
+     <span class="badge b-yellow">🎧 LENGTH ${j.duration||need+' min'}</span>
+     <span class="badge b-gray">⏰ DEADLINE ${j.h||24}h</span>
+     <span class="badge b-gray">📊 ${j.level||'Easy'}</span>
+     <span class="badge ${can?'b-green':'b-red'}">⏱️ ${need} MIN</span>
+    </div>
+    <div class="audio-box">
+     <div class="audio-label"><span>🎧 REAL AUDIO - TAP PLAY</span><span style="color:#facc15">${j.duration||''}</span></div>
+     ${j.audioUrl?`
+      <audio controls preload="metadata" src="${j.audioUrl}" style="margin-top:10px"></audio>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+       <button class="btn btn-play" onclick="document.getElementById('aud_${j.id}').play()">▶️ PLAY</button>
+       <button class="btn btn-dl" onclick="downloadAudio('${j.audioUrl}','${j.title.replace(/'/g,'')}')">⬇️ DOWNLOAD</button>
+      </div>
+      <audio id="aud_${j.id}" src="${j.audioUrl}" style="display:none"></audio>
+      <div style="font-size:9px;color:#6b7280;margin-top:8px;text-align:center">✅ Real audio • Download works • Length ${j.duration||need+' min'}</div>
+     `:`<div style="font-size:11px;color:#9ca3af;margin-top:8px">Audio preview: ${j.preview||'Available after accepting'}</div>`}
+    </div>
+    <button class="btn ${can?'btn-accept':'btn-save'}" style="margin-top:14px" onclick="${can?`openAccept('${j.id}')`:`openBuyMinutes()`}">${can?`🎙️ ACCEPT JOB - KES ${j.price}`:`⏱️ BUY ${need} MIN TO BID`}</button>
+   </div>`;
+  });
+ }else if(tab==='my'){
+  if(!my.length) html=`<div class="empty"><div class="empty-icon">📝</div><b>No tasks</b></div>`;
+  else my.forEach(j=>{
+   let expired=Date.now() > j.deadline;
+   let timeLeft=formatDeadline(j.deadline);
+   let totalTime=(j.h||24)*3600000;
+   let elapsed=Date.now()-j.acceptedAt;
+   let leftPercent=Math.max(0,100 - (elapsed/totalTime*100));
+   html+=`<div class="card" style="border-color:${expired?'#ef4444':'rgba(250,204,21,0.25)'}">
+    <div class="card-head"><div class="card-title">${j.title}</div><span class="badge ${expired?'b-red':'b-yellow'}">${expired?'🔒 EXPIRED':timeLeft}</span></div>
+    <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+     <span class="badge b-yellow">🎧 ${j.duration||''}</span>
+     <span class="badge ${expired?'b-red':'b-gray'}">⏰ ${expired?'Expired':timeLeft}</span>
+     <span class="badge b-purple">Used ${j.minutesDeducted||0} min</span>
+    </div>
+    <div class="deadline-bar"><div class="deadline-fill" style="width:${leftPercent}%;background:${expired?'#ef4444':'linear-gradient(90deg,#facc15,#f59e0b)'}"></div></div>
+    <div class="audio-box">
+     <div class="audio-label"><span>🎧 LISTEN & TRANSCRIBE</span><span>${j.duration||''}</span></div>
+     ${j.audioUrl?`
+      <audio controls id="audio_${j.id}" src="${j.audioUrl}"></audio>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+       <button class="btn btn-play" onclick="document.getElementById('audio_${j.id}').play()">▶️ PLAY</button>
+       <button class="btn btn-dl" onclick="downloadAudio('${j.audioUrl}','${j.title.replace(/'/g,'')}')">⬇️ DOWNLOAD</button>
+      </div>`:`<div style="font-size:11px;color:#9ca3af">${j.preview||''}</div>`}
+    </div>
+    ${expired?`<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:12px;margin-top:12px;text-align:center"><b style="color:#f87171">🔒 Task Locked - Deadline Passed</b><br><small style="color:#9ca3af">You can no longer submit</small></div>`:
+    `<textarea id="txt_${j.id}" oninput="saveDraft('${j.id}')" placeholder="Type transcription here...">${j.draft||''}</textarea>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="btn btn-save" onclick="saveDraft('${j.id}')">💾 SAVE DRAFT</button><button class="btn btn-submit" onclick="submitJob('${j.id}')">📤 SUBMIT</button></div>`}
+   </div>`;
+  });
+ }else if(tab==='pd'){
+  if(!pd.length) html=`<div class="empty"><div class="empty-icon">⏳</div><b>No pending</b></div>`;
+  else html=pd.map(j=>`<div class="card"><div style="display:flex;justify-content:space-between"><b style="font-size:13px">${j.title}</b><span class="badge b-yellow">⏳ PENDING</span></div><small style="color:#6b7280">${new Date(j.submittedAt).toLocaleString()} • ${j.duration||''}</small><div style="background:#000;border:1px solid #222;border-radius:12px;padding:10px;margin-top:10px;font-size:11px;color:#a1a1b5;max-height:90px;overflow:auto">${(j.content||'').substring(0,260)}...</div></div>`).join('');
+ }else if(tab==='ap'){
+  if(!ap.length) html=`<div class="empty"><div class="empty-icon">🏆</div><b>No approved</b></div>`;
+  else html=ap.map(j=>`<div class="approved-card"><div style="display:flex;justify-content:space-between"><b style="font-size:13px">${j.title}</b><b style="background:#22c55e;color:#fff;padding:6px 12px;border-radius:99px;font-size:11px">+KES ${j.price}</b></div><small style="color:#86efac">${new Date(j.reviewedAt).toLocaleString()}</small></div>`).join('');
+ }else{
+  if(!rj.length) html=`<div class="empty"><div class="empty-icon">📭</div><b>No rejected</b></div>`;
+  else html=rj.map(j=>`<div class="rejected-card"><div style="display:flex;gap:10px"><b style="color:#f87171">${j.title}</b></div><div style="margin-top:8px;font-size:11px;color:#fecaca">${j.feedback||''}</div></div>`).join('');
+ }
+ document.getElementById('content').innerHTML=html;
+}
+setInterval(()=>{ if(tab==='av' || tab==='my') render(); },1000);
+render();
+updateMinUI();
+</script>
+</body>
+  </html>
