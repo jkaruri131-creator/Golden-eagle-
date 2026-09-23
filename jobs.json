@@ -1,0 +1,37 @@
+[
+  {
+    "id": "TR-25-8841-A",
+    "title": "JOB 1 - DANGEROUS ENCOUNTER",
+    "audioUrl": "/job1.mp3",
+    "duration": "10:30",
+    "status": "available"
+  },
+  {
+    "id": "TR-25-9027-B",
+    "title": "JOB 2 - FOOTBALL TICKET 690000",
+    "audioUrl": "/job2.mp3",
+    "duration": "09:45",
+    "status": "available"
+  },
+  {
+    "id": "TR-25-9133-C",
+    "title": "JOB 3 - CASH IS MAKING COMEBACK",
+    "audioUrl": "/job3.mp3",
+    "duration": "11:20",
+    "status": "available"
+  },
+  {
+    "id": "TR-25-9276-D",
+    "title": "JOB 4 - 9% TRUST NURSES",
+    "audioUrl": "/job4.mp3",
+    "duration": "10:15",
+    "status": "available"
+  },
+  {
+    "id": "TR-25-9418-E",
+    "title": "JOB 5 - BRITISH WEDDINGS 2025",
+    "audioUrl": "/job5.mp3",
+    "duration": "12:10",
+    "status": "available"
+  }
+]
