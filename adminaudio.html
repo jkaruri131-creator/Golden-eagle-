@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Audio - Firebase Auto</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet">
+<!-- Firebase auto-config - NO API KEY NEEDED - uses your existing Firebase -->
+<script src="/__/firebase/8.10.0/firebase-app.js"></script>
+<script src="/__/firebase/8.10.0/firebase-database.js"></script>
+<script src="/__/firebase/init.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif}
+body{background:#050510;color:#fff;padding:14px 12px 100px}
+.top{max-width:900px;margin:0 auto 16px;display:flex;justify-content:space-between;align-items:center}
+.card{max-width:900px;margin:0 auto 14px;background:linear-gradient(135deg,#121225,#0e0e1e);border:1px solid rgba(255,215,0,.15);border-radius:20px;padding:16px}
+.badge{font-size:8px;padding:4px 9px;border-radius:99px;font-weight:900;border:1px solid;display:inline-block}
+.b-purple{background:rgba(168,85,247,.12);color:#a78bfa;border-color:rgba(168,85,247,.25)}
+.b-green{background:rgba(34,197,94,.12);color:#4ade80;border-color:rgba(34,197,94,.25)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tab{padding:10px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#9ca3af;font-weight:800;font-size:11px;cursor:pointer}
+.tab.active{background:linear-gradient(135deg,#facc15,#f59e0b);color:#000;border-color:#facc15}
+input{width:100%;background:#000;border:1.5px solid #222;border-radius:12px;padding:11px;color:#fff;font-size:12px;outline:none;margin-top:6px}
+input:focus{border-color:#facc15}
+.btn{padding:11px 16px;border:none;border-radius:12px;font-weight:800;font-size:11px;cursor:pointer}
+.btn-gold{background:linear-gradient(135deg,#facc15,#f59e0b);color:#000}
+.btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-red{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+.btn-purple{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff}
+.btn-gray{background:rgba(255,255,255,.08);color:#d1d5db;border:1px solid rgba(255,255,255,.1)}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.item{background:#0a0a14;border:1px solid #222;border-radius:14px;padding:12px;margin-top:10px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+.stat{background:rgba(0,0,0,0.3);border:1px solid #222;border-radius:10px;padding:8px;text-align:center}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:#1a1a2e;border:1px solid #facc15;padding:12px 18px;border-radius:99px;transition:.4s;z-index:99}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="top"><h1 style="font-family:'Space Grotesk';font-size:20px">🎧 <span style="color:#facc15">ADMIN MINUTES</span> 🔥 FINAL</h1><a href="dashboard.html" style="color:#9ca3af;text-decoration:none;font-size:12px">← Dashboard</a></div>
+<div class="card" style="border-color:#22c55e;background:rgba(34,197,94,0.05)"><div style="font-size:10px;color:#4ade80;font-weight:800">● FINAL FIXED - SAVES TO FIREBASE - ALL PHONES SEE INSTANTLY - NO LOCAL</div><div id="syncStatus" style="font-size:9px;color:#9ca3af;margin-top:4px">Connecting to your Firebase...</div></div>
+<div class="card">
+<div class="tabs"><button class="tab active" id="tab1" onclick="setTab('minutes')">⏱️ REQUESTS <b id="cMin">0</b></button><button class="tab" id="tab2" onclick="setTab('users')">👤 EDIT MINUTES</button></div>
+<div id="view-minutes"><h3 style="font-size:13px;color:#a78bfa">Minutes Purchase Requests - Live from transcription.html</h3><div id="minutesList"><div style="color:#666;padding:20px;text-align:center">Loading from Firebase...</div></div></div>
+<div id="view-users" style="display:none"><h3 style="font-size:13px;color:#facc15">Edit User Minutes - TOTAL / AVAILABLE / USED - Saves to Firebase (not local)</h3><label style="font-size:9px;color:#888;margin-top:12px;display:block">USER EMAIL</label><input id="editEmail" placeholder="user@gmail.com"><div class="row" style="margin-top:8px"><div><label style="font-size:9px;color:#facc15">TOTAL</label><input id="editTotal" type="number" oninput="calcTotal()"></div><div><label style="font-size:9px;color:#4ade80">AVAILABLE</label><input id="editAvailable" type="number" oninput="calcAvail()"></div><div><label style="font-size:9px;color:#f87171">USED</label><input id="editUsed" type="number" oninput="calcUsed()"></div></div><div id="userBalanceInfo" style="margin-top:12px;background:#000;border:1px solid #222;border-radius:12px;padding:12px;font-size:11px;color:#9ca3af">Enter email and click VIEW</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="btn btn-gold" onclick="setUserMinutes()">💾 SAVE TO FIREBASE - ALL GADGETS SEE IT</button><button class="btn btn-gray" onclick="loadUserMinutes()">🔍 VIEW</button></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px"><button class="btn btn-purple" onclick="addMinutesToUser(16)">+16</button><button class="btn btn-purple" onclick="addMinutesToUser(60)">+60</button><button class="btn btn-purple" onclick="addMinutesToUser(120)">+120</button></div><hr style="margin:14px 0;border:none;border-top:1px solid #222"><h4 style="font-size:11px;color:#888">ALL USERS FROM FIREBASE - LIVE</h4><div id="allUsersList"></div></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+let db;
+try{
+ db = firebase.database();
+ document.getElementById('syncStatus').innerHTML="🟢 Firebase Connected - Using your existing Firebase - No API needed";
+ document.getElementById('syncStatus').style.color="#4ade80";
+}catch(e){
+ document.getElementById('syncStatus').innerHTML="⚠️ Firebase not found - Trying compat mode...";
+ // Fallback: try to load firebase from your other files if this fails
+ setTimeout(()=>{
+   try{ db = firebase.database(); document.getElementById('syncStatus').innerHTML="🟢 Firebase Connected (compat)"; document.getElementById('syncStatus').style.color="#4ade80"; initFirebase(); }catch(e2){ document.getElementById('syncStatus').innerHTML="❌ Firebase not found - Upload to Firebase Hosting or add config"; }
+ },1000);
+}
+
+function toast(m){ let el=document.getElementById('toast'); el.innerText=m; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3500); }
+function setTab(t){ document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); document.getElementById(t==='minutes'?'tab1':'tab2').classList.add('active'); document.getElementById('view-minutes').style.display=t==='minutes'?'block':'none'; document.getElementById('view-users').style.display=t==='users'?'block':'none'; }
+function calcTotal(){ let tot=parseInt(editTotal.value)||0; let used=parseInt(editUsed.value)||0; editAvailable.value=Math.max(0,tot-used); }
+function calcUsed(){ let tot=parseInt(editTotal.value)||0; let used=parseInt(editUsed.value)||0; editAvailable.value=Math.max(0,tot-used); }
+function calcAvail(){ let tot=parseInt(editTotal.value)||0; let av=parseInt(editAvailable.value)||0; editUsed.value=Math.max(0,tot-av); }
+
+function initFirebase(){
+ if(!db) db = firebase.database();
+
+ // Listen for pending requests - when user buys in transcription.html
+ db.ref('minutes_requests').on('value', (snap)=>{
+  let data = snap.val()||{};
+  let list = Object.entries(data).filter(([k,v])=>v.status==='pending').map(([k,v])=>({key:k,...v})).sort((a,b)=>b.createdAt-a.createdAt);
+  document.getElementById('cMin').innerText=list.length;
+  let html='';
+  if(!list.length) html='<div style="color:#666;font-size:11px;padding:20px;text-align:center">No pending requests - When user buys minutes in transcription.html, it appears here instantly on all your gadgets</div>';
+  else list.forEach(r=>{
+   html+=`<div class="item"><div style="display:flex;justify-content:space-between"><b style="font-size:12px">${r.email}</b><span class="badge b-purple">${r.minutes} min • KES ${r.amount}</span></div><div style="font-size:10px;color:#9ca3af;margin-top:6px">Code: <b style="color:#facc15">${r.mpesaCode||''}</b> | Name: ${r.mpesaName||''}<br>${new Date(r.createdAt).toLocaleString()}</div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-green" onclick="approveMinutes('${r.key}','${r.email}',${r.minutes})">✅ APPROVE</button><button class="btn btn-red" onclick="rejectMinutes('${r.key}')">❌ REJECT</button></div></div>`;
+  });
+  document.getElementById('minutesList').innerHTML=html;
+ });
+
+ // Listen for all users
+ db.ref('user_minutes').on('value', (snap)=>{
+  let data = snap.val()||{};
+  let html='';
+  let emails = Object.keys(data);
+  if(emails.length===0) html='<div style="color:#666;font-size:11px;padding:10px">No users yet - When you edit minutes, users will appear here</div>';
+  else emails.forEach(key=>{
+   let u=data[key];
+   let cleanEmail = u.email||key.replace(/_/g,'.');
+   if(!u.total && u.total!==0) return;
+   html+=`<div class="item"><div style="display:flex;justify-content:space-between"><b style="font-size:11px">${cleanEmail}</b><span class="badge b-green">${u.available} avail</span></div><div class="stat-grid"><div class="stat"><small>TOTAL</small><b>${u.total}</b></div><div class="stat"><small style="color:#4ade80">AVAIL</small><b style="color:#4ade80">${u.available}</b></div><div class="stat"><small style="color:#f87171">USED</small><b style="color:#f87171">${u.used}</b></div></div><button class="btn btn-gray" style="margin-top:8px;padding:6px 10px;font-size:9px" onclick="editEmail.value='${cleanEmail}';loadUserMinutes()">VIEW / EDIT</button></div>`;
+  });
+  document.getElementById('allUsersList').innerHTML=html;
+ });
+}
+
+window.approveMinutes = function(key,email,mins){
+ email=email.toLowerCase();
+ let userKey = email.replace(/\./g,'_');
+ db.ref('user_minutes/'+userKey).once('value').then(snap=>{
+  let cur = snap.exists()? (snap.val().total||0) : 0;
+  let used = snap.exists()? (snap.val().used||0) : 0;
+  let newTot = cur + parseInt(mins);
+  db.ref('user_minutes/'+userKey).set({email:email, total:newTot, used:used, available:newTot-used, updated:Date.now()});
+  db.ref('minutes_requests/'+key).remove();
+  toast(`Approved ${mins} min to ${email} - TOTAL now ${newTot} - User sees it instantly on all gadgets`);
+ });
+}
+
+window.rejectMinutes = function(key){
+ db.ref('minutes_requests/'+key).remove();
+ toast('Rejected');
+}
+
+window.setUserMinutes = function(){
+ let email=editEmail.value.trim().toLowerCase(); let total=parseInt(editTotal.value)||0; let avail=parseInt(editAvailable.value)||0; let used=parseInt(editUsed.value)||0;
+ if(!email){alert('Enter email');return;}
+ if(total!==avail+used) avail=Math.max(0,total-used);
+ let userKey = email.replace(/\./g,'_');
+ db.ref('user_minutes/'+userKey).set({email:email, total:total, available:avail, used:used, updated:Date.now()}).then(()=>{
+  toast(`✅ SAVED TO FIREBASE - ${email} - T:${total} A:${avail} U:${used} - User sees it NOW on all phones`);
+  loadUserMinutes();
+ });
+}
+
+window.loadUserMinutes = function(){
+ let email=editEmail.value.trim().toLowerCase(); if(!email){alert('Enter email');return;}
+ let userKey = email.replace(/\./g,'_');
+ db.ref('user_minutes/'+userKey).once('value').then(snap=>{
+  let tot=0, used=0, av=0;
+  if(snap.exists()){ let u=snap.val(); tot=u.total||0; used=u.used||0; av=u.available||Math.max(0,tot-used); }
+  editTotal.value=tot; editAvailable.value=av; editUsed.value=used;
+  userBalanceInfo.innerHTML=`<b>${email}</b><div class="stat-grid" style="margin-top:8px"><div class="stat"><small>TOTAL</small><b>${tot}</b></div><div class="stat"><small style="color:#4ade80">AVAIL</small><b style="color:#4ade80">${av}</b></div><div class="stat"><small style="color:#f87171">USED</small><b style="color:#f87171">${used}</b></div></div><div style="font-size:9px;color:#4ade80;margin-top:6px">🟢 Live from Firebase - User sees this on transcription.html on all phones</div>`;
+ });
+}
+
+window.addMinutesToUser = function(m){
+ let email=editEmail.value.trim().toLowerCase(); if(!email){alert('Enter email');return;}
+ let userKey = email.replace(/\./g,'_');
+ db.ref('user_minutes/'+userKey).once('value').then(snap=>{
+  let cur = snap.exists()? (snap.val().total||0) : 0;
+  let used = snap.exists()? (snap.val().used||0) : 0;
+  let nt=cur+m;
+  db.ref('user_minutes/'+userKey).set({email:email, total:nt, used:used, available:nt-used, updated:Date.now()}).then(()=>{
+   toast(`Added ${m} min to ${email} - TOTAL now ${nt} - Synced to all phones`);
+   loadUserMinutes();
+  });
+ });
+}
+
+// Init after firebase loads
+setTimeout(initFirebase, 1500);
+</script>
+</body>
+  </html>
