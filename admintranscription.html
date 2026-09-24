@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Transcription - Pending Only</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui,sans-serif;margin:0;padding:0}
+body{background:#07070a;color:#e5e7eb;padding:14px}
+.header{max-width:900px;margin:0 auto;background:#1a1a2e;border:2px solid #22c55e;border-radius:16px;padding:16px;display:flex;justify-content:space-between;align-items:center}
+.card{max-width:900px;margin:12px auto;background:#1a1a2e;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px}
+.job{background:#111126;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;margin-bottom:12px}
+.btn{padding:9px 14px;border-radius:8px;border:none;font-weight:800;font-size:11px;cursor:pointer;margin-right:6px}
+.btn-green{background:#22c55e;color:#fff}.btn-red{background:#ef4444;color:#fff}.btn-dark{background:rgba(255,255,255,0.08);color:#9ca3af}
+.trans-box{background:#000;border:1px solid #222;border-radius:10px;padding:10px;margin-top:8px;max-height:180px;overflow:auto;font-size:11px;white-space:pre-wrap;line-height:1.6}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);z-index:100;display:none;align-items:center;justify-content:center;padding:14px}
+.modal-overlay.show{display:flex}
+.modal{width:100%;max-width:480px;background:#1a1a2e;border:2px solid #ef4444;border-radius:18px;padding:18px}
+textarea{width:100%;background:#0a0a14;border:1px solid #333;border-radius:10px;padding:10px;color:#fff;margin-top:8px;min-height:90px}
+</style>
+</head>
+<body>
+<div class="header">
+<div><b style="color:#4ade80">🎙️ ADMIN TRANSCRIPTION - PENDING ONLY</b><br><small id="sync" style="color:#4ade80">🟢 Firebase Live - Pending jobs from transcription.html</small><br><small style="color:#9ca3af">Approve → auto feedback + KES to dashboard | Reject → No KES</small></div>
+<div><b id="cPend" style="color:#facc15;font-size:22px">0</b><br><small style="color:#9ca3af">Pending</small></div>
+</div>
+
+<div class="card">
+<h3 style="color:#facc15">⏳ Pending Jobs - Waiting Approval</h3>
+<p style="font-size:10px;color:#6b7280;margin-top:4px">User submits in transcription.html → appears here instantly → you approve/reject → job migrates to Approved/Rejected in user's dashboard</p>
+<div id="list" style="margin-top:14px"></div>
+</div>
+
+<div class="modal-overlay" id="mReject" onclick="if(event.target===this)closeM()">
+<div class="modal">
+<h3 style="color:#f87171">❌ Reject with Feedback</h3>
+<div id="rInfo" style="font-size:11px;margin-top:10px;background:rgba(0,0,0,0.4);padding:10px;border-radius:10px"></div>
+<textarea id="rText" placeholder="Write feedback e.g. Poor accuracy, missing speaker labels, incomplete..."></textarea>
+<div style="display:flex;gap:8px;margin-top:10px">
+<button class="btn btn-dark" style="flex:1" onclick="closeM()">Cancel</button>
+<button class="btn btn-red" style="flex:1" onclick="doRejectFB()">Submit Rejection</button>
+</div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, setDoc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",authDomain:"diamines-agencies.firebaseapp.com",projectId:"diamines-agencies",storageBucket:"diamines-agencies.firebasestorage.app",messagingSenderId:"438413306857",appId:"1:438413306857:web:3c7f736794be6a49b0f978"};
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+
+let all=[], currentId=null;
+window.closeM=()=>document.getElementById('mReject').classList.remove('show');
+
+onSnapshot(collection(db,'transcriptionSubmissions'),snap=>{
+ all=[];
+ snap.forEach(d=>{let data=d.data(); if(data.status==='pending') all.push({id:d.id,...data});});
+ all.sort((a,b)=>(b.submittedAt||0)-(a.submittedAt||0));
+ document.getElementById('cPend').innerText=all.length;
+ document.getElementById('sync').innerText=`🟢 Firebase LIVE - ${all.length} pending jobs`;
+ render();
+});
+
+function render(){
+ if(!all.length){
+  document.getElementById('list').innerHTML=`<div style="text-align:center;padding:40px;color:#4b5563">📭 No pending - When user submits transcription, appears here</div>`;
+  return;
+ }
+ document.getElementById('list').innerHTML=all.map(j=>`
+  <div class="job">
+   <div style="display:flex;justify-content:space-between;gap:10px">
+    <div>
+     <b>🎧 ${j.jobTitle||j.title||'Transcription Job'}</b><br>
+     <small style="color:#9ca3af">User: <b style="color:#facc15">${j.userEmail||j.email}</b> | Price: <b style="color:#4ade80">KES ${j.price||0}</b> | ${j.duration||''}</small><br>
+     <small style="color:#6b7280">${j.submittedAt? new Date(j.submittedAt).toLocaleString():''} | JobID: ${j.jobId||''}</small>
+    </div>
+    <span style="background:rgba(250,204,21,0.12);color:#facc15;border:1px solid rgba(250,204,21,0.25);padding:4px 10px;border-radius:99px;font-size:9px;font-weight:800;height:fit-content">PENDING</span>
+   </div>
+   ${j.audioUrl?`<audio controls src="${j.audioUrl}" style="width:100%;margin-top:10px;height:36px"></audio>`:''}
+   <div class="trans-box">${(j.content||'No content').substring(0,1000)}</div>
+   <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
+    <button class="btn btn-green" onclick="approve('${j.id}')">✅ APPROVE +KES ${j.price}</button>
+    <button class="btn btn-red" onclick="openReject('${j.id}')">❌ REJECT WITH FEEDBACK</button>
+    <button class="btn btn-dark" onclick="rejectNoFB('${j.id}')">🚫 REJECT WITHOUT FEEDBACK</button>
+   </div>
+  </div>
+ `).join('');
+}
+
+window.approve=async(id)=>{
+ let j=all.find(x=>x.id===id); if(!j) return;
+ if(!confirm(`Approve?\nUser: ${j.userEmail}\nJob: ${j.jobTitle}\nKES ${j.price} will be credited to dashboard`)) return;
+
+ let feedback=`Excellent work! Your transcription was accurate, well formatted and on time. Approved. KES ${j.price} credited to your dashboard. Keep up the great work!`;
+
+ await updateDoc(doc(db,'transcriptionSubmissions',id),{status:'approved',feedback:feedback,approvedAt:Date.now()});
+
+ let email=(j.userEmail||j.email||'').toLowerCase();
+ try{
+  await setDoc(doc(db,'transcriptionHistory',id),{...j,status:'approved',feedback:feedback,approvedAt:Date.now(),userEmail:email});
+  let earnRef=doc(db,'userEarnings',email);
+  let snap=await getDoc(earnRef);
+  let cur=snap.exists()?(snap.data().totalEarnings||0):0;
+  await setDoc(earnRef,{email:email,totalEarnings:cur+parseInt(j.price||0),lastUpdate:Date.now(),lastJob:j.jobTitle||j.title,lastAmount:parseInt(j.price||0)},{merge:true});
+  await addDoc(collection(db,'earningsTransactions'),{email:email,amount:parseInt(j.price||0),jobId:j.jobId||'',jobTitle:j.jobTitle||j.title||'Transcription',type:'transcription_approved',feedback:feedback,createdAt:Date.now()});
+ }catch(e){console.log(e);}
+
+ alert(`✅ Approved!\n${email}\n+KES ${j.price} credited\nFeedback auto added\nMigrates to Approved in user's dashboard`);
+}
+
+window.openReject=(id)=>{
+ let j=all.find(x=>x.id===id); if(!j) return;
+ currentId=id;
+ document.getElementById('rInfo').innerHTML=`<b>${j.jobTitle||j.title}</b><br>User: <b style="color:#facc15">${j.userEmail}</b> | KES ${j.price}<br><small>${(j.content||'').substring(0,120)}...</small>`;
+ document.getElementById('rText').value='';
+ document.getElementById('mReject').classList.add('show');
+}
+
+window.doRejectFB=async()=>{
+ if(!currentId) return;
+ let fb=document.getElementById('rText').value.trim();
+ if(!fb){alert('Write feedback');return;}
+ let j=all.find(x=>x.id===currentId);
+ await updateDoc(doc(db,'transcriptionSubmissions',currentId),{status:'rejected',feedback:fb,rejectedAt:Date.now(),rejectedWithFeedback:true});
+ try{ await setDoc(doc(db,'transcriptionHistory',currentId),{...j,status:'rejected',feedback:fb,rejectedAt:Date.now()}); }catch{}
+ closeM();
+ alert(`❌ Rejected with feedback\n${j.userEmail}\nFeedback: ${fb}\nMigrates to Rejected in user's dashboard - No KES`);
+ currentId=null;
+}
+
+window.rejectNoFB=async(id)=>{
+ let j=all.find(x=>x.id===id); if(!j) return;
+ if(!confirm(`Reject without feedback?\nUser: ${j.userEmail}\nNo feedback, No KES`)) return;
+ await updateDoc(doc(db,'transcriptionSubmissions',id),{status:'rejected',feedback:'Rejected by admin - No feedback provided',rejectedAt:Date.now(),rejectedWithFeedback:false});
+ try{ await setDoc(doc(db,'transcriptionHistory',id),{...j,status:'rejected',feedback:'Rejected - No feedback',rejectedAt:Date.now()}); }catch{}
+ alert(`🚫 Rejected without feedback\n${j.userEmail}\nMigrates to Rejected - No KES`);
+}
+</script>
+</body>
+  </html>
