@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Transcription - Pending Only</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui,sans-serif;margin:0;padding:0}
+body{background:#07070a;color:#e5e7eb;padding:14px}
+.header{max-width:900px;margin:0 auto;background:#1a1a2e;border:2px solid #22c55e;border-radius:16px;padding:16px;display:flex;justify-content:space-between;align-items:center}
+.card{max-width:900px;margin:12px auto;background:#1a1a2e;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px}
+.job{background:#111126;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;margin-bottom:12px;position:relative}
+.btn{padding:10px 16px;border-radius:9px;border:none;font-weight:800;font-size:11px;cursor:pointer;margin-right:6px;transition:0.2s}
+.btn-green{background:#22c55e;color:#fff}.btn-green:active{transform:scale(0.95);background:#16a34a}
+.btn-red{background:#ef4444;color:#fff}.btn-red:active{transform:scale(0.95)}
+.btn-dark{background:rgba(255,255,255,0.12);color:#e5e7eb;border:1px solid rgba(255,255,255,0.15)}.btn-dark:active{transform:scale(0.95)}
+.trans-box{background:#000;border:1px solid #222;border-radius:10px;padding:10px;margin-top:8px;max-height:180px;overflow:auto;font-size:11px;white-space:pre-wrap;line-height:1.6;color:#d1d5db}
+.action-bar{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:10px;position:sticky;bottom:0}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:999;display:none;align-items:center;justify-content:center;padding:14px}
+.modal-overlay.show{display:flex}
+.modal{width:100%;max-width:480px;background:#1a1a2e;border:2px solid #ef4444;border-radius:18px;padding:18px;animation:pop 0.3s}
+@keyframes pop{0%{transform:scale(0.9)}100%{transform:scale(1)}}
+textarea{width:100%;background:#0a0a14;border:1.5px solid #333;border-radius:10px;padding:12px;color:#fff;margin-top:10px;min-height:110px;font-size:12px;outline:none}
+textarea:focus{border-color:#ef4444}
+</style>
+</head>
+<body>
+<div class="header">
+<div><b style="color:#4ade80">🎙️ ADMIN TRANSCRIPTION - PENDING ONLY</b><br><small id="sync" style="color:#4ade80">🟢 Firebase LIVE - Pending jobs</small><br><small style="color:#9ca3af">Approve → auto feedback + KES to dashboard | Reject → No KES</small></div>
+<div style="text-align:center"><b id="cPend" style="color:#facc15;font-size:26px">0</b><br><small style="color:#9ca3af">Pending</small></div>
+</div>
+
+<div class="card">
+<h3 style="color:#facc15">⏳ Pending Jobs - Waiting Approval</h3>
+<p style="font-size:10px;color:#6b7280;margin-top:4px">User submits in transcription.html → appears here instantly → you approve/reject → job migrates to Approved/Rejected in user's dashboard</p>
+<div id="list" style="margin-top:14px"></div>
+</div>
+
+<div class="modal-overlay" id="mReject" onclick="if(event.target===this)closeM()">
+<div class="modal">
+<h3 style="color:#f87171;text-align:center">❌ Reject with Feedback</h3>
+<div id="rInfo" style="font-size:11px;margin-top:12px;background:rgba(0,0,0,0.5);padding:12px;border-radius:10px;border:1px solid #222"></div>
+<label style="font-size:10px;color:#f87171;margin-top:12px;display:block;font-weight:800">WRITE FEEDBACK:</label>
+<textarea id="rText" placeholder="e.g. Poor accuracy, missing speaker labels, incomplete transcription, please improve quality..."></textarea>
+<div style="display:flex;gap:8px;margin-top:12px">
+<button class="btn btn-dark" style="flex:1" onclick="closeM()">Cancel</button>
+<button class="btn btn-red" style="flex:1" onclick="doRejectFB()">❌ Submit Rejection</button>
+</div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, setDoc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",authDomain:"diamines-agencies.firebaseapp.com",projectId:"diamines-agencies",storageBucket:"diamines-agencies.firebasestorage.app",messagingSenderId:"438413306857",appId:"1:438413306857:web:3c7f736794be6a49b0f978"};
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+
+let all=[], currentId=null;
+window.closeM=()=>document.getElementById('mReject').classList.remove('show');
+
+onSnapshot(collection(db,'transcriptionSubmissions'),snap=>{
+ all=[];
+ snap.forEach(d=>{
+  let data=d.data();
+  if((data.status||'pending')==='pending') all.push({id:d.id,...data});
+ });
+ all.sort((a,b)=>(b.submittedAt||0)-(a.submittedAt||0));
+ document.getElementById('cPend').innerText=all.length;
+ document.getElementById('sync').innerText=`🟢 Firebase LIVE - ${all.length} pending jobs - Buttons active`;
+ render();
+});
+
+function render(){
+ if(!all.length){
+  document.getElementById('list').innerHTML=`<div style="text-align:center;padding:50px;color:#4b5563"><div style="font-size:40px">📭</div><b>No pending</b><br><small>When user submits transcription, it appears here</small></div>`;
+  return;
+ }
+ document.getElementById('list').innerHTML=all.map(j=>`
+  <div class="job">
+   <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+    <div style="flex:1">
+     <b style="font-size:14px">🎧 ${escapeHtml(j.jobTitle||j.title||'Transcription Job')}</b><br>
+     <small style="color:#9ca3af">User: <b style="color:#facc15">${escapeHtml(j.userEmail||j.email||'')}</b> | Price: <b style="color:#4ade80">KES ${j.price||0}</b> | ${escapeHtml(j.duration||'')}</small><br>
+     <small style="color:#6b7280">${j.submittedAt? new Date(j.submittedAt).toLocaleString():''} | ID: ${(j.jobId||'').substring(0,12)}</small>
+    </div>
+    <span style="background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.3);padding:5px 12px;border-radius:99px;font-size:9px;font-weight:900;height:fit-content">PENDING</span>
+   </div>
+   ${j.audioUrl?`<audio controls src="${j.audioUrl}" style="width:100%;margin-top:12px;height:40px;border-radius:10px"></audio>`:''}
+   <div style="margin-top:10px"><small style="color:#a78bfa;font-weight:800;font-size:9px">TRANSCRIPTION CONTENT:</small></div>
+   <div class="trans-box">${escapeHtml((j.content||'No content').substring(0,1200))}${(j.content||'').length>1200?'... [Too long, admin can scroll]':''}</div>
+   
+   <!-- FIXED BUTTONS - ALWAYS VISIBLE -->
+   <div class="action-bar">
+    <button class="btn btn-green" onclick="approve('${j.id}')">✅ APPROVE +KES ${j.price}</button>
+    <button class="btn btn-red" onclick="openReject('${j.id}')">❌ REJECT WITH FEEDBACK</button>
+    <button class="btn btn-dark" onclick="rejectNoFB('${j.id}')">🚫 REJECT WITHOUT FEEDBACK</button>
+   </div>
+  </div>
+ `).join('');
+}
+
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+window.approve=async(id)=>{
+ let j=all.find(x=>x.id===id); if(!j) return;
+ if(!confirm(`✅ APPROVE?\n\nUser: ${j.userEmail}\nJob: ${j.jobTitle}\nPrice: KES ${j.price}\n\nAuto feedback will be added:\n"Excellent work! Accurate, well formatted..."\n\nKES ${j.price} will be credited to dashboard instantly.`)) return;
+
+ try{
+  let feedback=`Excellent work! Your transcription was accurate, well formatted and on time. Approved. KES ${j.price} credited to your dashboard. Keep up the great work!`;
+  
+  // 1. Update submission - Efficient
+  await updateDoc(doc(db,'transcriptionSubmissions',id),{
+   status:'approved',
+   feedback:feedback,
+   approvedAt:Date.now()
+  });
+
+  // 2. Add earnings - Efficient
+  let email=(j.userEmail||j.email||'').toLowerCase().trim();
+  await setDoc(doc(db,'transcriptionHistory',id),{...j,status:'approved',feedback:feedback,approvedAt:Date.now(),userEmail:email},{merge:true});
+  
+  let earnRef=doc(db,'userEarnings',email);
+  let snap=await getDoc(earnRef);
+  let cur=snap.exists()?(snap.data().totalEarnings||0):0;
+  
+  await setDoc(earnRef,{
+   email:email,
+   totalEarnings:cur+parseInt(j.price||0),
+   lastUpdate:Date.now(),
+   lastJob:j.jobTitle||j.title,
+   lastAmount:parseInt(j.price||0)
+  },{merge:true});
+
+  await addDoc(collection(db,'earningsTransactions'),{
+   email:email,
+   amount:parseInt(j.price||0),
+   jobId:j.jobId||'',
+   jobTitle:j.jobTitle||j.title||'Transcription Job',
+   type:'transcription_approved',
+   feedback:feedback,
+   createdAt:Date.now()
+  });
+
+  alert(`✅ APPROVED!\n\nUser: ${email}\n+KES ${j.price} credited\nFeedback auto added\nMigrates to Approved tab instantly`);
+ }catch(e){
+  alert('❌ Error: '+e.message);
+  console.log(e);
+ }
+}
+
+window.openReject=(id)=>{
+ let j=all.find(x=>x.id===id); if(!j) return;
+ currentId=id;
+ document.getElementById('rInfo').innerHTML=`<b>${escapeHtml(j.jobTitle||j.title||'Job')}</b><br>User: <b style="color:#facc15">${escapeHtml(j.userEmail||'')}</b> | Price: <b style="color:#4ade80">KES ${j.price}</b><br><small style="color:#9ca3af">Preview: ${escapeHtml((j.content||'').substring(0,100))}...</small>`;
+ document.getElementById('rText').value='';
+ document.getElementById('mReject').classList.add('show');
+}
+
+window.doRejectFB=async()=>{
+ if(!currentId) return;
+ let fb=document.getElementById('rText').value.trim();
+ if(!fb){alert('Write feedback first');return;}
+ let j=all.find(x=>x.id===currentId);
+ if(!j) return;
+
+ try{
+  await updateDoc(doc(db,'transcriptionSubmissions',currentId),{
+   status:'rejected',
+   feedback:fb,
+   rejectedAt:Date.now(),
+   rejectedWithFeedback:true
+  });
+  await setDoc(doc(db,'transcriptionHistory',currentId),{...j,status:'rejected',feedback:fb,rejectedAt:Date.now(),userEmail:(j.userEmail||j.email||'').toLowerCase()},{merge:true});
+  
+  document.getElementById('mReject').classList.remove('show');
+  alert(`❌ REJECTED WITH FEEDBACK\n\nUser: ${j.userEmail}\nFeedback: ${fb}\nMigrates to Rejected tab - No KES credited`);
+  currentId=null;
+ }catch(e){
+  alert('❌ Error: '+e.message);
+ }
+}
+
+window.rejectNoFB=async(id)=>{
+ let j=all.find(x=>x.id===id); if(!j) return;
+ if(!confirm(`🚫 REJECT WITHOUT FEEDBACK?\n\nUser: ${j.userEmail}\nJob: ${j.jobTitle}\nPrice: KES ${j.price}\n\nNo feedback will be shown.\nNo KES credited.\nContinue?`)) return;
+
+ try{
+  await updateDoc(doc(db,'transcriptionSubmissions',id),{
+   status:'rejected',
+   feedback:'Rejected by admin - No feedback provided',
+   rejectedAt:Date.now(),
+   rejectedWithFeedback:false
+  });
+  await setDoc(doc(db,'transcriptionHistory',id),{...j,status:'rejected',feedback:'Rejected - No feedback',rejectedAt:Date.now(),userEmail:(j.userEmail||j.email||'').toLowerCase()},{merge:true});
+  
+  alert(`🚫 REJECTED WITHOUT FEEDBACK\n\nUser: ${j.userEmail}\nNo feedback\nMigrates to Rejected tab - No KES`);
+ }catch(e){
+  alert('❌ Error: '+e.message);
+ }
+}
+</script>
+</body>
+  </html>
