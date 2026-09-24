@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES - Professional Transcription</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif}
+body{background:#05050a;color:#fff;min-height:100vh;padding:0 0 100px;position:relative;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 20% 30%,rgba(168,85,247,0.15),transparent 40%),radial-gradient(circle at 80% 70%,rgba(250,204,21,0.12),transparent 40%),radial-gradient(circle at 50% 50%,rgba(34,197,94,0.08),transparent 50%);pointer-events:none;z-index:-1}
+.topbar{max-width:680px;margin:0 auto;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:20;background:rgba(5,5,10,0.8);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06)}
+.back{width:40px;height:40px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:18px;transition:0.3s}.back:hover{background:rgba(250,204,21,0.15)}
+.brand{font-family:'Space Grotesk';font-weight:800;font-size:13px;letter-spacing:2px;color:#facc15}
+.wallet{max-width:680px;margin:16px auto;background:linear-gradient(135deg,rgba(26,16,46,0.9),rgba(21,21,40,0.9));border:1px solid rgba(168,85,247,0.25);border-radius:24px;padding:18px;position:relative;overflow:hidden;backdrop-filter:blur(12px);box-shadow:0 10px 40px rgba(168,85,247,0.15)}
+.wallet::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#a855f7,transparent)}
+.min-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
+.min-box{background:linear-gradient(180deg,rgba(0,0,0,0.5),rgba(0,0,0,0.2));border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:14px;text-align:center;position:relative;overflow:hidden}
+.min-box::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.min-box.total::after{background:linear-gradient(90deg,#6b7280,#9ca3af)}.min-box.avail::after{background:linear-gradient(90deg,#22c55e,#4ade80)}.min-box.used::after{background:linear-gradient(90deg,#ef4444,#f87171)}
+.tabs{max-width:680px;margin:14px auto;display:flex;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:5px;gap:4px;overflow-x:auto;backdrop-filter:blur(10px)}
+.tab{flex:1;min-width:90px;padding:11px 8px;border:none;border-radius:14px;background:transparent;color:#6b7280;font-weight:800;font-size:9px;cursor:pointer;white-space:nowrap;transition:0.3s;display:flex;flex-direction:column;align-items:center;gap:3px}.tab b{font-size:13px;color:inherit}.tab.active{background:linear-gradient(135deg,#facc15,#f59e0b);color:#000;box-shadow:0 4px 20px rgba(250,204,21,0.3)}.tab.active b{color:#000}
+.wrap{max-width:680px;margin:0 auto;padding:0 14px}
+.card{position:relative;background:linear-gradient(180deg,rgba(30,30,50,0.9) 0%,rgba(21,21,40,0.9) 100%);border:1px solid rgba(255,255,255,0.07);border-radius:24px;padding:18px;margin-bottom:16px;overflow:hidden;backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.05);transition:0.4s}
+.card:hover{transform:translateY(-2px);border-color:rgba(250,204,21,0.15);box-shadow:0 12px 40px rgba(0,0,0,0.4),0 0 20px rgba(250,204,21,0.08)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#facc15,#f59e0b,#22c55e,#a855f7,#facc15);background-size:200% 100%;animation:line 3s linear infinite}
+@keyframes line{0%{background-position:0%}100%{background-position:200%}}
+.card-locked{opacity:0.5;pointer-events:none;filter:grayscale(0.3)}.card-locked::after{content:'🔒 LOCKED - Deadline Expired';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);background:rgba(239,68,68,0.95);color:#fff;padding:8px 20px;border-radius:99px;font-weight:900;font-size:12px;z-index:5;box-shadow:0 4px 20px rgba(0,0,0,0.5)}
+.card-head{display:flex;justify-content:space-between;align-items:start;gap:12px}
+.card-title{font-family:'Space Grotesk';font-size:16px;font-weight:800;line-height:1.3;flex:1}
+.price-tag{background:linear-gradient(135deg,#facc15,#f59e0b);color:#000;padding:7px 14px;border-radius:99px;font-weight:900;font-size:13px;box-shadow:0 4px 15px rgba(250,204,21,0.3);white-space:nowrap}
+.desc{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:12px;margin-top:12px;font-size:11px;color:#a1a1b5;line-height:1.7}
+.meta{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.meta-item{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:6px 10px;border-radius:99px;font-size:9px;font-weight:700;color:#9ca3af}
+.meta-item.yellow{background:rgba(250,204,21,0.1);color:#facc15;border-color:rgba(250,204,21,0.2)}
+.meta-item.green{background:rgba(34,197,94,0.1);color:#4ade80;border-color:rgba(34,197,94,0.2)}
+.meta-item.purple{background:rgba(168,85,247,0.1);color:#a78bfa;border-color:rgba(168,85,247,0.2)}
+.meta-item.red{background:rgba(239,68,68,0.1);color:#f87171;border-color:rgba(239,68,68,0.2)}
+.audio-wrap{background:linear-gradient(135deg,#000,#0a0a14);border:1px solid rgba(250,204,21,0.15);border-radius:16px;padding:14px;margin-top:14px;position:relative}
+.audio-wrap::before{content:'🔊';position:absolute;top:-8px;left:14px;background:#08080f;padding:2px 8px;border-radius:99px;font-size:10px}
+.deadline-bar{margin-top:14px;background:rgba(0,0,0,0.4);border-radius:99px;height:6px;overflow:hidden;border:1px solid rgba(255,255,255,0.05)}
+.deadline-fill{height:100%;border-radius:99px;transition:1s}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-weight:900;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:0.3s;letter-spacing:0.5px}
+.btn-accept{background:linear-gradient(135deg,#facc15,#f59e0b);color:#000;box-shadow:0 6px 20px rgba(250,204,21,0.25)}.btn-accept:hover{transform:translateY(-1px);box-shadow:0 10px 30px rgba(250,204,21,0.35)}
+.btn-submit{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 6px 20px rgba(34,197,94,0.25)}
+.btn-save{background:rgba(255,255,255,0.06);color:#d1d5db;border:1px solid rgba(255,255,255,0.1)}
+.btn-buy{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;box-shadow:0 6px 20px rgba(168,85,247,0.25)}
+.btn-dl{background:rgba(250,204,21,0.1);color:#facc15;border:1px solid rgba(250,204,21,0.25)}
+.btn-play{background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.1)}
+textarea{width:100%;background:rgba(0,0,0,0.4);border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;color:#fff;padding:14px;font-size:12px;min-height:130px;margin-top:12px;outline:none;transition:0.3s}
+textarea:focus{border-color:#a855f7;background:rgba(0,0,0,0.6)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}.modal-overlay.show{display:flex}
+.modal{width:100%;max-width:440px;border-radius:28px;padding:24px;background:linear-gradient(180deg,#1e1e32,#151528);border:1px solid rgba(255,255,255,0.08);max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:pop 0.4s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes pop{0%{transform:scale(0.9) translateY(20px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(150px);background:linear-gradient(135deg,#1e1e32,#151528);border:1px solid rgba(250,204,21,0.3);padding:14px 20px;border-radius:99px;z-index:200;transition:0.5s cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,0.5)}.toast.show{transform:translateX(-50%) translateY(0)}
+.approval-card{background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(16,185,129,0.08));border:1px solid rgba(34,197,94,0.25);border-radius:20px;padding:16px;margin-top:10px;position:relative;overflow:hidden}
+.approval-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,#22c55e,#10b981)}
+.rejection-card{background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(220,38,38,0.08));border:1px solid rgba(239,68,68,0.25);border-radius:20px;padding:16px;margin-top:10px;position:relative;overflow:hidden}
+.rejection-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,#ef4444,#dc2626)}
+.pending-card{background:linear-gradient(135deg,rgba(250,204,21,0.12),rgba(245,158,11,0.06));border:1px solid rgba(250,204,21,0.2);border-radius:20px;padding:16px;margin-top:10px;position:relative;overflow:hidden}
+.pending-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,#facc15,#f59e0b)}
+.confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:150}
+.pkg-grid{display:grid;gap:10px;margin-top:14px}.pkg-card{background:linear-gradient(135deg,rgba(26,26,46,0.8),rgba(21,21,40,0.8));border:1.5px solid rgba(255,255,255,0.06);border-radius:18px;padding:16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:0.3s}.pkg-card:hover{border-color:rgba(168,85,247,0.3);transform:translateY(-1px)}.pkg-card.selected{border-color:#a855f7;background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(124,58,237,0.08));box-shadow:0 8px 25px rgba(168,85,247,0.2)}
+</style>
+</head>
+<body>
+<div class="topbar">
+<a class="back" href="dashboard.html">←</a>
+<div style="text-align:center"><div style="font-family:'Space Grotesk';font-weight:800;font-size:14px">🎙️ DIAMINES <span style="color:#facc15">JOBS</span></div><div style="font-size:7px;color:#6b7280;letter-spacing:2px;font-weight:800">PROFESSIONAL PLATFORM</div></div>
+<div style="width:40px"></div>
+</div>
+
+<div class="wallet">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:48px;height:48px;background:linear-gradient(135deg,#a855f7,#7c3aed);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 6px 20px rgba(168,85,247,0.3)">⏱️</div><div><div style="font-size:8px;color:#a78bfa;font-weight:800;letter-spacing:1px">MINUTES WALLET • Firebase Live</div><b style="font-size:13px;font-family:'Space Grotesk'">Bidding Balance</b><div id="syncNote" style="font-size:8px;color:#4ade80;margin-top:2px">🟢 Live sync - All phones</div></div></div>
+<button class="btn btn-buy" style="width:auto;padding:10px 18px;font-size:10px" onclick="openBuyMinutes()">💳 BUY</button>
+</div>
+<div class="min-grid">
+<div class="min-box total"><small style="color:#9ca3af;font-size:8px;font-weight:800;letter-spacing:1px">TOTAL</small><b id="minTotal" style="font-size:20px;display:block;margin-top:4px">0</b><small style="color:#6b7280;font-size:8px">min</small></div>
+<div class="min-box avail"><small style="color:#4ade80;font-size:8px;font-weight:800;letter-spacing:1px">AVAILABLE</small><b id="minAvail" style="font-size:20px;display:block;margin-top:4px;color:#4ade80">0</b><small style="color:#6b7280;font-size:8px">min</small></div>
+<div class="min-box used"><small style="color:#f87171;font-size:8px;font-weight:800;letter-spacing:1px">USED</small><b id="minUsed" style="font-size:20px;display:block;margin-top:4px;color:#f87171">0</b><small style="color:#6b7280;font-size:8px">min</small></div>
+</div>
+</div>
+
+<div class="tabs">
+<button class="tab active" id="tAv" onclick="switchTab('av')">🌍<span>AVAILABLE</span><b id="cAv">0</b></button>
+<button class="tab" id="tMy" onclick="switchTab('my')">🎧<span>MY TASKS</span><b id="cMy">0</b></button>
+<button class="tab" id="tPd" onclick="switchTab('pd')">⏳<span>PENDING</span><b id="cPd">0</b></button>
+<button class="tab" id="tAp" onclick="switchTab('ap')">✅<span>APPROVED</span><b id="cAp">0</b></button>
+<button class="tab" id="tRj" onclick="switchTab('rj')">❌<span>REJECTED</span><b id="cRj">0</b></button>
+</div>
+
+<div class="wrap" id="content"></div>
+
+<!-- BUY MODAL -->
+<div class="modal-overlay" id="mBuyMinutes" onclick="if(event.target===this)closeM('mBuyMinutes')"><div class="modal" style="border-color:#a855f7"><h3 style="color:#a78bfa;text-align:center;font-family:'Space Grotesk';font-size:18px">💳 Buy Minutes - Professional</h3><div class="min-grid" style="margin-top:14px"><div class="min-box total"><small>TOTAL</small><b id="mTotal">0</b></div><div class="min-box avail"><small>AVAIL</small><b id="mAvail" style="color:#4ade80">0</b></div><div class="min-box used"><small>USED</small><b id="mUsed" style="color:#f87171">0</b></div></div>
+<div class="pkg-grid"><div class="pkg-card" id="pkg16" onclick="selectMinutesPkg(16,200)"><div><b style="font-size:13px">16 Minutes</b><br><small style="color:#9ca3af">Starter • Perfect for trial</small></div><b style="color:#facc15;font-size:14px">KES 200</b></div><div class="pkg-card" id="pkg60" onclick="selectMinutesPkg(60,680)"><div><b style="font-size:13px">60 Minutes 🔥 Popular</b><br><small style="color:#9ca3af">Best value • Most chosen</small></div><b style="color:#facc15;font-size:14px">KES 680</b></div><div class="pkg-card" id="pkg120" onclick="selectMinutesPkg(120,1035)"><div><b style="font-size:13px">120 Minutes 💎 Pro</b><br><small style="color:#9ca3af">Pro • For professionals</small></div><b style="color:#facc15;font-size:14px">KES 1035</b></div></div>
+<div id="paySection" style="display:none;margin-top:16px;background:linear-gradient(135deg,rgba(0,0,0,0.5),rgba(10,10,20,0.5));border:1px solid rgba(168,85,247,0.2);border-radius:18px;padding:16px"><div style="text-align:center"><div style="font-size:9px;color:#a78bfa;font-weight:800;letter-spacing:2px">SEND MONEY TO M-PESA</div><b style="font-size:30px;color:#facc15;font-family:'Space Grotesk';letter-spacing:1px">0141416120</b><div style="margin-top:8px;display:flex;gap:8px;justify-content:center"><span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.2);padding:4px 10px;border-radius:99px;font-size:10px;color:#4ade80">Pay: <b id="payAmt">KES 0</b></span><span style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.2);padding:4px 10px;border-radius:99px;font-size:10px;color:#a78bfa">Get: <b id="payMin">0 min</b></span></div></div><input id="mpesaCode" placeholder="M-PESA CODE e.g. QGH7Y8T9" style="width:100%;background:rgba(0,0,0,0.4);border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;color:#fff;margin-top:14px"><input id="mpesaName" placeholder="M-PESA FULL NAME" style="width:100%;background:rgba(0,0,0,0.4);border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;color:#fff;margin-top:8px"><input id="mpesaAmount" placeholder="Amount Sent e.g. 200" type="number" style="width:100%;background:rgba(0,0,0,0.4);border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;color:#fff;margin-top:8px"><button class="btn btn-buy" style="margin-top:14px" onclick="submitMinutesPurchase()">📤 SUBMIT REQUEST TO ADMIN - Firebase Live</button></div><button class="btn btn-save" style="margin-top:12px" onclick="closeM('mBuyMinutes')">Close</button></div></div>
+
+<!-- ACCEPT MODAL -->
+<div class="modal-overlay" id="mAccept" onclick="if(event.target===this)closeM('mAccept')"><div class="modal" style="border-color:#facc15"><div style="text-align:center"><div style="width:60px;height:60px;background:linear-gradient(135deg,#facc15,#f59e0b);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto;box-shadow:0 8px 25px rgba(250,204,21,0.3)">🎙️</div><h3 id="maTitle" style="color:#facc15;margin-top:12px;font-family:'Space Grotesk'"></h3><p style="font-size:10px;color:#9ca3af;margin-top:4px">You are about to accept this professional transcription job</p></div><div class="min-grid" style="margin-top:16px"><div class="min-box"><small>REWARD</small><b id="maPrice" style="color:#4ade80;font-size:14px"></b></div><div class="min-box"><small>DEADLINE</small><b id="maTime" style="color:#facc15;font-size:14px"></b></div><div class="min-box"><small>COST</small><b id="maCost" style="color:#a78bfa;font-size:14px"></b></div></div><div style="background:rgba(250,204,21,0.08);border:1px solid rgba(250,204,21,0.15);border-radius:14px;padding:12px;margin-top:14px"><small style="color:#facc15;font-weight:800;font-size:9px">⚠️ IMPORTANT - After accepting:</small><ul style="font-size:10px;color:#9ca3af;margin-top:6px;padding-left:16px;line-height:1.6"><li>Job disappears from main platform - no one else can take it</li><li><span id="maCost2"></span> minutes deducted instantly & smoothly</li><li>Deadline starts - submit before expiry</li></ul></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-save" style="flex:1" onclick="closeM('mAccept')">CANCEL</button><button class="btn btn-accept" style="flex:1" onclick="doAccept()">✅ ACCEPT & DEDUCT MINUTES</button></div></div></div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="mSuccess" onclick="if(event.target===this)closeM('mSuccess')"><div class="modal" style="border-color:#22c55e"><div style="text-align:center"><div style="width:70px;height:70px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto;box-shadow:0 8px 25px rgba(34,197,94,0.3)">🎉</div><h3 style="color:#4ade80;margin-top:12px;font-family:'Space Grotesk'">Task Accepted!</h3><p style="font-size:10px;color:#9ca3af;margin-top:4px">Minutes deducted smoothly • Job removed from marketplace</p></div><div id="mSuccessTxt" style="margin-top:14px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15);border-radius:14px;padding:12px;font-size:11px;text-align:center"></div><button class="btn btn-submit" style="margin-top:16px" onclick="closeM('mSuccess');switchTab('my')">GO TO MY TASKS →</button></div></div>
+
+<!-- SUBMIT SUCCESS -->
+<div class="modal-overlay" id="mSub" onclick="if(event.target===this)closeM('mSub')"><div class="modal" style="border-color:#22c55e"><div style="text-align:center"><div style="width:70px;height:70px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto">📤</div><h3 style="color:#4ade80;margin-top:12px">Submitted Successfully!</h3><div style="text-align:center;margin-top:12px"><b id="mSubPrice" style="font-size:26px;color:#facc15"></b><p style="font-size:11px;color:#9ca3af;margin-top:6px">Waiting admin review in admintranscription.html<br>Attractive feedback will appear after approval/rejection</p></div></div><button class="btn btn-submit" style="margin-top:16px" onclick="closeM('mSub');switchTab('pd')">VIEW PENDING - Attractive Card</button></div></div>
+
+<div class="toast" id="toast"><span id="toastIcon">✨</span><div><b id="toastT">Saved</b><br><small id="toastS" style="color:#9ca3af;font-size:10px">Safe</small></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, onSnapshot, addDoc, setDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig={apiKey:"AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",authDomain:"diamines-agencies.firebaseapp.com",projectId:"diamines-agencies",storageBucket:"diamines-agencies.firebasestorage.app",messagingSenderId:"438413306857",appId:"1:438413306857:web:3c7f736794be6a49b0f978"};
+const app=initializeApp(firebaseConfig); const db=getFirestore(app);
+
+let EMAIL='guest@diamines.com';
+try{let c=JSON.parse(localStorage.getItem('DIAMINES_CURRENT')||'null'); if(c&&c.email) EMAIL=c.email.toLowerCase().trim();}catch{}
+try{let e2=localStorage.getItem('userEmail')||localStorage.getItem('email'); if(e2) EMAIL=e2.toLowerCase().trim();}catch{}
+
+const KEY_ALL='DIAMINES_TRANS_ALL_JOBS';
+const KEY_MY='DIAMINES_TRANS_MY_'+EMAIL;
+const KEY_TOTAL='DIAMINES_TRANS_TOTAL_MINUTES_'+EMAIL;
+const KEY_USED='DIAMINES_TRANS_USED_MINUTES_'+EMAIL;
+
+function getAll(){try{return JSON.parse(localStorage.getItem(KEY_ALL)||'[]')}catch{return[]}}
+function getMy(){try{return JSON.parse(localStorage.getItem(KEY_MY)||'[]')}catch{return[]}}
+function getTotal(){let v=parseInt(localStorage.getItem(KEY_TOTAL)||'0');return isNaN(v)?0:v;}
+function getUsed(){let v=parseInt(localStorage.getItem(KEY_USED)||'0');return isNaN(v)?0:v;}
+function getAvailable(){return Math.max(0,getTotal()-getUsed());}
+function setAll(v){localStorage.setItem(KEY_ALL,JSON.stringify(v));}
+function setMy(v){localStorage.setItem(KEY_MY,JSON.stringify(v));}
+function updateMinUI(){let t=getTotal(),u=getUsed(),a=getAvailable();document.getElementById('minTotal').innerText=t;document.getElementById('minAvail').innerText=a;document.getElementById('minUsed').innerText=u;let mt=document.getElementById('mTotal');if(mt){mt.innerText=t+' min';document.getElementById('mAvail').innerText=a+' min';document.getElementById('mUsed').innerText=u+' min';}}
+
+// FIREBASE LIVE MINUTES
+onSnapshot(doc(db,'userMinutes',EMAIL.toLowerCase()),snap=>{
+ if(snap.exists()){
+  let d=snap.data();
+  localStorage.setItem(KEY_TOTAL,String(d.total||0));
+  localStorage.setItem(KEY_USED,String(d.used||0));
+  updateMinUI();
+  document.getElementById('syncNote').innerHTML=`🟢 LIVE - TOTAL ${d.total} | AVAIL ${d.available||d.avail} | USED ${d.used} • Firebase`;
+ }
+});
+
+// FIREBASE LIVE JOBS - WITH TAKEN LOGIC (job disappears once taken)
+let allJobsRaw=[];
+onSnapshot(collection(db,'transcriptionJobs'),snap=>{
+ allJobsRaw=[];
+ snap.forEach(s=>{ allJobsRaw.push({id:s.id,...s.data()}); });
+ allJobsRaw.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+ // Only show jobs not taken by anyone - PROFESSIONAL LOGIC
+ let availableJobs = allJobsRaw.filter(j=> !j.taken );
+ localStorage.setItem(KEY_ALL,JSON.stringify(availableJobs));
+ render();
+});
+
+let firebaseSubs=[];
+onSnapshot(collection(db,'transcriptionSubmissions'),snap=>{
+ firebaseSubs=[];
+ snap.forEach(s=>{
+  let data=s.data();
+  if((data.userEmail||data.email||'').toLowerCase()===EMAIL.toLowerCase()){
+   firebaseSubs.push({id:s.id,...data});
+  }
+ });
+ render();
+});
+
+let tab='av',curId=null,selectedPkg={minutes:0,amount:0};
+window.switchTab=function(t){tab=t;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById('t'+(t==='av'?'Av':t==='my'?'My':t==='pd'?'Pd':t==='ap'?'Ap':'Rj')).classList.add('active');render();}
+window.closeM=function(id){document.getElementById(id).classList.remove('show');}
+window.toast=function(t,s,icon='✨'){document.getElementById('toastT').innerText=t;document.getElementById('toastS').innerText=s;document.getElementById('toastIcon').innerText=icon;let el=document.getElementById('toast');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3500);}
+window.openBuyMinutes=function(){updateMinUI();document.getElementById('mBuyMinutes').classList.add('show');document.getElementById('paySection').style.display='none';document.querySelectorAll('.pkg-card').forEach(c=>c.classList.remove('selected'));}
+window.selectMinutesPkg=function(min,amt){selectedPkg={minutes:min,amount:amt};document.querySelectorAll('.pkg-card').forEach(c=>c.classList.remove('selected'));document.getElementById('pkg'+min).classList.add('selected');document.getElementById('payAmt').innerText='KES '+amt;document.getElementById('payMin').innerText=min+' min';document.getElementById('paySection').style.display='block';}
+window.submitMinutesPurchase=async function(){
+ let code=document.getElementById('mpesaCode').value.trim(); let name=document.getElementById('mpesaName').value.trim(); let amt=document.getElementById('mpesaAmount').value.trim();
+ if(!code||!name||!amt){alert('Enter M-Pesa code, name and amount');return;}
+ if(selectedPkg.amount==0){alert('Select package');return;}
+ await addDoc(collection(db,'minutesDeposits'),{email:EMAIL,minutes:selectedPkg.minutes,amount:parseInt(amt),mpesaCode:code,mpesaName:name,status:'pending',createdAt:Date.now()});
+ toast('Request sent to adminaudio','Admin will approve - Firebase live','💳'); closeM('mBuyMinutes');
+ document.getElementById('mpesaCode').value='';document.getElementById('mpesaName').value='';document.getElementById('mpesaAmount').value='';
+};
+function getMinutesFromJob(j){if(j.minutesNeed) return parseInt(j.minutesNeed);let d=j.duration||'';let m=parseInt(String(d).replace(/[^0-9]/g,''));return isNaN(m)||m<=0?10:m;}
+function formatDeadline(dl){let left=Math.max(0,dl-Date.now());if(left<=0) return 'Expired';let h=Math.floor(left/3600000), m=Math.floor((left%3600000)/60000);return h+'h '+m+'m left';}
+function getDeadlinePercent(deadline){let total=24*3600000; let left=Math.max(0,deadline-Date.now()); return Math.max(0,Math.min(100,(left/total)*100));}
+function isExpired(deadline){return Date.now()>deadline;}
+window.downloadAudio=function(url,title){let clean=(title||'audio').replace(/[^a-z0-9]/gi,'_');let a=document.createElement('a');a.href=url;a.download=clean+'.mp3';document.body.appendChild(a);a.click();setTimeout(()=>document.body.removeChild(a),1000);}
+window.openAccept=function(id){let all=getAll();let j=all.find(x=>x.id===id);if(!j)return;let need=getMinutesFromJob(j);if(getAvailable()<need){toast('Not enough minutes','Need '+need+' min, you have '+getAvailable()+' - Buy minutes','⏱️');openBuyMinutes();return;}curId=id;document.getElementById('maTitle').innerText=j.title;document.getElementById('maPrice').innerText='KES '+(j.price||350);document.getElementById('maTime').innerText=(j.h||24)+'h';document.getElementById('maCost').innerText=need+' min';document.getElementById('maCost2').innerText=need;document.getElementById('mAccept').classList.add('show');}
+
+// === PROFESSIONAL ACCEPT LOGIC: JOB DISAPPEARS FROM MAIN PLATFORM ONCE TAKEN + SMOOTH MINUTES DEDUCTION ===
+window.doAccept=async function(){
+ let all=getAll();let idx=all.findIndex(x=>x.id===curId);if(idx===-1)return;let job=all[idx];let need=getMinutesFromJob(job);
+ if(getAvailable()<need){toast('Insufficient minutes','Buy more minutes','❌');return;}
+
+ // Check if job already taken by someone else (race condition)
+ try{
+  let jobSnap=await getDoc(doc(db,'transcriptionJobs',curId));
+  if(jobSnap.exists() && jobSnap.data().taken){
+   toast('Job already taken','This job was just taken by another user','🚫');
+   render();
+   closeM('mAccept');
+   return;
+  }
+ }catch(e){}
+
+ // Smooth minutes deduction
+ let newUsed=getUsed()+need;
+ localStorage.setItem(KEY_USED,String(newUsed));
+ updateMinUI();
+
+ // 1. Deduct minutes in Firebase - smooth flow
+ await setDoc(doc(db,'userMinutes',EMAIL.toLowerCase()),{
+   email:EMAIL.toLowerCase(),
+   total:getTotal(),
+   used:newUsed,
+   available:getAvailable(),
+   avail:getAvailable(),
+   updated:Date.now()
+ },{merge:true});
+
+ // 2. Mark job as TAKEN in Firebase - so it disappears from main website for everyone
+ try{
+  await updateDoc(doc(db,'transcriptionJobs',curId),{
+   taken:true,
+   takenBy:EMAIL.toLowerCase(),
+   takenAt:Date.now()
+  });
+ }catch(e){
+  // If update fails (maybe doc id is different), delete from available and continue
+  console.log('Mark taken error',e);
+ }
+
+ // 3. Move to My Tasks
+ job.acceptedAt=Date.now();
+ job.deadline=Date.now()+(job.h||24)*3600000;
+ job.minutesDeducted=need;
+ job.taken=true;
+ job.takenBy=EMAIL.toLowerCase();
+
+ let my=getMy();my.push(job);setMy(my);
+ all.splice(idx,1);setAll(all);
+
+ closeM('mAccept');
+ document.getElementById('mSuccessTxt').innerHTML=`
+  <div style="display:flex;align-items:center;gap:10px;justify-content:center"><div style="width:36px;height:36px;background:linear-gradient(135deg,#facc15,#f59e0b);border-radius:10px;display:flex;align-items:center;justify-content:center">🎧</div><div style="text-align:left"><b>${job.title}</b><br><small style="color:#9ca3af">KES ${job.price} • ${job.duration} • ${job.h}h deadline</small></div></div>
+  <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="background:rgba(0,0,0,0.3);border-radius:10px;padding:8px"><small style="color:#6b7280">DEDUCTED</small><b style="display:block;color:#a78bfa">${need} MIN</b></div><div style="background:rgba(0,0,0,0.3);border-radius:10px;padding:8px"><small style="color:#6b7280">REMAINING</small><b style="display:block;color:#4ade80">${getAvailable()} MIN</b></div></div>
+  <div style="margin-top:10px;font-size:10px;color:#4ade80;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15);border-radius:10px;padding:8px">✅ Job removed from marketplace - No one else can accept it now - Deadline lock active</div>
+ `;
+ document.getElementById('mSuccess').classList.add('show');
+ render();
+ toast('Job accepted! Minutes deducted','Job removed from main platform','🎉');
+};
+
+window.saveDraft=function(id){let t=document.getElementById('txt_'+id)?.value||'';let my=getMy();let f=my.find(x=>x.id===id);if(f){f.draft=t;setMy(my);toast('Draft saved','Safe - Your progress saved','💾');}}
+
+window.submitJob=async function(id){
+ let my=getMy();let idx=my.findIndex(x=>x.id===id);if(idx===-1)return;let job=my[idx];
+ if(isExpired(job.deadline)){toast('Deadline expired','This task is locked - Cannot submit','🔒');render();return;}
+ let txt=document.getElementById('txt_'+id).value.trim();if(txt.length<30){alert('Min 30 chars required for professional transcription');return;}
+ job.content=txt;job.submittedAt=Date.now();job.userEmail=EMAIL;
+ try{
+  await addDoc(collection(db,'transcriptionSubmissions'),{
+   userEmail:EMAIL,email:EMAIL,jobId:job.id,jobTitle:job.title,title:job.title,price:job.price,duration:job.duration,h:job.h,level:job.level||'Easy',audioUrl:job.audioUrl||'',content:txt,status:'pending',submittedAt:Date.now(),minutesDeducted:job.minutesDeducted||10
+  });
+ }catch(e){console.log(e);}
+ my.splice(idx,1);setMy(my);
+ document.getElementById('mSubPrice').innerText='KES '+(job.price||350);
+ document.getElementById('mSub').classList.add('show');
+ render();
+}
+
+window.render=function(){
+ updateMinUI();
+ let all=getAll(),my=getMy();
+ let pd=firebaseSubs.filter(x=>x.status==='pending');
+ let ap=firebaseSubs.filter(x=>x.status==='approved');
+ let rj=firebaseSubs.filter(x=>x.status==='rejected');
+
+ document.getElementById('cAv').innerText=all.length;
+ document.getElementById('cMy').innerText=my.length;
+ document.getElementById('cPd').innerText=pd.length;
+ document.getElementById('cAp').innerText=ap.length;
+ document.getElementById('cRj').innerText=rj.length;
+
+ let html='';
+ if(tab==='av'){
+  if(!all.length) html=`<div style="text-align:center;padding:60px 20px"><div style="width:80px;height:80px;background:linear-gradient(135deg,rgba(250,204,21,0.15),rgba(245,158,11,0.08));border:1px solid rgba(250,204,21,0.2);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto">📭</div><b style="font-family:'Space Grotesk';font-size:16px;margin-top:16px;display:block">No jobs available</b><small style="color:#6b7280;margin-top:8px;display:block;line-height:1.6">Jobs published in transcription-jobs.html appear here instantly.<br>Once taken by any user, they disappear from main platform - Firebase live</small></div>`;
+  else html=all.map(j=>{
+   let need=getMinutesFromJob(j);let can=getAvailable()>=need;
+   return `<div class="card">
+    <div class="card-head"><div><div class="card-title">🎙️ ${j.title}</div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><span class="meta-item yellow">💰 KES ${j.price} Reward</span><span class="meta-item purple">📊 ${j.level||'Easy'} Level</span></div></div><div class="price-tag">KES ${j.price}</div></div>
+    <div class="desc">${j.desc||'Professional transcription task - Transcribe audio accurately with speaker labels and timestamps'}</div>
+    <div class="meta"><span class="meta-item">🎧 ${j.duration||'10 min'}</span><span class="meta-item">⏰ ${j.h||24}h deadline</span><span class="meta-item ${can?'green':'red'}">⏱️ ${need} MIN TO BID</span><span class="meta-item yellow">🔥 ${j.taken?'Taken':'Available'}</span></div>
+    ${j.audioUrl?`<div class="audio-wrap"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><small style="color:#facc15;font-weight:800;font-size:9px;letter-spacing:1px">🔊 TRANSCRIPTION AUDIO • Professional Quality</small><small style="color:#6b7280;font-size:9px">${j.duration}</small></div><audio controls src="${j.audioUrl}" style="width:100%;height:42px;border-radius:10px"></audio><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button class="btn btn-play" onclick="this.parentElement.previousElementSibling.play()">▶️ PLAY AUDIO</button><button class="btn btn-dl" onclick="downloadAudio('${j.audioUrl}','${j.title}')">⬇️ DOWNLOAD MP3</button></div></div>`:''}
+    <div style="margin-top:14px"><button class="btn ${can?'btn-accept':'btn-save'}" onclick="${can?`openAccept('${j.id}')`:`openBuyMinutes()`}">${can?`🎙️ ACCEPT JOB - KES ${j.price} • ${need} MIN`:`⏱️ BUY ${need} MIN TO BID - KES ${j.price}`}</button><small style="display:block;text-align:center;color:#6b7280;font-size:9px;margin-top:8px">Job disappears from marketplace once accepted by anyone - Firebase live sync</small></div>
+   </div>`;
+  }).join('');
+ }else if(tab==='my'){
+  if(!my.length) html=`<div style="text-align:center;padding:60px 20px"><div style="width:80px;height:80px;background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(124,58,237,0.08));border:1px solid rgba(168,85,247,0.2);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto">🎧</div><b style="margin-top:16px;display:block">No active tasks</b><small style="color:#6b7280">Accept a job from Available - Minutes deducted smoothly</small></div>`;
+  else html=my.map(j=>{
+   let expired=isExpired(j.deadline); let left=formatDeadline(j.deadline); let percent=getDeadlinePercent(j.deadline);
+   let fillColor=percent>50?'linear-gradient(90deg,#22c55e,#4ade80)':percent>20?'linear-gradient(90deg,#facc15,#f59e0b)':'linear-gradient(90deg,#ef4444,#f87171)';
+   return `<div class="card ${expired?'card-locked':''}">
+    <div class="card-head"><div class="card-title">${j.title}</div><span class="meta-item ${expired?'red':'yellow'}" style="padding:6px 12px">${expired?'🔒 EXPIRED':`⏳ ${left}`}</span></div>
+    <div class="meta" style="margin-top:10px"><span class="meta-item yellow">🎧 ${j.duration}</span><span class="meta-item green">KES ${j.price}</span><span class="meta-item purple">Cost: ${j.minutesDeducted||10} min deducted</span></div>
+    <div class="deadline-bar"><div class="deadline-fill" style="width:${percent}%;background:${fillColor}"></div></div>
+    <small style="color:#6b7280;font-size:9px;margin-top:6px;display:block">Deadline: ${new Date(j.deadline).toLocaleString()} • ${expired?'LOCKED - Cannot submit after deadline':left+' left'}</small>
+    ${j.audioUrl?`<audio controls src="${j.audioUrl}" style="width:100%;margin-top:12px;height:40px;border-radius:12px"></audio>`:''}
+    <textarea id="txt_${j.id}" placeholder="Type professional transcription here... min 30 chars, speaker labels, timestamps..." ${expired?'disabled':''}>${j.draft||''}</textarea>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px"><button class="btn btn-save" onclick="saveDraft('${j.id}')" ${expired?'disabled':''}>💾 SAVE DRAFT</button><button class="btn btn-submit" onclick="submitJob('${j.id}')" ${expired?'disabled':''}>${expired?'🔒 LOCKED - EXPIRED':'📤 SUBMIT FOR REVIEW'}</button></div>
+    ${expired?`<div style="margin-top:10px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:10px;text-align:center"><small style="color:#f87171;font-weight:800">🔒 Deadline reached - Task locked - Cannot submit</small></div>`:''}
+   </div>`;
+  }).join('');
+ }else if(tab==='pd'){
+  if(!pd.length) html=`<div style="text-align:center;padding:60px 20px"><div style="width:80px;height:80px;background:linear-gradient(135deg,rgba(250,204,21,0.15),rgba(245,158,11,0.08));border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto">⏳</div><b style="margin-top:16px;display:block">No pending submissions</b><small style="color:#6b7280">Submit work from My Tasks - Attractive pending card appears</small></div>`;
+  else html=pd.map(j=>`
+   <div class="card" style="border-color:rgba(250,204,21,0.2)">
+    <div style="display:flex;justify-content:space-between;align-items:start"><div><div class="card-title">⏳ ${j.jobTitle||j.title}</div><small style="color:#9ca3af">Submitted: ${new Date(j.submittedAt).toLocaleString()}</small></div><span class="price-tag" style="background:linear-gradient(135deg,#facc15,#f59e0b)">PENDING</span></div>
+    <div class="pending-card"><div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;background:linear-gradient(135deg,#facc15,#f59e0b);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px">⏳</div><div><b style="font-size:12px">Awaiting Admin Review</b><br><small style="color:#9ca3af">Your transcription is being reviewed in admintranscription.html</small><br><small style="color:#facc15;font-weight:800">KES ${j.price} will be credited if approved</small></div></div><div style="margin-top:12px;background:rgba(0,0,0,0.3);border-radius:12px;padding:12px"><small style="color:#a78bfa;font-weight:800">YOUR TRANSCRIPTION:</small><div style="font-size:11px;margin-top:6px;color:#d1d5db;line-height:1.6">${(j.content||'').substring(0,400)}${(j.content||'').length>400?'...':''}</div></div></div>
+   </div>
+  `).join('');
+ }
+ else if(tab==='ap'){
+  if(!ap.length) html=`<div style="text-align:center;padding:60px 20px"><div style="width:80px;height:80px;background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(16,185,129,0.08));border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto">✅</div><b style="margin-top:16px;display:block">No approved yet</b><small style="color:#6b7280">When admin approves in admintranscription.html, attractive approval card with KES credited appears</small></div>`;
+  else html=ap.map(j=>`
+   <div class="card" style="border-color:rgba(34,197,94,0.25)">
+    <div style="display:flex;justify-content:space-between;align-items:start"><div><div class="card-title" style="color:#4ade80">✅ ${j.jobTitle||j.title} - Approved</div><small style="color:#9ca3af">Approved: ${new Date(j.approvedAt||j.submittedAt).toLocaleString()} • KES ${j.price} credited</small></div><div class="price-tag" style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff">+KES ${j.price}</div></div>
+    <div class="approval-card"><div style="display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 15px rgba(34,197,94,0.3)">🎉</div><div><b style="color:#4ade80;font-size:13px">Approved with Excellent Feedback!</b><br><small style="color:#bbf7d0;font-size:10px">KES ${j.price} credited to dashboard instantly • Firebase live</small></div></div><div style="margin-top:14px;background:rgba(0,0,0,0.25);border:1px solid rgba(34,197,94,0.15);border-radius:14px;padding:12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="width:28px;height:28px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:12px">👨‍💼</div><div><small style="color:#4ade80;font-weight:800;font-size:9px;letter-spacing:1px">ADMIN FEEDBACK • Positive</small><br><b style="font-size:11px">Client Review</b></div></div><div style="font-size:11px;color:#bbf7d0;line-height:1.7;font-style:italic">"${j.feedback||'Excellent work! Your transcription was accurate, well formatted and delivered on time. Approved. Keep up the great work! KES '+j.price+' credited.'}"</div><div style="margin-top:8px;display:flex;gap:4px"><span style="background:rgba(34,197,94,0.15);padding:3px 8px;border-radius:99px;font-size:8px;color:#4ade80">⭐⭐⭐⭐⭐ Excellent</span><span style="background:rgba(34,197,94,0.15);padding:3px 8px;border-radius:99px;font-size:8px;color:#4ade80">✅ Accurate</span><span style="background:rgba(34,197,94,0.15);padding:3px 8px;border-radius:99px;font-size:8px;color:#4ade80">⏰ On Time</span></div></div></div>
+   </div>
+  `).join('');
+ }
+ else{
+  if(!rj.length) html=`<div style="text-align:center;padding:60px 20px"><div style="width:80px;height:80px;background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(220,38,38,0.08));border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto">❌</div><b style="margin-top:16px;display:block">No rejected</b><small style="color:#6b7280">If rejected, attractive feedback card appears here</small></div>`;
+  else html=rj.map(j=>`
+   <div class="card" style="border-color:rgba(239,68,68,0.25)">
+    <div style="display:flex;justify-content:space-between;align-items:start"><div><div class="card-title" style="color:#f87171">❌ ${j.jobTitle||j.title} - Rejected</div><small style="color:#9ca3af">Rejected: ${new Date(j.rejectedAt||j.submittedAt).toLocaleString()} • No payment</small></div><div class="price-tag" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff">REJECTED</div></div>
+    <div class="rejection-card"><div style="display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 15px rgba(239,68,68,0.3)">💬</div><div><b style="color:#f87171;font-size:13px">Feedback from Admin</b><br><small style="color:#fecaca;font-size:10px">Please improve based on feedback • No KES credited</small></div></div><div style="margin-top:14px;background:rgba(0,0,0,0.25);border:1px solid rgba(239,68,68,0.15);border-radius:14px;padding:12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="width:28px;height:28px;background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:12px">👨‍💼</div><div><small style="color:#f87171;font-weight:800;font-size:9px;letter-spacing:1px">ADMIN FEEDBACK • Needs Improvement</small><br><b style="font-size:11px">Client Review</b></div></div><div style="font-size:11px;color:#fecaca;line-height:1.7;font-style:italic">"${j.feedback||'Rejected - Please improve accuracy, add speaker labels and timestamps. Try again.'}"</div><div style="margin-top:10px;background:rgba(0,0,0,0.2);border-radius:10px;padding:8px"><small style="color:#f87171;font-weight:800;font-size:9px">💡 HOW TO IMPROVE:</small><ul style="font-size:10px;color:#fecaca;margin-top:4px;padding-left:16px;line-height:1.6"><li>Check accuracy & spelling</li><li>Add speaker labels (Speaker 1, Speaker 2)</li><li>Include timestamps</li><li>Proofread before submit</li></ul></div></div></div>
+   </div>
+  `).join('');
+ }
+ document.getElementById('content').innerHTML=html;
+}
+render();updateMinUI();
+
+// Auto-lock check every 30 sec - deadline reached cards lock
+setInterval(()=>{ if(tab==='my') render(); },30000);
+</script>
+</body>
+  </html>
