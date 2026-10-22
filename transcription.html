@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES - Professional Transcription</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif}
+body{background:#05050a;color:#fff;min-height:100vh;padding:0 0 100px;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 20% 30%,rgba(168,85,247,0.15),transparent 40%),radial-gradient(circle at 80% 70%,rgba(250,204,21,0.12),transparent 40%),radial-gradient(circle at 50% 50%,rgba(34,197,94,0.08),transparent 50%);pointer-events:none;z-index:-1}
+.topbar{max-width:680px;margin:0 auto;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:20;background:rgba(5,5,10,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06)}
+.back{width:40px;height:40px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:18px}
+.wallet-section{max-width:680px;margin:16px auto 8px;padding:0 4px}
+.wallet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.wallet-card-m{background:linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.03));border:1px solid rgba(255,255,255,0.10);border-radius:16px;padding:12px;position:relative;overflow:hidden;backdrop-filter:blur(12px);box-shadow:0 6px 18px rgba(0,0,0,0.25);transition:0.35s;min-height:86px;display:flex;flex-direction:column;justify-content:space-between}
+.wallet-card-m:hover{transform:translateY(-3px);border-color:rgba(250,204,21,0.35);box-shadow:0 12px 30px rgba(0,0,0,0.4),0 0 20px rgba(250,204,21,0.12)}
+.card-balance{grid-column:span 3;background:radial-gradient(120% 120% at 0% 0%,#3d2a0a 0%,#1a160a 45%,#1a102a 100%);border:1px solid rgba(250,204,21,0.45);min-height:92px;box-shadow:0 10px 32px rgba(250,204,21,0.18)}
+.card-icon{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;border:1px solid rgba(255,255,255,0.12)}
+.c-bal{background:linear-gradient(135deg,#facc15,#f59e0b)} .c-earn{background:linear-gradient(135deg,#22c55e,#16a34a)} .c-with{background:linear-gradient(135deg,#f59e0b,#d97706)} .c-task{background:linear-gradient(135deg,#a855f7,#7c3aed)} .c-prog{background:linear-gradient(135deg,#3b82f6,#2563eb)} .c-appr{background:linear-gradient(135deg,#22c55e,#15803d)}
+.card-top{display:flex;justify-content:space-between;align-items:center}
+.card-label{font-size:7.5px;color:#9ca3af;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;margin-top:8px;display:block}
+.card-value{font-size:13px;font-weight:1000;color:#fff;margin-top:3px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-value.big{font-size:23px;background:linear-gradient(135deg,#fff 10%,#facc15 50%,#fbbf24 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card-value.green{color:#4ade80} .card-value.gold{color:#fbbf24} .card-value.blue{color:#60a5fa}
+.btn-withdraw-m{padding:7px 16px;border-radius:99px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-weight:900;font-size:9px;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(34,197,94,0.35)}
+.kes-mini{background:rgba(250,204,21,0.14);border:1px solid rgba(250,204,21,0.28);color:#facc15;font-size:6.5px;font-weight:900;padding:3px 7px;border-radius:99px}
+.wallet{max-width:680px;margin:14px auto;background:linear-gradient(135deg,rgba(26,16,46,0.9),rgba(21,21,40,0.9));border:1px solid rgba(168,85,247,0.25);border-radius:24px;padding:18px;position:relative;overflow:hidden;backdrop-filter:blur(12px);box-shadow:0 10px 40px rgba(168,85,247,0.15)}
+.wallet::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#facc15,transparent)}
+.min-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
+.min-box{background:linear-gradient(180deg,rgba(0,0,0,0.5),rgba(0,0,0,0.2));border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:14px;text-align:center;position:relative;overflow:hidden}
+.min-box::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.min-box.total::after{background:linear-gradient(90deg,#6b7280,#9ca3af)}.min-box.avail::after{background:linear-gradient(90deg,#22c55e,#4ade80)}.min-box.used::after{background:linear-gradient(90deg,#ef4444,#f87171)}
+.tabs{max-width:680px;margin:14px auto;display:flex;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:5px;gap:4px;overflow-x:auto}
+.tab{flex:1;min-width:90px;padding:11px 8px;border:none;border-radius:14px;background:transparent;color:#6b7280;font-weight:800;font-size:9px;cursor:pointer;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:3px}.tab b{font-size:13px;color:inherit}.tab.active{background:linear-gradient(135deg,#facc15,#f59e0b);color:#000;box-shadow:0 4px 20px rgba(250,204,21,0.3)}.tab.active b{color:#000}
+.wrap{max-width:680px;margin:0 auto;padding:0 14px}
+.card{position:relative;background:linear-gradient(180deg,rgba(30,30,50,0.9) 0%,rgba(21,21,40,0.9) 100%);border:1px solid rgba(255,255,255,0.07);border-radius:24px;padding:18px;margin-bottom:16px;overflow:hidden;backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.05)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#facc15,#f59e0b,#22c55e,#a855f7,#facc15);background-size:200% 100%;animation:line 3s linear infinite}
+@keyframes line{0%{background-position:0%}100%{background-position:200%}}
+.card-head{display:flex;justify-content:space-between;align-items:start;gap:12px}
+.card-title{font-family:'Space Grotesk';font-size:16px;font-weight:800;line-height:1.3;flex:1}
+.price-tag{background:linear-gradient(135deg,#facc15,#f59e0b);color:#000;padding:7px 14px;border-radius:99px;font-weight:900;font-size:13px;white-space:nowrap}
+.desc{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:12px;margin-top:12px;font-size:11px;color:#a1a1b5;line-height:1.7}
+.meta{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.meta-item{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:6px 10px;border-radius:99px;font-size:9px;font-weight:700;color:#9ca3af}
+.meta-item.yellow{background:rgba(250,204,21,0.1);color:#facc15;border-color:rgba(250,204,21,0.2)}
+.meta-item.green{background:rgba(34,197,94,0.1);color:#4ade80;border-color:rgba(34,197,94,0.2)}
+.meta-item.purple{background:rgba(168,85,247,0.1);color:#a78bfa;border-color:rgba(168,85,247,0.2)}
+.audio-wrap{background:linear-gradient(135deg,#000,#0a0a14);border:1px solid rgba(250,204,21,0.15);border-radius:16px;padding:14px;margin-top:14px;position:relative}
+.audio-wrap::before{content:'🔊';position:absolute;top:-8px;left:14px;background:#08080f;padding:2px 8px;border-radius:99px;font-size:10px}
+.deadline-bar{margin-top:14px;background:rgba(0,0,0,0.4);border-radius:99px;height:6px;overflow:hidden;border:1px solid rgba(255,255,255,0.05)}
+.deadline-fill{height:100%;border-radius:99px;transition:1s}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-weight:900;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:0.3s}
+.btn-accept{background:linear-gradient(135deg,#facc15,#f59e0b);color:#000}
+.btn-submit{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-save{background:rgba(255,255,255,0.06);color:#d1d5db;border:1px solid rgba(255,255,255,0.1)}
+.btn-buy{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff}
+.btn-dl{background:rgba(250,204,21,0.1);color:#facc15;border:1px solid rgba(250,204,21,0.25)}
+.btn-play{background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.1)}
+textarea{width:100%;background:rgba(0,0,0,0.4);border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;color:#fff;padding:14px;font-size:12px;min-height:130px;margin-top:12px;outline:none}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(22px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}.modal-overlay.show{display:flex}
+.modal{width:100%;max-width:440px;border-radius:28px;padding:24px;background:linear-gradient(180deg,#1e1e32,#151528);border:1px solid rgba(255,255,255,0.08);max-height:92vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,0.6);animation:pop 0.45s cubic-bezier(0.34,1.56,0.64,1);position:relative}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#facc15,transparent)}
+@keyframes pop{0%{transform:scale(0.85) translateY(30px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(150px);background:linear-gradient(135deg,#1e1e32,#151528);border:1px solid rgba(250,204,21,0.3);padding:14px 20px;border-radius:99px;z-index:200;transition:0.5s cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,0.5)}.toast.show{transform:translateX(-50%) translateY(0)}
+.approval-card{background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(16,185,129,0.08));border:1px solid rgba(34,197,94,0.25);border-radius:20px;padding:16px;margin-top:10px;position:relative}
+.approval-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,#22c55e,#10b981)}
+.rejection-card{background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(220,38,38,0.08));border:1px solid rgba(239,68,68,0.25);border-radius:20px;padding:16px;margin-top:10px;position:relative}
+.rejection-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,#ef4444,#dc2626)}
+.pending-card{background:linear-gradient(135deg,rgba(250,204,21,0.12),rgba(245,158,11,0.06));border:1px solid rgba(250,204,21,0.2);border-radius:20px;padding:16px;margin-top:10px;position:relative}
+.pending-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,#facc15,#f59e0b)}
+.pkg-grid{display:grid;gap:10px;margin-top:14px}.pkg-card{background:linear-gradient(135deg,rgba(26,26,46,0.8),rgba(21,21,40,0.8));border:1.5px solid rgba(255,255,255,0.06);border-radius:18px;padding:16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:0.3s}.pkg-card:hover{border-color:rgba(250,204,21,0.3);transform:translateY(-1px)}.pkg-card.selected{border-color:#facc15;background:linear-gradient(135deg,rgba(250,204,21,0.15),rgba(168,85,247,0.08));box-shadow:0 8px 25px rgba(250,204,21,0.2)}
+.input-gold{width:100%;background:rgba(0,0,0,0.45);border:1.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 14px;color:#fff;font-size:13px;outline:none;transition:0.3s;margin-top:10px}
+.input-gold:focus{border-color:#facc15;background:rgba(0,0,0,0.65);box-shadow:0 0 0 3px rgba(250,204,21,0.15)}
+.count-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.count-box{background:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(0,0,0,0.3));border:1px solid rgba(250,204,21,0.25);border-radius:14px;padding:12px;text-align:center}
+.count-box b{font-size:22px;color:#fff;display:block;font-weight:800}
+.count-box small{font-size:8px;color:#9ca3af;font-weight:800;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="topbar">
+<a class="back" href="dashboard.html">←</a>
+<div style="text-align:center"><div style="font-family:'Space Grotesk';font-weight:800;font-size:14px">🎙️ DIAMINES <span style="color:#facc15">JOBS</span></div><div style="font-size:7px;color:#6b7280;letter-spacing:2px;font-weight:800">PROFESSIONAL PLATFORM</div></div>
+<div style="width:40px"></div>
+</div>
+
+<div class="wallet-section" id="walletSection">
+<div class="wallet-grid">
+  <div class="wallet-card-m card-balance">
+    <div class="card-top"><div style="display:flex;align-items:center;gap:8px"><div class="card-icon c-bal">💎</div><span class="kes-mini">● LIVE</span></div><button class="btn-withdraw-m" onclick="openWithdraw()">💸 WITHDRAW</button></div>
+    <span class="card-label">AVAILABLE BALANCE</span><b class="card-value big">KES <span id="walletBalance">0</span></b>
+  </div>
+  <div class="wallet-card-m"><div class="card-top"><div class="card-icon c-earn">📈</div><span class="kes-mini" style="color:#4ade80;background:rgba(34,197,94,0.12)">+ EARNED</span></div><span class="card-label">TOTAL EARNED</span><b class="card-value green" id="statEarned">KES 0</b></div>
+  <div class="wallet-card-m"><div class="card-top"><div class="card-icon c-with">💳</div><span class="kes-mini" style="color:#fbbf24;background:rgba(245,158,11,0.12)">OUT</span></div><span class="card-label">WITHDRAWN</span><b class="card-value gold" id="statWithdrawn">KES 0</b></div>
+  <div class="wallet-card-m"><div class="card-top"><div class="card-icon c-task">📚</div><span class="kes-mini" style="color:#a78bfa;background:rgba(168,85,247,0.12)">DONE</span></div><span class="card-label">TASKS DONE</span><b class="card-value" id="statDone">0</b></div>
+  <div class="wallet-card-m"><div class="card-top"><div class="card-icon c-prog">⚡</div><span class="kes-mini" style="color:#60a5fa;background:rgba(59,130,246,0.12)">ACTIVE</span></div><span class="card-label">IN PROGRESS</span><b class="card-value blue" id="statProgress">0</b></div>
+  <div class="wallet-card-m"><div class="card-top"><div class="card-icon c-appr">✅</div><span class="kes-mini" style="color:#4ade80;background:rgba(34,197,94,0.12)">OK</span></div><span class="card-label">APPROVED</span><b class="card-value green" id="statApproved">0</b></div>
+</div>
+</div>
+
+<div class="wallet">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:48px;height:48px;background:linear-gradient(135deg,#a855f7,#7c3aed);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px">⏱️</div><div><div style="font-size:8px;color:#a78bfa;font-weight:800;letter-spacing:1px">BIDDING BALANCE</div><b style="font-size:13px;font-family:'Space Grotesk'">Minutes Wallet</b></div></div>
+<button class="btn btn-buy" style="width:auto;padding:10px 18px;font-size:10px" onclick="openBuyMinutes()">💳 BUY MIN</button>
+</div>
+<div class="min-grid">
+<div class="min-box total"><small style="color:#9ca3af;font-size:8px;font-weight:800">TOTAL</small><b id="minTotal" style="font-size:20px;display:block;margin-top:4px">0</b><small style="color:#6b7280;font-size:8px">min</small></div>
+<div class="min-box avail"><small style="color:#4ade80;font-size:8px;font-weight:800">AVAILABLE</small><b id="minAvail" style="font-size:20px;display:block;margin-top:4px;color:#4ade80">0</b><small style="color:#6b7280;font-size:8px">min</small></div>
+<div class="min-box used"><small style="color:#f87171;font-size:8px;font-weight:800">USED</small><b id="minUsed" style="font-size:20px;display:block;margin-top:4px;color:#f87171">0</b><small style="color:#6b7280;font-size:8px">min</small></div>
+</div>
+</div>
+
+<div class="tabs">
+<button class="tab active" id="tAv" onclick="switchTab('av')">🌍<span>AVAILABLE</span><b id="cAv">0</b></button>
+<button class="tab" id="tMy" onclick="switchTab('my')">🎧<span>MY TASKS</span><b id="cMy">0</b></button>
+<button class="tab" id="tPd" onclick="switchTab('pd')">⏳<span>PENDING</span><b id="cPd">0</b></button>
+<button class="tab" id="tAp" onclick="switchTab('ap')">✅<span>APPROVED</span><b id="cAp">0</b></button>
+<button class="tab" id="tRj" onclick="switchTab('rj')">❌<span>REJECTED</span><b id="cRj">0</b></button>
+</div>
+
+<div class="wrap" id="content"></div>
+
+<div class="modal-overlay" id="mBuyMinutes" onclick="if(event.target===this)closeM('mBuyMinutes')"><div class="modal" style="border-color:#facc15"><div style="text-align:center"><div style="width:64px;height:64px;background:linear-gradient(135deg,#facc15,#f59e0b);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto">💳</div><h3 style="color:#facc15;margin-top:12px;font-family:'Space Grotesk';font-size:18px">Buy Minutes</h3></div><div class="min-grid" style="margin-top:16px"><div class="min-box total"><small>TOTAL</small><b id="mTotal">0</b></div><div class="min-box avail"><small>AVAIL</small><b id="mAvail" style="color:#4ade80">0</b></div><div class="min-box used"><small>USED</small><b id="mUsed" style="color:#f87171">0</b></div></div>
+<div class="pkg-grid"><div class="pkg-card" id="pkg16" onclick="selectMinutesPkg(16,200)"><div><b style="font-size:13px">16 Minutes</b></div><b style="color:#facc15">KES 200</b></div><div class="pkg-card" id="pkg60" onclick="selectMinutesPkg(60,680)"><div><b style="font-size:13px">60 Minutes 🔥 Popular</b></div><b style="color:#facc15">KES 680</b></div><div class="pkg-card" id="pkg120" onclick="selectMinutesPkg(120,1035)"><div><b style="font-size:13px">120 Minutes 💎 Pro</b></div><b style="color:#facc15">KES 1035</b></div></div>
+<div id="paySection" style="display:none;margin-top:18px;background:linear-gradient(135deg,rgba(0,0,0,0.5),rgba(15,15,30,0.6));border:1px solid rgba(250,204,21,0.2);border-radius:20px;padding:18px"><div style="text-align:center"><b style="font-size:28px;color:#facc15;font-family:'Space Grotesk'">0141416120</b><div style="margin-top:8px;display:flex;gap:8px;justify-content:center"><span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.2);padding:5px 12px;border-radius:99px;font-size:10px;color:#4ade80">Pay: <b id="payAmt">KES 0</b></span><span style="background:rgba(168,85,247,0.12);padding:5px 12px;border-radius:99px;font-size:10px;color:#a78bfa">Get: <b id="payMin">0 min</b></span></div></div><input id="mpesaCode" class="input-gold" placeholder="M-PESA CODE"><input id="mpesaName" class="input-gold" placeholder="M-PESA FULL NAME"><input id="mpesaAmount" class="input-gold" placeholder="Amount Sent" type="number"><button class="btn btn-buy" style="margin-top:16px;background:linear-gradient(135deg,#facc15,#f59e0b);color:#000" onclick="submitMinutesPurchase()">📤 SUBMIT REQUEST</button></div><button class="btn btn-save" style="margin-top:14px" onclick="closeM('mBuyMinutes')">Close</button></div></div>
+
+<div class="modal-overlay" id="mWithdraw" onclick="if(event.target===this)closeM('mWithdraw')"><div class="modal" style="border-color:#22c55e"><div style="text-align:center"><div style="width:64px;height:64px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto">💸</div><h3 style="color:#4ade80;margin-top:12px;font-family:'Space Grotesk';font-size:18px">Withdraw Earnings</h3><p style="font-size:10px;color:#9ca3af;margin-top:4px">Minimum KES 400</p></div><div style="margin-top:16px;background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(0,0,0,0.3));border:1px solid rgba(34,197,94,0.2);border-radius:16px;padding:14px;text-align:center"><small style="color:#9ca3af;font-size:9px">AVAILABLE</small><b id="wBalDisplay" style="display:block;font-size:24px;color:#4ade80;margin-top:4px">KES 0</b><small style="color:#fbbf24;font-size:9px">Min: KES 400</small></div><input id="wAmount" class="input-gold" type="number" placeholder="Amount e.g. 500 (Min 400)"><input id="wPhone" class="input-gold" placeholder="M-PESA Phone"><input id="wName" class="input-gold" placeholder="M-PESA Full Name"><button class="btn btn-submit" style="margin-top:14px" onclick="submitWithdraw()">💸 REQUEST WITHDRAWAL</button><button class="btn btn-save" style="margin-top:10px" onclick="closeM('mWithdraw')">Cancel</button></div></div>
+
+<div class="modal-overlay" id="mWithdrawClosed" onclick="if(event.target===this)closeM('mWithdrawClosed')"><div class="modal" style="border-color:rgba(250,204,21,0.4)"><div style="text-align:center"><div style="width:70px;height:70px;background:linear-gradient(135deg,#facc15,#f59e0b);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto">⏰</div><h3 style="color:#facc15;margin-top:12px;font-family:'Space Grotesk';font-size:18px">Withdrawal Schedule</h3><p style="font-size:11px;color:#e5e7eb;margin-top:8px">Withdrawals are available on <b style="color:#facc15">Fridays</b></p><div style="background:linear-gradient(135deg,rgba(250,204,21,0.12),rgba(0,0,0,0.3));border:1px solid rgba(250,204,21,0.25);border-radius:16px;padding:14px;margin-top:14px"><small style="color:#facc15;font-weight:900;letter-spacing:1px;font-size:9px">TIME REMAINING TO WITHDRAWAL</small><div class="count-grid"><div class="count-box"><b id="cdDays">00</b><small>DAYS</small></div><div class="count-box"><b id="cdHours">00</b><small>HOURS</small></div><div class="count-box"><b id="cdMins">00</b><small>MINS</small></div><div class="count-box"><b id="cdSecs">00</b><small>SECS</small></div></div><div style="margin-top:10px;background:rgba(0,0,0,0.3);border-radius:99px;padding:8px 12px;display:flex;justify-content:center;align-items:center;gap:6px"><span style="width:8px;height:8px;background:#22c55e;border-radius:50%;display:inline-block"></span><small id="cdText" style="color:#4ade80;font-weight:800;font-size:10px">Calculating...</small></div></div><button class="btn btn-save" style="margin-top:14px" onclick="closeM('mWithdrawClosed')">Okay, I Will Wait</button></div></div></div>
+
+<div class="modal-overlay" id="mAccept" onclick="if(event.target===this)closeM('mAccept')"><div class="modal" style="border-color:#facc15"><div style="text-align:center"><div style="width:60px;height:60px;background:linear-gradient(135deg,#facc15,#f59e0b);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto">🎙️</div><h3 id="maTitle" style="color:#facc15;margin-top:12px;font-family:'Space Grotesk'"></h3></div><div class="min-grid" style="margin-top:16px"><div class="min-box"><small>REWARD</small><b id="maPrice" style="color:#4ade80;font-size:14px"></b></div><div class="min-box"><small>DEADLINE</small><b id="maTime" style="color:#facc15;font-size:14px"></b></div><div class="min-box"><small>COST</small><b id="maCost" style="color:#a78bfa;font-size:14px"></b></div></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-save" style="flex:1" onclick="closeM('mAccept')">CANCEL</button><button class="btn btn-accept" style="flex:1" onclick="doAccept()">✅ ACCEPT & DEDUCT</button></div></div></div>
+
+<div class="modal-overlay" id="mSuccess"><div class="modal" style="border-color:#22c55e"><div style="text-align:center"><div style="width:70px;height:70px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto">🎉</div><h3 style="color:#4ade80;margin-top:12px;font-family:'Space Grotesk'">Task Accepted!</h3></div><div id="mSuccessTxt" style="margin-top:14px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15);border-radius:14px;padding:12px;font-size:11px;text-align:center"></div><button class="btn btn-submit" style="margin-top:16px" onclick="closeM('mSuccess');switchTab('my')">GO TO MY TASKS →</button></div></div>
+
+<div class="modal-overlay" id="mSub"><div class="modal" style="border-color:#22c55e"><div style="text-align:center"><div style="width:70px;height:70px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto">📤</div><h3 style="color:#4ade80;margin-top:12px">Submitted!</h3><b id="mSubPrice" style="font-size:26px;color:#facc15;display:block;margin-top:8px"></b></div><button class="btn btn-submit" style="margin-top:16px" onclick="closeM('mSub');switchTab('pd')">VIEW PENDING</button></div></div>
+
+<div class="toast" id="toast"><span id="toastIcon">✨</span><div><b id="toastT">Saved</b><br><small id="toastS" style="color:#9ca3af;font-size:10px">Safe</small></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, onSnapshot, addDoc, setDoc, updateDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig={apiKey:"AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",authDomain:"diamines-agencies.firebaseapp.com",projectId:"diamines-agencies",storageBucket:"diamines-agencies.firebasestorage.app",messagingSenderId:"438413306857",appId:"1:438413306857:web:3c7f736794be6a49b0f978"};
+const app=initializeApp(firebaseConfig); const db=getFirestore(app);
+let EMAIL='guest@diamines.com';
+try{let c=JSON.parse(localStorage.getItem('DIAMINES_CURRENT')||'null'); if(c&&c.email) EMAIL=c.email.toLowerCase().trim();}catch{}
+try{let e2=localStorage.getItem('userEmail')||localStorage.getItem('email'); if(e2) EMAIL=e2.toLowerCase().trim();}catch{}
+const KEY_ALL='DIAMINES_TRANS_ALL_JOBS_'+EMAIL;
+const KEY_MY='DIAMINES_TRANS_MY_'+EMAIL;
+const KEY_TOTAL='DIAMINES_TRANS_TOTAL_MINUTES_'+EMAIL;
+const KEY_USED='DIAMINES_TRANS_USED_MINUTES_'+EMAIL;
+const KEY_WALLET_CACHE='DIAMINES_TRANS_WALLET_CACHE_'+EMAIL;
+function getAll(){try{return JSON.parse(localStorage.getItem(KEY_ALL)||'[]')}catch{return[]}}
+function getMy(){try{return JSON.parse(localStorage.getItem(KEY_MY)||'[]')}catch{return[]}}
+function getTotal(){let v=parseInt(localStorage.getItem(KEY_TOTAL)||'0');return isNaN(v)?0:v;}
+function getUsed(){let v=parseInt(localStorage.getItem(KEY_USED)||'0');return isNaN(v)?0:v;}
+function getAvailable(){return Math.max(0,getTotal()-getUsed());}
+function setAll(v){localStorage.setItem(KEY_ALL,JSON.stringify(v));}
+function setMy(v){localStorage.setItem(KEY_MY,JSON.stringify(v));}
+let totalWithdrawn=0; let walletOverride=null; let currentBalance=0;
+let firebaseSubs=[];
+
+function getNairobiTime(){
+ let now=new Date();
+ let utc=now.getTime()+(now.getTimezoneOffset()*60000);
+ return new Date(utc+(3*3600000));
+}
+function isWithdrawalOpen(){
+ let nairobi=getNairobiTime();
+ let day=nairobi.getDay();
+ if(day!==5) return false;
+ let totalMins=nairobi.getHours()*60+nairobi.getMinutes();
+ return totalMins>=720 && totalMins<750;
+}
+function startCountdown(){
+ if(window._cdInt) clearInterval(window._cdInt);
+ function upd(){
+  let tmp=getNairobiTime();
+  let r=new Date(tmp);
+  let d=r.getDay();
+  let diff=(5-d+7)%7;
+  r.setDate(r.getDate()+diff);
+  r.setHours(12,0,0,0);
+  if(diff===0 && (tmp.getHours()*60+tmp.getMinutes())>=750){
+   r.setDate(r.getDate()+7);
+  }
+  let diffMs=r.getTime()-tmp.getTime();
+  let total=Math.max(0,Math.floor(diffMs/1000));
+  let days=Math.floor(total/86400);
+  let hours=Math.floor((total%86400)/3600);
+  let mins=Math.floor((total%3600)/60);
+  let secs=total%60;
+  let e1=document.getElementById('cdDays'); if(e1) e1.innerText=String(days).padStart(2,'0');
+  let e2=document.getElementById('cdHours'); if(e2) e2.innerText=String(hours).padStart(2,'0');
+  let e3=document.getElementById('cdMins'); if(e3) e3.innerText=String(mins).padStart(2,'0');
+  let e4=document.getElementById('cdSecs'); if(e4) e4.innerText=String(secs).padStart(2,'0');
+  let txt=document.getElementById('cdText');
+  if(txt){
+   if(days>0) txt.innerText=days+' day'+(days>1?'s':'')+' '+hours+'h remaining';
+   else if(hours>0) txt.innerText=hours+'h '+mins+'m remaining';
+   else txt.innerText=mins+'m '+secs+'s remaining';
+  }
+ }
+ upd();
+ window._cdInt=setInterval(upd,1000);
+}
+
+try{let cached=JSON.parse(localStorage.getItem(KEY_WALLET_CACHE)||'null'); if(cached){ renderWallet(cached.balance,cached.earned,cached.withdrawn,cached.done,cached.progress,cached.approved); }}catch{}
+function renderWallet(bal,earn,wd,done,prog,appr){
+ document.getElementById('walletBalance').innerText=Number(bal||0).toLocaleString();
+ document.getElementById('statEarned').innerText='KES '+Number(earn||0).toLocaleString();
+ document.getElementById('statWithdrawn').innerText='KES '+Number(wd||0).toLocaleString();
+ document.getElementById('statDone').innerText=done||0;
+ document.getElementById('statProgress').innerText=prog||0;
+ document.getElementById('statApproved').innerText=appr||0;
+ currentBalance=bal||0;
+ let wb=document.getElementById('wBalDisplay'); if(wb) wb.innerText='KES '+Number(bal||0).toLocaleString();
+}
+function doCalcWallet(){
+ let approved=firebaseSubs.filter(x=>x.status==='approved');
+ let rejected=firebaseSubs.filter(x=>x.status==='rejected');
+ let pending=firebaseSubs.filter(x=>x.status==='pending');
+ let approvedCount=approved.length;
+ let rejectedCount=rejected.length;
+ let pendingCount=pending.length;
+ let tasksDone=approvedCount+rejectedCount+pendingCount;
+ let my=getMy();
+ let inProgress=my.length+pendingCount;
+ let earn=approved.reduce((s,j)=>s+parseInt(j.price||0),0);
+ let bal=Math.max(0,earn-totalWithdrawn);
+ if(walletOverride && walletOverride.isOverride){
+   renderWallet(walletOverride.balance,walletOverride.earned,walletOverride.withdrawn,walletOverride.done,walletOverride.progress,walletOverride.approved);
+   localStorage.setItem(KEY_WALLET_CACHE,JSON.stringify({...walletOverride}));
+   return;
+ }
+ renderWallet(bal,earn,totalWithdrawn,tasksDone,inProgress,approvedCount);
+ localStorage.setItem(KEY_WALLET_CACHE,JSON.stringify({balance:bal,earned:earn,withdrawn:totalWithdrawn,done:tasksDone,progress:inProgress,approved:approvedCount,isOverride:false}));
+}
+function updateMinUI(){
+ let t=getTotal(),u=getUsed(),a=getAvailable();
+ let elT=document.getElementById('minTotal'); if(elT) elT.innerText=t;
+ let elA=document.getElementById('minAvail'); if(elA) elA.innerText=a;
+ let elU=document.getElementById('minUsed'); if(elU) elU.innerText=u;
+ let mt=document.getElementById('mTotal'); if(mt) mt.innerText=t+' min';
+ let ma=document.getElementById('mAvail'); if(ma) ma.innerText=a+' min';
+ let mu=document.getElementById('mUsed'); if(mu) mu.innerText=u+' min';
+}
+updateMinUI(); doCalcWallet();
+
+// ✅ LINKED TO BOTH WALLET AND MINUTES - INSTANT ON ALL DEVICES
+onSnapshot(doc(db,'transcriptionWalletOverrides',EMAIL.toLowerCase()),snap=>{
+ if(snap.exists()){
+  walletOverride=snap.data();
+  renderWallet(walletOverride.balance,walletOverride.earned,walletOverride.withdrawn,walletOverride.done,walletOverride.progress,walletOverride.approved);
+  localStorage.setItem(KEY_WALLET_CACHE,JSON.stringify(walletOverride));
+ }else{
+  walletOverride=null;
+  localStorage.removeItem(KEY_WALLET_CACHE);
+ }
+ doCalcWallet();
+});
+
+// ✅ FIXED - 3 MINUTES CARDS - LINKED TO YOUR ADMIN FILE - userMinutes - INSTANT
+onSnapshot(doc(db,'transcriptionUserMinutes',EMAIL.toLowerCase()),snap=>{
+ if(snap.exists()){
+  let d=snap.data();
+  let total = d.total?? d.totalMinutes?? 0;
+  let used = d.used?? d.usedMinutes?? 0;
+  total=parseInt(total)||0; used=parseInt(used)||0;
+  localStorage.setItem(KEY_TOTAL,String(total));
+  localStorage.setItem(KEY_USED,String(used));
+  updateMinUI();
+ }
+});
+onSnapshot(doc(db,'userMinutes',EMAIL.toLowerCase()),snap=>{
+ if(snap.exists()){
+  let d=snap.data();
+  let total = d.total?? d.totalMinutes?? 0;
+  let used = d.used?? d.usedMinutes?? 0;
+  total=parseInt(total)||0; used=parseInt(used)||0;
+  localStorage.setItem(KEY_TOTAL,String(total));
+  localStorage.setItem(KEY_USED,String(used));
+  updateMinUI();
+ }
+});
+
+onSnapshot(query(collection(db,'withdrawals'),where('email','==',EMAIL.toLowerCase())),snap=>{
+ totalWithdrawn=0;
+ snap.forEach(d=>{
+  let data=d.data();
+  if(data.status==='approved'){
+   if(!data.type || data.type==='transcription' || data.source==='transcription'){
+    totalWithdrawn+=parseInt(data.amount||0);
+   }
+  }
+ });
+ doCalcWallet();
+});
+
+let allJobsRaw=[]; 
+onSnapshot(collection(db,'transcriptionJobs'),snap=>{ allJobsRaw=[]; snap.forEach(s=>{ allJobsRaw.push({id:s.id,...s.data()}); }); allJobsRaw.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)); let availableJobs = allJobsRaw.filter(j=>!j.taken ); localStorage.setItem(KEY_ALL,JSON.stringify(availableJobs)); render(); });
+
+onSnapshot(collection(db,'transcriptionSubmissions'),snap=>{
+ firebaseSubs=[]; 
+ snap.forEach(s=>{ 
+  let data=s.data(); 
+  if((data.userEmail||data.email||'').toLowerCase()===EMAIL.toLowerCase()){
+   firebaseSubs.push({id:s.id,...data});
+  } 
+ }); 
+ doCalcWallet(); 
+ render();
+});
+
+let tab='av',curId=null,selectedPkg={minutes:0,amount:0};
+window.switchTab=function(t){tab=t;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById('t'+(t==='av'?'Av':t==='my'?'My':t==='pd'?'Pd':t==='ap'?'Ap':'Rj')).classList.add('active');render();}
+window.closeM=function(id){document.getElementById(id).classList.remove('show');}
+window.toast=function(t,s,icon='✨'){document.getElementById('toastT').innerText=t;document.getElementById('toastS').innerText=s;document.getElementById('toastIcon').innerText=icon;let el=document.getElementById('toast');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3500);}
+window.openBuyMinutes=function(){updateMinUI();document.getElementById('mBuyMinutes').classList.add('show');document.getElementById('paySection').style.display='none';document.querySelectorAll('.pkg-card').forEach(c=>c.classList.remove('selected'));}
+window.openWithdraw=function(){
+ if(!isWithdrawalOpen()){
+  startCountdown();
+  document.getElementById('mWithdrawClosed').classList.add('show');
+  return;
+ }
+ let bal=currentBalance;
+ if(bal<400){ toast('Minimum KES 400','You have KES '+bal,'❌'); return; }
+ document.getElementById('wBalDisplay').innerText='KES '+Number(bal).toLocaleString();
+ document.getElementById('mWithdraw').classList.add('show');
+}
+window.selectMinutesPkg=function(min,amt){selectedPkg={minutes:min,amount:amt};document.querySelectorAll('.pkg-card').forEach(c=>c.classList.remove('selected'));document.getElementById('pkg'+min).classList.add('selected');document.getElementById('payAmt').innerText='KES '+amt;document.getElementById('payMin').innerText=min+' min';document.getElementById('paySection').style.display='block';}
+window.submitMinutesPurchase=async function(){
+ let code=document.getElementById('mpesaCode').value.trim(); let name=document.getElementById('mpesaName').value.trim(); let amt=document.getElementById('mpesaAmount').value.trim();
+ if(!code||!name||!amt){toast('Fill all fields','Enter M-Pesa details','⚠️');return;}
+ if(selectedPkg.amount==0){toast('Select package','Choose minutes','⚠️');return;}
+ try{
+  await addDoc(collection(db,'minutesDeposits'),{email:EMAIL,minutes:selectedPkg.minutes,amount:parseInt(amt),mpesaCode:code,mpesaName:name,status:'pending',createdAt:Date.now(),type:'transcription'});
+  toast('Request sent','Admin will approve shortly','💳'); closeM('mBuyMinutes');
+  document.getElementById('mpesaCode').value='';document.getElementById('mpesaName').value='';document.getElementById('mpesaAmount').value='';
+ }catch(e){ toast('Error','Try again','❌'); }
+}
+window.submitWithdraw=async function(){
+ if(!isWithdrawalOpen()){
+  closeM('mWithdraw');
+  startCountdown();
+  document.getElementById('mWithdrawClosed').classList.add('show');
+  return;
+ }
+ let amount=parseInt(document.getElementById('wAmount').value.trim());
+ let phone=document.getElementById('wPhone').value.trim();
+ let name=document.getElementById('wName').value.trim();
+ if(!amount||!phone||!name){ toast('Fill all fields','Required','⚠️'); return; }
+ if(amount<400){ toast('Minimum KES 400','Enter at least 400','❌'); return; }
+ if(amount>currentBalance){ toast('Insufficient balance','You have KES '+currentBalance,'❌'); return; }
+ try{
+  await addDoc(collection(db,'withdrawals'),{
+    email:EMAIL, amount:amount, phone:phone, fullName:name, name:name, mpesaPhone:phone,
+    status:'pending', type:'transcription', source:'transcription', createdAt:Date.now()
+  });
+  toast('Withdraw requested','Sent to admin','💸');
+  closeM('mWithdraw');
+  document.getElementById('wAmount').value='';document.getElementById('wPhone').value='';document.getElementById('wName').value='';
+ }catch(e){ toast('Error','Try again','❌'); }
+}
+function getMinutesFromJob(j){if(j.minutesNeed) return parseInt(j.minutesNeed);let d=j.duration||'';let m=parseInt(String(d).replace(/[^0-9]/g,''));return isNaN(m)||m<=0?10:m;}
+function formatDeadline(dl){let left=Math.max(0,dl-Date.now());if(left<=0) return 'Expired';let h=Math.floor(left/3600000), m=Math.floor((left%3600000)/60000);return h+'h '+m+'m left';}
+function getDeadlinePercent(deadline){let total=24*3600000; let left=Math.max(0,deadline-Date.now()); return Math.max(0,Math.min(100,(left/total)*100));}
+function isExpired(deadline){return Date.now()>deadline;}
+window.downloadAudio=function(url,title){let clean=(title||'audio').replace(/[^a-z0-9]/gi,'_');let a=document.createElement('a');a.href=url;a.download=clean+'.mp3';document.body.appendChild(a);a.click();setTimeout(()=>document.body.removeChild(a),1000);}
+window.openAccept=function(id){let all=getAll();let j=all.find(x=>x.id===id);if(!j)return;let need=getMinutesFromJob(j);if(getAvailable()<need){toast('Not enough minutes','Need '+need+' min','⏱️');openBuyMinutes();return;}curId=id;document.getElementById('maTitle').innerText=j.title;document.getElementById('maPrice').innerText='KES '+(j.price||350);document.getElementById('maTime').innerText=(j.h||24)+'h';document.getElementById('maCost').innerText=need+' min';document.getElementById('mAccept').classList.add('show');}
+window.doAccept=async function(){
+ let all=getAll();let idx=all.findIndex(x=>x.id===curId);if(idx===-1)return;let job=all[idx];let need=getMinutesFromJob(job);
+ if(getAvailable()<need){toast('Insufficient minutes','Buy more','❌');return;}
+ try{let jobSnap=await getDoc(doc(db,'transcriptionJobs',curId)); if(jobSnap.exists() && jobSnap.data().taken){toast('Job taken','Taken by another','🚫');render();closeM('mAccept');return;}}catch(e){}
+ let newUsed=getUsed()+need; localStorage.setItem(KEY_USED,String(newUsed)); updateMinUI();
+ await setDoc(doc(db,'transcriptionUserMinutes',EMAIL.toLowerCase()),{email:EMAIL.toLowerCase(),total:getTotal(),used:newUsed,available:getAvailable(),totalMinutes:getTotal(),usedMinutes:newUsed,availableMinutes:getAvailable(),updated:Date.now()},{merge:true});
+ await setDoc(doc(db,'userMinutes',EMAIL.toLowerCase()),{email:EMAIL.toLowerCase(),total:getTotal(),used:newUsed,available:getAvailable(),avail:getAvailable(),updated:Date.now()},{merge:true});
+ try{ await updateDoc(doc(db,'transcriptionJobs',curId),{taken:true,takenBy:EMAIL.toLowerCase(),takenAt:Date.now()}); }catch(e){}
+ job.acceptedAt=Date.now();job.deadline=Date.now()+(job.h||24)*3600000;job.minutesDeducted=need;job.taken=true;job.takenBy=EMAIL.toLowerCase();
+ let my=getMy();my.push(job);setMy(my);all.splice(idx,1);setAll(all); closeM('mAccept');
+ document.getElementById('mSuccessTxt').innerHTML=`<b>${job.title}</b><br>KES ${job.price} • ${job.duration}`; document.getElementById('mSuccess').classList.add('show');render();toast('Job accepted!','Minutes deducted','🎉');
+};
+window.saveDraft=function(id){let t=document.getElementById('txt_'+id)?.value||'';let my=getMy();let f=my.find(x=>x.id===id);if(f){f.draft=t;setMy(my);toast('Draft saved','Safe','💾');}}
+window.submitJob=async function(id){
+ let my=getMy();let idx=my.findIndex(x=>x.id===id);if(idx===-1)return;let job=my[idx];
+ if(isExpired(job.deadline)){toast('Deadline expired','Locked','🔒');render();return;}
+ let txt=document.getElementById('txt_'+id).value.trim();if(txt.length<30){alert('Min 30 chars required');return;}
+ job.content=txt;job.submittedAt=Date.now();job.userEmail=EMAIL;
+ try{ await addDoc(collection(db,'transcriptionSubmissions'),{userEmail:EMAIL,email:EMAIL,jobId:job.id,jobTitle:job.title,title:job.title,price:job.price,duration:job.duration,h:job.h,level:job.level||'Easy',audioUrl:job.audioUrl||'',content:txt,status:'pending',submittedAt:Date.now(),minutesDeducted:job.minutesDeducted||10}); }catch(e){}
+ my.splice(idx,1);setMy(my);document.getElementById('mSubPrice').innerText='KES '+(job.price||350);document.getElementById('mSub').classList.add('show');render();
+}
+window.render=function(){
+ updateMinUI();
+ let all=getAll(),my=getMy();
+ let pd=firebaseSubs.filter(x=>x.status==='pending');
+ let ap=firebaseSubs.filter(x=>x.status==='approved');
+ let rj=firebaseSubs.filter(x=>x.status==='rejected');
+ document.getElementById('cAv').innerText=all.length;
+ document.getElementById('cMy').innerText=my.length;
+ document.getElementById('cPd').innerText=pd.length;
+ document.getElementById('cAp').innerText=ap.length;
+ document.getElementById('cRj').innerText=rj.length;
+ let html='';
+ if(tab==='av'){
+  if(!all.length) html=`<div style="text-align:center;padding:60px 20px">📭 No jobs</div>`;
+  else html=all.map(j=>{let need=getMinutesFromJob(j);let can=getAvailable()>=need;return `<div class="card"><div class="card-head"><div><div class="card-title">🎙️ ${j.title}</div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><span class="meta-item yellow">💰 KES ${j.price} Reward</span><span class="meta-item purple">📊 ${j.level||'Easy'} Level</span></div></div><div class="price-tag">KES ${j.price}</div></div><div class="desc">${j.desc||'Professional transcription task'}</div><div class="meta"><span class="meta-item">🎧 ${j.duration||'10 min'}</span><span class="meta-item">⏰ ${j.h||24}h</span><span class="meta-item ${can?'green':'red'}">⏱️ ${need} MIN</span></div>${j.audioUrl?`<div class="audio-wrap"><audio controls src="${j.audioUrl}" style="width:100%;height:42px;border-radius:10px"></audio><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button class="btn btn-play" onclick="this.parentElement.previousElementSibling.play()">▶️ PLAY</button><button class="btn btn-dl" onclick="downloadAudio('${j.audioUrl}','${j.title}')">⬇️ DOWNLOAD</button></div></div>`:''}<div style="margin-top:14px"><button class="btn ${can?'btn-accept':'btn-save'}" onclick="${can?`openAccept('${j.id}')`:`openBuyMinutes()`}">${can?`🎙️ ACCEPT - KES ${j.price} • ${need} MIN`:`⏱️ BUY ${need} MIN`}</button></div></div>`;}).join('');
+ }else if(tab==='my'){
+  if(!my.length) html=`<div style="text-align:center;padding:60px 20px">🎧 No active tasks</div>`;
+  else html=my.map(j=>{let expired=isExpired(j.deadline);let left=formatDeadline(j.deadline);let percent=getDeadlinePercent(j.deadline);let fillColor=percent>50?'linear-gradient(90deg,#22c55e,#4ade80)':percent>20?'linear-gradient(90deg,#facc15,#f59e0b)':'linear-gradient(90deg,#ef4444,#f87171)';return `<div class="card ${expired?'card-locked':''}"><div class="card-head"><div class="card-title">${j.title}</div><span class="meta-item ${expired?'red':'yellow'}" style="padding:6px 12px">${expired?'🔒 EXPIRED':`⏳ ${left}`}</span></div><div class="meta" style="margin-top:10px"><span class="meta-item yellow">🎧 ${j.duration}</span><span class="meta-item green">KES ${j.price}</span></div><div class="deadline-bar"><div class="deadline-fill" style="width:${percent}%;background:${fillColor}"></div></div><small style="color:#6b7280;font-size:9px;margin-top:6px;display:block">Deadline: ${new Date(j.deadline).toLocaleString()}</small>${j.audioUrl?`<audio controls src="${j.audioUrl}" style="width:100%;margin-top:12px;height:40px"></audio>`:''}<textarea id="txt_${j.id}" placeholder="Type transcription..." ${expired?'disabled':''}>${j.draft||''}</textarea><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px"><button class="btn btn-save" onclick="saveDraft('${j.id}')" ${expired?'disabled':''}>💾 SAVE DRAFT</button><button class="btn btn-submit" onclick="submitJob('${j.id}')" ${expired?'disabled':''}>${expired?'🔒 LOCKED':'📤 SUBMIT'}</button></div></div>`;}).join('');
+ }else if(tab==='pd'){
+  if(!pd.length) html=`<div style="text-align:center;padding:60px 20px">⏳ No pending</div>`;
+  else html=pd.map(j=>`<div class="card"><div style="display:flex;justify-content:space-between"><div class="card-title">⏳ ${j.jobTitle||j.title}</div><span class="price-tag">PENDING</span></div><div class="pending-card"><b style="font-size:12px">Awaiting Review</b><br><small style="color:#facc15">KES ${j.price} if approved</small><div style="margin-top:12px;background:rgba(0,0,0,0.3);border-radius:12px;padding:12px"><small>YOUR TRANSCRIPTION:</small><div style="font-size:11px;margin-top:6px">${(j.content||'').substring(0,400)}</div></div></div></div>`).join('');
+ }else if(tab==='ap'){
+  if(!ap.length) html=`<div style="text-align:center;padding:60px 20px">✅ No approved yet</div>`;
+  else html=ap.map(j=>`<div class="card" style="border-color:#22c55e"><div style="display:flex;justify-content:space-between"><div class="card-title" style="color:#4ade80">✅ ${j.jobTitle||j.title}</div><div class="price-tag" style="background:#22c55e;color:#fff">+KES ${j.price}</div></div><div class="approval-card"><b style="color:#4ade80">Approved!</b><br><small style="color:#bbf7d0">${j.feedback||'Excellent work!'}</small></div></div>`).join('');
+ }else{
+  if(!rj.length) html=`<div style="text-align:center;padding:60px 20px">❌ No rejected</div>`;
+  else html=rj.map(j=>`<div class="card" style="border-color:#ef4444"><div class="card-title" style="color:#f87171">❌ ${j.jobTitle||j.title}</div><div class="rejection-card"><b style="color:#f87171">Feedback:</b><br><small style="color:#fecaca">${j.feedback||'Rejected'}</small></div></div>`).join('');
+ }
+ document.getElementById('content').innerHTML=html;
+}
+render();updateMinUI();doCalcWallet();
+setInterval(()=>{ if(tab==='my') render(); },30000);
+</script>
+</body>
+                                                                                                                                                                                                                                               </html>
