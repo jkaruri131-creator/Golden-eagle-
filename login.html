@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIAMINES - Login</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#070711;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+.box{width:100%;max-width:380px;background:#111126;border:1px solid #222;border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.logo{text-align:center;margin-bottom:16px}
+.logo h1{font-size:28px;font-weight:900;letter-spacing:2px;color:#facc15;text-shadow:0 0 20px rgba(250,204,21,0.4)}
+.logo p{font-size:10px;color:#8b8ba7;letter-spacing:3px;margin-top:2px}
+.input{width:100%;background:#1a1a35;border:1px solid #333;border-radius:10px;padding:13px 12px;color:#fff;margin-bottom:12px;outline:none;font-size:14px}
+.input:focus{border-color:#facc15;box-shadow:0 0 0 3px rgba(250,204,21,0.1)}
+.btn{width:100%;padding:14px;border-radius:10px;border:none;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#facc15,#ffb700);color:#000;font-size:15px;box-shadow:0 6px 20px rgba(250,204,21,0.3);margin-top:6px;transition:0.2s}
+.btn:active{transform:scale(0.98)}
+.btn:disabled{opacity:0.6;cursor:not-allowed}
+.msg{display:none;padding:11px;border-radius:10px;font-size:12px;margin-bottom:12px;text-align:center;font-weight:600}
+.msg.err{background:rgba(255,23,68,0.15);border:1px solid #ff1744;color:#ffb3c1;display:block}
+.msg.ok{background:rgba(0,230,118,0.15);border:1px solid #00e676;color:#86efac;display:block}
+.forgot{color:#facc15;font-size:11px;text-align:right;margin:-4px 0 14px;cursor:pointer;display:block;text-decoration:none;font-weight:700}
+.forgot:hover{text-decoration:underline}
+
+/* BEAUTIFUL POPUPS */
+.popup{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeIn 0.3s ease}
+.popupBox{background:linear-gradient(145deg,#1a1a35,#111126);border:1px solid rgba(250,204,21,0.3);border-radius:20px;padding:26px 22px;max-width:340px;text-align:center;width:90%;box-shadow:0 25px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(250,204,21,0.1),0 0 40px rgba(250,204,21,0.15);animation:popUp 0.35s cubic-bezier(0.34,1.56,0.64,1)}
+.popupIcon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:26px}
+.popupIcon.success{background:linear-gradient(135deg,#00e676,#00c853);box-shadow:0 8px 20px rgba(0,230,118,0.4)}
+.popupIcon.error{background:linear-gradient(135deg,#ff1744,#d50000);box-shadow:0 8px 20px rgba(255,23,68,0.4)}
+.popupIcon.info{background:linear-gradient(135deg,#facc15,#ffb700);box-shadow:0 8px 20px rgba(250,204,21,0.4)}
+.popupTitle{font-size:18px;font-weight:900;margin-bottom:8px;letter-spacing:0.5px}
+.popupText{color:#c7c7d7;font-size:13px;line-height:1.5;margin-bottom:18px;font-weight:500}
+.popupBtn{width:100%;padding:12px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:14px;transition:0.2s}
+.popupBtn:active{transform:scale(0.97)}
+.popupBtn.gold{background:linear-gradient(135deg,#facc15,#ffb700);color:#000;box-shadow:0 6px 18px rgba(250,204,21,0.35)}
+.popupBtn.red{background:linear-gradient(135deg,#ff1744,#ff5252);color:#fff}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popUp{from{opacity:0;transform:scale(0.85) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+</style>
+</head><body>
+<div class="box">
+<div class="logo"><h1>DIAMINES</h1><p>LOGIN TO ACCOUNT</p></div>
+<div id="msg" class="msg" style="display:none"></div>
+<input id="user" class="input" placeholder="Username or Email">
+<input id="password" type="password" class="input" placeholder="Password">
+<a class="forgot" id="forgotLink">Forgot Password?</a>
+<button class="btn" id="loginBtn">LOGIN</button>
+<p style="text-align:center;margin-top:14px;font-size:11px;color:#8b8ba7">Don't have account? <a href="register.html" style="color:#facc15;text-decoration:none;font-weight:700">Register</a></p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB6QxzDFhIIHwt6TTZla6g4m-FaJdMol6M",
+  authDomain: "diamines-agencies.firebaseapp.com",
+  projectId: "diamines-agencies",
+  storageBucket: "diamines-agencies.firebasestorage.app",
+  messagingSenderId: "438413306857",
+  appId: "1:438413306857:web:3c7f736794be6a49b0f978"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+function showMsg(t,ok){
+  let m=document.getElementById('msg');
+  m.innerText=t;
+  m.className= ok? 'msg ok' : 'msg err';
+  m.style.display='block';
+}
+
+// NEW BEAUTIFUL POPUP - NO BACKEND INFO
+function showPopup(type, title, msg){
+  let icon = type === 'success' ? '✅' : type === 'error' ? '❌' : '📧';
+  let iconClass = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+  let titleColor = type === 'error' ? '#ff8da1' : '#facc15';
+  let btnClass = type === 'error' ? 'red' : 'gold';
+  let d=document.createElement('div');
+  d.className='popup';
+  d.innerHTML=`
+    <div class="popupBox">
+      <div class="popupIcon ${iconClass}">${icon}</div>
+      <h2 class="popupTitle" style="color:${titleColor}">${title}</h2>
+      <p class="popupText">${msg}</p>
+      <button class="popupBtn ${btnClass}" onclick="this.closest('.popup').remove()">OK, Got it</button>
+    </div>`;
+  d.addEventListener('click', (e)=>{ if(e.target===d) d.remove(); });
+  document.body.appendChild(d);
+}
+
+function saveSession(userData, uid){
+  localStorage.setItem('DIAMINES_CURRENT', JSON.stringify(userData));
+  localStorage.setItem('DIAMINES_CURRENT_USER', JSON.stringify(userData));
+  localStorage.setItem('DIAMINES_CURRENT_EMAIL', userData.email.toLowerCase());
+  localStorage.setItem('DIAMINES_CURRENT_UID', uid);
+  localStorage.setItem('username', userData.username);
+  localStorage.setItem('email', userData.email);
+}
+
+async function fetchUserData(uid, emailLower){
+  try{ let s = await getDoc(doc(db, "users", uid)); if(s.exists()) return s.data(); }catch(e){}
+  try{ let s2 = await getDoc(doc(db, "users", emailLower)); if(s2.exists()) return s2.data(); }catch(e){}
+  try{ let q = query(collection(db, "users"), where("email","==", emailLower)); let qs = await getDocs(q); if(!qs.empty) return qs.docs[0].data(); }catch(e){}
+  return null;
+}
+
+async function resolveEmailFromInput(input){
+  input = input.trim().toLowerCase();
+  if(input.includes('@')) return input;
+  try{
+    const usersRef = collection(db, "users");
+    let q1 = query(usersRef, where("usernameLower","==", input));
+    let s1 = await getDocs(q1);
+    if(!s1.empty) return String(s1.docs[0].data().email).toLowerCase();
+    let allSnap = await getDocs(usersRef);
+    let found = null;
+    allSnap.forEach(docSnap=>{ if(String(docSnap.data().username||'').toLowerCase() === input) found = String(docSnap.data().email).toLowerCase(); });
+    if(found) return found;
+  }catch(e){}
+  return null;
+}
+
+// FORGOT PASSWORD - NO BACKEND ERRORS SHOWN
+document.getElementById('forgotLink').onclick = async ()=>{
+  let u=document.getElementById('user').value.trim();
+  if(!u){ u = prompt("Enter your username or email to reset:"); if(!u) return; }
+  document.getElementById('loginBtn').disabled = true;
+  document.getElementById('loginBtn').innerText = "Sending Email...";
+  let emailToReset = await resolveEmailFromInput(u);
+  if(!emailToReset){
+    showMsg('❌ Account not found. Please check username or email.');
+    showPopup('error','Account Not Found','We could not find your account. Try using your email address instead.');
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginBtn').innerText = "LOGIN";
+    return;
+  }
+  try{
+    await sendPasswordResetEmail(auth, emailToReset);
+    showPopup('info','Email Sent!','We have sent a password reset link to <b style="color:#fff">'+emailToReset+'</b>. Please check your inbox and spam folder and tap the reset button.');
+    showMsg('✅ Reset email sent to '+emailToReset, true);
+  }catch(err){
+    // HIDE BACKEND CODE - show friendly message only
+    if(err.code === 'auth/user-not-found'){
+      showPopup('error','Not Found','This email is not registered with DIAMINES.');
+      showMsg('❌ Email not registered');
+    } else if(err.code === 'auth/too-many-requests'){
+      showPopup('error','Too Many Requests','You requested too many times. Please wait 2 minutes and try again.');
+      showMsg('❌ Please wait and try again');
+    } else if(err.code === 'auth/network-request-failed'){
+      showPopup('error','Network Error','Check your internet connection and try again.');
+      showMsg('❌ Check internet connection');
+    } else {
+      showPopup('error','Could Not Send','We could not send reset email right now. Please try again later.');
+      showMsg('❌ Could not send email, try again');
+    }
+  }
+  document.getElementById('loginBtn').disabled = false;
+  document.getElementById('loginBtn').innerText = "LOGIN";
+};
+
+// LOGIN - FIXED FOR AFTER RESET + NO BACKEND INFO
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  if(document.getElementById('loginBtn').innerText.includes('Sending')) return;
+  let u=document.getElementById('user').value.trim();
+  let p=document.getElementById('password').value;
+  if(!u||!p) return showMsg('Please fill in all fields');
+
+  document.getElementById('loginBtn').disabled = true;
+  document.getElementById('loginBtn').innerText = "Checking Account...";
+
+  let emailToLogin = u.includes('@')? u.toLowerCase().trim() : null;
+  if(!emailToLogin){
+    showMsg('Checking your account...', true);
+    let resolved = await resolveEmailFromInput(u);
+    if(resolved){ emailToLogin = resolved; }
+    else {
+      showMsg('❌ Username not found. Try using your email.');
+      showPopup('error','Username Not Found','We could not find that username. Please try with your email address.');
+      document.getElementById('loginBtn').disabled = false;
+      document.getElementById('loginBtn').innerText = "LOGIN";
+      return;
+    }
+  }
+
+  showMsg('Logging in, please wait...', true);
+  document.getElementById('loginBtn').innerText = "Logging In...";
+
+  try{
+    await signOut(auth).catch(()=>{});
+    emailToLogin = emailToLogin.trim().toLowerCase();
+    const cred = await signInWithEmailAndPassword(auth, emailToLogin, p.trim());
+    const uid = cred.user.uid;
+    let userData = await fetchUserData(uid, emailToLogin);
+    if(!userData) userData = { email: emailToLogin, username: emailToLogin.split('@')[0], balance: 0, totalDeposit: 0, isActivated: false };
+    saveSession(userData, uid);
+
+    let deleted=(JSON.parse(localStorage.getItem('DIAMINES_DELETED_BLACKLIST')||'[]')).map(x=>String(x).toLowerCase());
+    let banned=(JSON.parse(localStorage.getItem('DIAMINES_BANNED')||'[]')).map(x=>String(x).toLowerCase());
+    if(deleted.includes(emailToLogin)){
+      showPopup('error','Account Deleted','Your account was permanently deleted. Contact support.');
+      document.getElementById('loginBtn').disabled=false; document.getElementById('loginBtn').innerText="LOGIN"; return;
+    }
+    if(banned.includes(emailToLogin)){
+      showPopup('error','Account On Hold','Your account is currently on hold. Please contact support.');
+      document.getElementById('loginBtn').disabled=false; document.getElementById('loginBtn').innerText="LOGIN"; return;
+    }
+
+    let isActivated = userData.isActivated || userData.isMembershipActive || userData.membershipActive || false;
+    let totalDeposit = Number(userData.totalDeposit || userData.balance || 0);
+    let localActive = localStorage.getItem('DIAMINES_MEMBERSHIP_'+emailToLogin) === 'active';
+
+    showPopup('success','Welcome Back!','Hello '+userData.username+'! Opening your account...');
+    showMsg('✅ Welcome '+userData.username+'! Redirecting...',true);
+
+    setTimeout(()=>{
+      if(!isActivated &&!localActive && totalDeposit < 1) location.href='membership.html';
+      else location.href='dashboard.html';
+    },900);
+
+  }catch(err){
+    // HIDE ALL BACKEND CODES - only friendly messages
+    if(err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found'){
+      showMsg('❌ Wrong username/email or password');
+      showPopup('error','Login Failed','Wrong email or password. Please check and try again. If you just reset, type your new password carefully.');
+    } else if(err.code === 'auth/too-many-requests'){
+      showMsg('❌ Too many attempts. Wait a minute.');
+      showPopup('error','Too Many Attempts','You tried too many times. Please wait 1 minute and try again.');
+    } else if(err.code === 'auth/network-request-failed'){
+      showMsg('❌ No internet connection');
+      showPopup('error','Network Error','Please check your internet and try again.');
+    } else {
+      showMsg('❌ Wrong username/email or password');
+      showPopup('error','Login Failed','Unable to login. Please check your details and try again.');
+    }
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginBtn').innerText = "LOGIN";
+  }
+});
+</script>
+</body></html>
